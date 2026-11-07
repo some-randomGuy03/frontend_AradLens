@@ -43,6 +43,7 @@
     --ground: #e9e5dc;
     --paper: #fbfaf7;
     --paper-deep: #f2efe8;
+    --album-paper: #fdf8ee;
     --ink: #14181d;
     --ink-muted: #3f4650;
     --ink-faint: #5b6169;
@@ -134,7 +135,8 @@
   }
 
   /* Strat de overlay peste cameră */
-  #overlay { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; color: var(--bone); }
+  #overlay { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; color: var(--bone); transition: opacity 180ms ease; }
+  body.capture-active #overlay { opacity: 0; pointer-events: none; }
 
   /* Rândul de sus: brand stânga, contor de traseu dreapta, pe scrim subțire */
   .top {
@@ -255,7 +257,7 @@
     transition: opacity 220ms ease, color 220ms ease;
   }
   .ts-sun { opacity: 1; }
-  .ts-moon { opacity: .38; }
+  .ts-moon { opacity: .56; }
   .ts-knob {
     position: absolute; top: 3px; left: 3px;
     width: 24px; height: 24px;
@@ -264,8 +266,13 @@
     box-shadow: 0 2px 6px rgba(0,0,0,.20), inset 0 1px 0 var(--lg-rim-top);
     transition: transform 280ms var(--spring), background-color 220ms ease;
   }
-  html.dark-theme .ts-knob { transform: translateX(26px); background: #2b3039; }
-  html.dark-theme .ts-sun { opacity: .35; }
+  html.dark-theme .ts-knob {
+    transform: translateX(26px);
+    background: #363c47;
+    border: 1px solid rgba(255,255,255,.22);
+    box-shadow: 0 2px 7px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.24);
+  }
+  html.dark-theme .ts-sun { opacity: .55; }
   html.dark-theme .ts-moon { opacity: 1; color: var(--amber-deep); }
   .theme-switch:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; border-radius: 999px; }
   #rail .ring.capture-ready {
@@ -561,12 +568,32 @@
   #card .card-x {
     flex:0 0 auto; background:transparent; color: var(--text-main); border:1.5px solid var(--border-color);
     border-radius:12px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; min-height: 44px;
+    width: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
   }
   #card .card-meta { font-size:12px; margin-top:6px; letter-spacing:.3px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
   #card .card-desc { font-size:14px; line-height:1.55; margin:12px 0 14px; color: var(--text-main); max-width: 70ch; }
-  #card .card-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  #card .card-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
   #card .card-actions .btn { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); font-weight: 700; }
   #card .card-actions .btn.alt { background: transparent; border-color: var(--border-color); color: var(--text-main); }
+  #card .card-actions .voice-stop {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-main);
+    font-weight: 700;
+  }
+  #card .card-actions .voice-stop[hidden] { display: none; }
+  #card .voice-select {
+    min-height: 44px;
+    max-width: 190px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid var(--btn-line);
+    background: var(--btn-surface);
+    color: var(--text-main);
+    font: 600 12px/1 'Segoe UI', system-ui, sans-serif;
+    cursor: pointer;
+  }
+  #card .voice-select[hidden] { display: none; }
   body.light-theme #card { box-shadow: 2px -8px 28px rgba(23,17,6,.25); }
 
   /* Comparație foto istoric vs actual */
@@ -587,6 +614,12 @@
   #photoCmp .cmp-top {
     position:absolute; top:calc(10px + env(safe-area-inset-top)); left:12px; right:12px;
     display:flex; align-items:center; justify-content:space-between; gap:10px; z-index:2;
+  }
+  #photoCmp .cmp-top .cmp-tag:last-child { margin-right: 52px; }
+  #photoCmp .cmp-close-btn {
+    position: absolute; top: 0; right: 0;
+    width: 44px; min-height: 44px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
   }
   #photoCmp .cmp-tag {
     background:rgba(5,7,10,.78); color:var(--bone); font-size:12px; font-weight:700;
@@ -632,7 +665,7 @@
   }
   .cw-close {
     background: transparent; border: none; color: var(--ink); font-size: 20px;
-    line-height: 1; cursor: pointer; padding: 2px 6px; min-width: 44px; min-height: 44px; opacity: .85;
+    line-height: 1; cursor: pointer; padding: 2px 6px; min-width: 44px; min-height: 44px; opacity: 1;
   }
   .cw-close:hover { opacity: 1; }
   .cw-body { font-size: 12px; line-height: 1.45; opacity: 1; color: var(--ink); }
@@ -669,7 +702,7 @@
   #proximityToast .pt-title { font-weight: 700; color: var(--bone); }
   #proximityToast .pt-close {
     background: transparent; border: none; color: var(--bone); font-size: 20px;
-    line-height: 1; cursor: pointer; padding: 4px; min-width: 44px; min-height: 44px; opacity: .8;
+    line-height: 1; cursor: pointer; padding: 4px; min-width: 44px; min-height: 44px; opacity: 1;
   }
   #proximityToast .pt-close:hover { opacity: 1; }
 
@@ -688,11 +721,6 @@
   .album-header h2 {
     font-family: var(--display); font-size: 22px; font-weight: 600;
     letter-spacing: -0.005em; line-height: 1.15; color: var(--text-main); text-wrap: balance;
-  }
-  .album-header p {
-    font-size: 12px; margin-top: 4px; color: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .album-close-btn {
     background: var(--btn-surface); border: 1.5px solid var(--btn-line);
@@ -781,17 +809,34 @@
     font-family: var(--display); font-size: 20px; font-weight: 600;
     letter-spacing: -0.005em; line-height: 1.15; color: var(--text-main); margin-bottom: 4px; text-wrap: balance;
   }
-  .album-landmark-meta { font-size: 12px; margin-bottom: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .album-landmark-meta { font-size: 12px; margin-bottom: 8px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .album-detail-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .album-detail-heading { min-width: 0; }
+  #albumCompareModal { overflow: hidden; }
+  #albumCompareModal .album-detail {
+    max-height: calc(100dvh - 24px);
+    overflow: hidden;
+    padding: 14px;
+  }
 
   .cmp-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  }
-  @media (max-width: 480px) {
-    .cmp-grid { grid-template-columns: 1fr; }
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
   }
   .cmp-card {
+    flex: 1 0 46%;
+    min-width: 160px;
+    scroll-snap-align: start;
     background: transparent; border-radius: 12px; border: 1px solid var(--border-color);
-    padding: 12px; display: flex; flex-direction: column; min-height: 170px; color: var(--text-main);
+    padding: 10px; display: flex; flex-direction: column; min-height: 0; color: var(--text-main);
   }
   .cmp-card-title {
     font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
@@ -809,6 +854,7 @@
     width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;
   }
   .cmp-card-credit { font-size: 12px; line-height: 1.25; margin-top: 4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .cmp-you { font-weight: 700; color: var(--accent-green); }
   .cmp-inline-archive {
     display: flex; align-items: center; gap: 8px; width: 100%;
     margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--lg-border);
@@ -818,7 +864,16 @@
     width: 54px; height: 40px; object-fit: cover; border-radius: 7px; flex-shrink: 0;
   }
   .cmp-inline-archive span { font-size: 11px; line-height: 1.3; font-weight: 700; color: var(--ink-muted); }
-  .album-archive-strip { margin-top: 14px; }
+  .album-see-more-row { display: flex; justify-content: center; margin-top: 8px; }
+  .album-see-more {
+    border: 0; background: transparent; color: var(--amber-deep);
+    font: 700 12px/1 'Segoe UI', system-ui, sans-serif;
+    padding: 8px 10px; min-height: 36px; cursor: pointer; border-radius: 8px;
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+  .album-see-more:hover { background: rgba(255,255,255,.12); }
+  .album-see-more[hidden] { display: none; }
+  .album-archive-strip { margin-top: 10px; }
   .album-archive-strip[hidden] { display: none; }
   .album-archive-strip-title {
     margin-bottom: 7px;
@@ -894,6 +949,15 @@
   .cs-bottom {
     display: flex; flex-direction: column; align-items: center; gap: 14px;
   }
+  #captureScreen .cs-cancel-btn {
+    position: absolute;
+    top: calc(14px + env(safe-area-inset-top));
+    right: 14px;
+    width: 44px; height: 44px; min-height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
   .cs-shutter {
     width: 72px; height: 72px; border-radius: 50%; background: var(--bone);
     border: 4px solid rgba(246,242,233,.4); box-shadow: 2px 6px 20px rgba(0,0,0,.6);
@@ -927,6 +991,7 @@
     padding: 22px 20px; text-align: center; color: var(--ink); max-width: 340px; width: 100%;
     box-shadow: 2px 12px 32px rgba(0,0,0,.7);
   }
+  .cm-close { position: absolute; top: 10px; right: 10px; }
   body.light-theme .cm-card { background: #fffdf7; color: var(--amber-ink); border-color: rgba(23,17,6,.2); box-shadow: 2px 12px 32px rgba(23,17,6,.25); }
   body.light-theme .cm-card .cm-desc { color: var(--amber-ink); }
   .cm-icon { margin-bottom: 8px; color: var(--accent-green); }
@@ -987,6 +1052,8 @@
     position: relative; max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;
   }
   .modal-card.wide { max-width: 520px; }
+  .reward-close { position: absolute; top: 12px; right: 12px; z-index: 2; }
+  .lore-close { position: absolute; top: 12px; right: 12px; z-index: 2; }
   .modal-header {
     display: flex; align-items: flex-start; justify-content: space-between;
     padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;
@@ -1086,6 +1153,7 @@
   /* Filă de Istorie (Lore modal) */
   .lore-header {
     display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    padding-right: 54px;
   }
   .lore-badge {
     font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
@@ -1292,9 +1360,21 @@
   }
   .loc-coords { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
   .loc-desc { font-size: 13px; line-height: 1.45; color: var(--text-main); margin: 6px 0 0; }
-  .loc-imgs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .loc-preview-desc {
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .loc-preview-more { margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  /* First long-press view: larger, clearly separated photos in one row. */
+  #locPreview .loc-imgs { gap: 12px; }
+  #locPreview .loc-img-wrap { flex: 0 0 96px; width: 96px; height: 72px; }
+  .loc-imgs {
+    display: flex; flex-wrap: nowrap; gap: 10px; margin-top: 10px;
+    overflow-x: auto; overscroll-behavior-x: contain; padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
   .loc-img-wrap {
-    position: relative; width: 84px; height: 64px;
+    position: relative; flex: 0 0 84px; width: 84px; height: 64px;
     border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
     background: var(--bg-modal);
   }
@@ -1523,7 +1603,7 @@
                 box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
   }
   #rail .ring:active { transform: scale(.96); }
-  #rail .ring:disabled { opacity: .58; }
+  #rail .ring:disabled { opacity: .70; }
   #rail .ring.capture-ready {
     border-color: var(--amber-deep);
     box-shadow:
@@ -1571,6 +1651,7 @@
   }
   .modal-card { border-radius: 26px; }
   .modal-close-btn { width: 44px; height: 44px; border-radius: 12px; }
+  .modal-header > div { flex: 1; min-width: 0; }
   @keyframes sheetIn {
     from { opacity: 0; transform: translateY(18px) scale(.985); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -1583,11 +1664,15 @@
     border-radius: 0;
     animation: veilIn 240ms ease both;
     overflow: hidden;
+    padding-top: calc(10px + env(safe-area-inset-top));
     padding-bottom: 0;
   }
-  .album-header { border-bottom: 1px solid var(--lg-border); }
-  .album-header h2 { color: var(--ink); }
-  .album-header p { color: var(--ink-muted); text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+  .album-header {
+    border-bottom: 0;
+    padding-bottom: 4px;
+    margin-bottom: 0;
+  }
+  .album-header h2 { color: var(--ink); font-size: 20px; }
   .album-close-btn { color: var(--ink); border-color: var(--lg-border); }
   #albumMapTab {
     flex: 1; min-height: 0; overflow-y: auto;
@@ -1595,21 +1680,39 @@
     scroll-padding-top: 12px;
     scrollbar-width: thin;
   }
-  /* Full-bleed route header; it scrolls away with the map. */
+  /* Full-bleed route header; the map scrolls below it. */
   .level-selector {
     position: static;
-    margin: 0 -16px 12px;
-    padding: 10px 16px 12px;
-    background: var(--paper);
+    margin: 0 -16px 10px;
+    padding: 4px 16px 6px;
+    background: var(--album-paper);
     border-bottom: 1px solid var(--lg-border);
   }
+  .level-selector-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    margin-bottom: 2px;
+  }
   .level-selector-label {
+    flex-shrink: 0;
     display: block;
-    padding: 0 7px 4px;
+    padding: 0;
     font: 700 10px/1 'Segoe UI', system-ui, sans-serif;
     letter-spacing: .16em;
     text-transform: uppercase;
     color: var(--ink-muted);
+  }
+  .level-selector-hint {
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* ---------- 7. Level map (children paint no surface) ---------- */
@@ -1625,6 +1728,7 @@
     display: flex;
     flex-wrap: nowrap;
     gap: 2px;
+    margin-bottom: 0;
     padding: 0 4px;
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -1951,16 +2055,20 @@
     font-variant-numeric: tabular-nums;
   }
   .album-header-actions .legal-open { margin-left: 0; }
+  .album-header-actions .album-close-btn {
+    width: 44px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
   .album-header-actions .legal-open:hover,
   .album-header-actions .album-close-btn:hover { background: rgba(255,255,255,.18); }
   .album-header-actions .legal-open:active,
   .album-header-actions .album-close-btn:active { transform: scale(.97); }
   @media (max-width: 360px) {
-    .album-header { flex-wrap: wrap; gap: 10px; }
-    .album-header-actions { width: 100%; justify-content: flex-end; gap: 6px; }
-    .album-header-actions .legal-open,
-    .album-header-actions .album-close-btn { padding: 6px 9px; font-size: 12px; }
-    .album-header p { display: none; }
+    .album-header-actions { gap: 6px; }
+    .album-header-actions .legal-open { padding: 6px 9px; font-size: 12px; }
   }
   #legalModal { z-index: 90; }
 
@@ -1971,7 +2079,7 @@
   .cs-top, .cs-title, .cs-sub, .cs-badge, .cs-cancel-btn { color: var(--on-dark); }
   .cs-badge { background: rgba(5,7,10,.62); border-color: var(--amber); }
   .cs-shutter { background: var(--on-dark); border-color: rgba(246,242,233,.55); }
-  .cs-shutter-inner { border-color: var(--on-dark); }
+  .cs-shutter-inner { border-color: rgba(20,24,29,.78); }
   .cs-cancel-btn { background: rgba(5,7,10,.55); border-color: rgba(246,242,233,.35); }
   #photoCmp { background: #0b0e12; color: var(--on-dark); }
   #photoCmp .cmp-tag { background: rgba(5,7,10,.78); color: var(--on-dark); border-color: rgba(246,242,233,.2); }
@@ -2089,6 +2197,7 @@
     --ground: #111318;
     --paper: #1b1e24;
     --paper-deep: #15181d;
+    --album-paper: #181a1f;
     --ink: #f4efe6;
     --ink-muted: #c7bfb2;
     --ink-faint: #a69d90;
@@ -2113,7 +2222,7 @@
     --btn-bg: rgba(246,242,233,.10);
     --btn-border: rgba(246,242,233,.24);
     --btn-text: #f4efe6;
-    --rail-border: rgba(246,242,233,.36);
+    --rail-border: rgba(246,242,233,.46);
     --rail-fill-top: rgba(255,255,255,.10);
     --rail-fill-bottom: rgba(255,255,255,.03);
     --rail-shadow: 0 4px 14px rgba(0,0,0,.50);
@@ -2142,7 +2251,7 @@
     --lg-rim-top: rgba(255,255,255,.52);
     --lg-rim-hairline: rgba(255,255,255,.20);
     --lg-rim-bottom: rgba(255,255,255,.06);
-    --lg-border: rgba(246,242,233,.18);
+    --lg-border: rgba(246,242,233,.24);
     --lg-shadow: 0 12px 34px rgba(0,0,0,.48);
     --lg-modal-tint: rgba(26,29,36,.78);
     --lg-menu-surface: rgba(30,33,40,.75);
@@ -2182,11 +2291,15 @@
   }
   html.dark-theme .start-detail,
   html.dark-theme .start-credit,
-  html.dark-theme .album-header p,
   html.dark-theme #arLabel .al-meta,
   html.dark-theme .level-note { text-shadow: none; }
   html.dark-theme .level-track::before { border-left-color: rgba(246,242,233,.18); }
   html.dark-theme .level-lock { background: rgba(20,23,29,.92); }
+  html.dark-theme .level-sub { text-shadow: none; }
+  html.dark-theme .level-node {
+    background: #232730;
+    border-color: rgba(246,242,233,.30);
+  }
   html.dark-theme .cmp-card-content { background: rgba(255,255,255,.06); border-color: rgba(246,242,233,.14); }
   html.dark-theme .loc-chip { background: rgba(255,255,255,.08); }
   html.dark-theme .loc-img-confirm { background: rgba(20,23,29,.96); }
@@ -2217,6 +2330,16 @@
     box-shadow: inset 0 1px 0 var(--lg-rim-top), var(--lg-shadow);
   }
 
+  /* Selected game mode: a rounded outline around the whole option, not a
+     rectangular line or a filled button. */
+  .mode-select-card.is-selected {
+    border: 2px solid var(--amber);
+    border-radius: 22px;
+    padding: 16px 18px;
+    background: rgba(200,176,136,.10);
+    box-shadow: 0 10px 24px rgba(12,22,32,.08);
+  }
+
   /* ---------- 16. Fallbacks ---------- */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     #rail .ring, .modal-card, #card,
@@ -2232,6 +2355,13 @@
       background: var(--glass-solid);
       border-color: var(--rail-border);
     }
+  }
+
+  /* Album page: opaque cream paper, deliberately not a glass sheet. */
+  #albumModal {
+    background: var(--album-paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
 </style>
@@ -2300,7 +2430,7 @@
     <button id="shutterBtn" class="cs-shutter" aria-label="Fă fotografia">
       <span class="cs-shutter-inner" aria-hidden="true"></span>
     </button>
-    <button id="cancelCaptureBtn" class="cs-cancel-btn">Închide</button>
+    <button id="cancelCaptureBtn" class="cs-cancel-btn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
 </div>
 
@@ -2310,12 +2440,12 @@
 <!-- Modal confirmare / informare fotografiere -->
 <div id="captureModal" role="dialog" aria-modal="true" aria-labelledby="cmTitle" aria-live="polite">
   <div class="cm-card">
+    <button class="modal-close-btn cm-close" id="finishCaptureBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="cm-icon" id="cmIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
     <div class="cm-title" id="cmTitle">Poză făcută</div>
     <div class="cm-desc" id="cmDesc">Vezi poza în album.</div>
     <div style="display:flex;gap:8px;flex-direction:column;margin-top:12px;">
       <button id="viewInAlbumBtn" class="album-action-btn primary" style="display:none;">Vezi în album</button>
-      <button id="finishCaptureBtn" class="album-action-btn secondary">Închide</button>
     </div>
   </div>
 </div>
@@ -2332,17 +2462,19 @@
   <div class="album-header">
     <div>
       <h2 id="albumTitle">Album</h2>
-      <p>Alege un traseu. Atinge o oprire.</p>
     </div>
     <div class="album-header-actions">
       <button class="legal-open" id="legalOpenAlbumBtn" type="button">Legal</button>
-      <button class="album-close-btn" id="albumCloseBtn">Închide</button>
+      <button class="album-close-btn" id="albumCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
   </div>
 
   <!-- Selectorul de trasee: bară statică, pe toată lățimea, deasupra hărții -->
   <div class="level-selector">
-    <span class="level-selector-label">Trasee</span>
+    <div class="level-selector-head">
+      <span class="level-selector-label">Trasee</span>
+      <span class="level-selector-hint">Alege un traseu. Atinge o oprire.</span>
+    </div>
     <div class="level-chipbar" id="albumModuleBar" role="group" aria-label="Alege modulul traseului"></div>
   </div>
 
@@ -2362,8 +2494,13 @@
 <!-- Fereastra Atunci / Acum , deschisă din atingerea unei opriri de pe hartă -->
 <div id="albumCompareModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="albumLandmarkTitle">
   <div class="album-detail" id="albumCompareCard" style="width:100%;max-width:440px;">
-    <div class="album-landmark-name" id="albumLandmarkTitle">...</div>
-    <div class="album-landmark-meta" id="albumLandmarkMeta">...</div>
+    <div class="album-detail-head">
+      <div class="album-detail-heading">
+        <div class="album-landmark-name" id="albumLandmarkTitle">...</div>
+        <div class="album-landmark-meta" id="albumLandmarkMeta">...</div>
+      </div>
+      <button class="modal-close-btn" id="albumCompareCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
 
     <div class="cmp-grid">
       <!-- Card Atunci -->
@@ -2383,6 +2520,10 @@
       </div>
     </div>
 
+    <div class="album-see-more-row">
+      <button class="album-see-more" id="albumSeeMoreBtn" type="button" hidden>Vezi mai multe poze</button>
+    </div>
+
     <div class="album-archive-strip" id="albumArchiveStrip" hidden>
       <div class="album-archive-strip-title">Din arhiva site-ului</div>
       <div class="album-archive-strip-row" id="albumArchiveStripRow"></div>
@@ -2391,7 +2532,6 @@
     <!-- Butoane acțiune album -->
     <div class="album-actions">
       <button class="album-action-btn primary" id="albumGuideBtn">Ghidează-mă acolo</button>
-      <button class="album-action-btn secondary" id="albumBackBtn">Închide</button>
     </div>
   </div>
 </div>
@@ -2433,8 +2573,9 @@
     <ul class="loc-list" id="locList"></ul>
     <div class="cat-count" id="locCount" style="display:none;"></div>
 
+    <div id="locPreview" style="display:none;"></div>
+
     <div id="locDetail" style="display:none;">
-      <button class="cat-link" id="locBackBtn" type="button">Toate locațiile</button>
       <div id="locDetailBody"></div>
     </div>
   </div>
@@ -2494,7 +2635,7 @@
       </div>
 
       <!-- Modul Liber -->
-      <div class="mode-select-card featured" id="selectFreeModeCard">
+      <div class="mode-select-card" id="selectFreeModeCard">
         <div class="mode-badge-pill">Mod liber</div>
         <div class="mode-card-title">Toate locurile</div>
         <div class="mode-card-subtitle">Fără ordine</div>
@@ -2535,6 +2676,7 @@
 <!-- Modal 3: Filă de Istorie Deblocată (Lore Unfold Popup la fotografiere) -->
 <div id="storyLoreModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="loreTitle">
   <div class="modal-card">
+    <button class="modal-close-btn lore-close" id="loreCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="lore-header">
       <div class="lore-badge" id="loreStepBadge">Tur: 1/3</div>
       <div class="lore-year-stamp" id="loreYearStamp">Arad</div>
@@ -2566,6 +2708,7 @@
 <!-- Modal 4: Recompensă & Diplomă Capitol Finalizat -->
 <div id="rewardModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
   <div class="modal-card celebratory">
+    <button class="modal-close-btn reward-close" id="rewardCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="reward-ribbon">TUR ÎNCHEIAT</div>
     <div class="reward-icon-huge" id="rewardIconHuge" aria-hidden="true"></div>
     <h2 class="reward-title" id="rewardTitle">Diplomă</h2>
@@ -2585,7 +2728,6 @@
     <div class="reward-actions">
       <button class="album-action-btn primary" id="rewardNextChapterBtn">Alege alt tur</button>
       <button class="album-action-btn secondary" id="rewardViewAlbumBtn">Vezi albumul</button>
-      <button class="album-action-btn secondary" id="rewardCloseBtn">Închide</button>
     </div>
   </div>
 </div>
@@ -2788,12 +2930,14 @@
 <div id="card">
   <div class="card-head">
     <div class="card-title" id="cardTitle">...</div>
-    <button class="card-x" id="cardClose">Închide</button>
+    <button class="card-x" id="cardClose" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
   <div class="card-meta" id="cardMeta"></div>
   <div class="card-desc" id="cardDesc"></div>
   <div class="card-actions">
     <button class="btn" id="speakBtn">Ascultă</button>
+    <button class="btn voice-stop" id="stopSpeakBtn" hidden>Oprește</button>
+    <select id="voiceSelect" class="voice-select" aria-label="Voce" hidden></select>
     <button class="btn alt" id="photoBtn">Foto 1901 / acum</button>
   </div>
 </div>
@@ -2806,7 +2950,7 @@
   </div>
   <div class="cmp-top">
     <span class="cmp-tag">1901</span>
-    <button class="btn" id="cmpClose">Închide</button>
+    <button class="btn cmp-close-btn" id="cmpClose" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <span class="cmp-tag">Acum</span>
   </div>
   <input type="range" id="cmpRange" min="0" max="100" value="50" aria-label="Compară fotografia istorică cu cea actuală">
@@ -3197,6 +3341,26 @@
  "Traseu ghidat prin Arad.": "Guided route through Arad.",
  "Reia": "Restart",
  "Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.": "Check that the page is open over HTTPS, that you allowed motion/orientation and location access, then reload.",
+ "Vezi mai multe poze": "See more photos",
+ "Ascunde pozele": "Hide photos",
+ "Înapoi": "Back",
+ "Voce": "Voice",
+ "Voce automată": "Automatic voice",
+ "Redă": "Play",
+ "Nu există text de citit.": "There is no text to read.",
+ "Vocea API nu este disponibilă. Folosesc vocea browserului.": "The API voice is unavailable. Using the browser voice.",
+ "Apasă din nou pentru a reda audio.": "Tap again to play the audio.",
+ "Audio nu a putut fi redat. Încearcă din nou.": "The audio could not be played. Try again.",
+ "Serviciul vocal nu este disponibil momentan.": "The voice service is not available right now.",
+ "Serviciul vocal este ocupat. Încearcă din nou în câteva secunde.": "The voice service is busy. Try again in a few seconds.",
+ "Serviciul vocal nu a răspuns. Încearcă din nou.": "The voice service did not respond. Try again.",
+ "Serviciul vocal nu a răspuns la timp. Încearcă din nou.": "The voice service did not respond in time. Try again.",
+ "Răspuns neașteptat de la serviciul vocal.": "Unexpected response from the voice service.",
+ "Serviciul vocal nu a trimis audio.": "The voice service did not send audio.",
+ "Audio nu a putut fi descărcat. Încearcă din nou.": "The audio could not be downloaded. Try again.",
+ "Textul nu a putut fi citit. Încearcă din nou.": "The text could not be read. Try again.",
+ "Audio invalid de la serviciul vocal. Folosesc vocea browserului.": "Invalid audio from the voice service. Using the browser voice.",
+ "Oprește": "Stop",
  "Arad": "Arad",
  "Fortepan / Schoch Frigyes, Arad, 1901": "Fortepan / Schoch Frigyes, Arad, 1901",
  "AradLens": "AradLens"
@@ -3295,7 +3459,10 @@ const STRAZI_API_ID = {
 /* Numele din API ↔ numele din REPERE (aceeași clădire, altă formulare). */
 const ALIAS_API = {
   "primaria": "primaria arad",
-  "teatrul slavici": "teatrul i slavici"
+  "palatul administrativ": "primaria arad",
+  "teatrul slavici": "teatrul i slavici",
+  "teatrul clasic ioan slavici": "teatrul i slavici",
+  "catedrala veche sfantul ioan botezatorul": "catedrala veche"
 };
 
 function cleanApiName(name) {
@@ -3680,6 +3847,13 @@ function showStoryLockedToast(landmark) {
   proximityToastTimer = setTimeout(() => { toast.style.display = "none"; }, 5000);
 }
 
+function updateGamemodeSelectionUI() {
+  const story = $("#selectStoryModeCard");
+  const free = $("#selectFreeModeCard");
+  if (story) story.classList.toggle("is-selected", storyState.currentMode === "story");
+  if (free) free.classList.toggle("is-selected", storyState.currentMode !== "story");
+}
+
 function selectGamemode(mode) {
   storyState.currentMode = mode;
   if (mode === "story") {
@@ -3700,6 +3874,7 @@ function selectGamemode(mode) {
   setCaptionFallback(target);
   updateDetailsBtn();
   updateStoryUI();
+  updateGamemodeSelectionUI();
   scheduleUpdate();
 }
 
@@ -3717,6 +3892,7 @@ function selectChapter(chapterId) {
 }
 
 function openGamemodeModal() {
+  updateGamemodeSelectionUI();
   const m = $("#gamemodeModal");
   if (m) m.style.display = "flex";
 }
@@ -4259,7 +4435,6 @@ function initRouteDots(){
     const idx = ((Math.round(projected / BAND_SLOT) % n) + n) % n;
     const el = stopEl(idx);
     if (isStoryMode() && el && el.classList.contains("locked")) {
-      // Reticul pe un pas încuiat: rămâne oprirea deblocată și explicăm de ce.
       setWheelActiveIndex(bandActiveStep(), true);
       showStoryLockedToast(getCurrentStoryLandmark());
     } else if (el) {
@@ -4330,6 +4505,8 @@ function openCard(){
   $("#cardDesc").textContent  = t.apiDesc || t.descriere || "";
   $("#photoBtn").style.display = t.foto ? "" : "none";
   cardEl.style.display = "block";
+  renderVoiceOptions();
+  loadVoiceOptions().catch(() => {});
   scheduleUpdate();
 }
 
@@ -4338,19 +4515,301 @@ function closeCard(){
   stopSpeech();
 }
 
-/* --- Audio: sinteză vocală în română (Web Speech API) --- */
-function stopSpeech(){
-  if (window.speechSynthesis) speechSynthesis.cancel();
-  $("#speakBtn").textContent = "Ascultă";
+/* --- Audio: ElevenLabs prin API, cu Web Speech API ca fallback local --- */
+/* Voice defaults supplied for the AradLens public site. They are only used
+   when the API does not return/select a voice; no secret is stored here. */
+const VOICE_DEFAULTS = {
+  ro: { voice_id: "EXAVITQu4vr4xnSDxMaL", model_id: "eleven_v4_turbo" },
+  en: { voice_id: "pNInz6obpgDQGcFmaJgB", model_id: "eleven_v4_turbo" }
+};
+
+const voiceService = {
+  state: "idle",          // idle | loading | ready | unavailable
+  configured: null,       // null = unknown, true/false from /voice/status
+  voices: [],
+  modelId: null,
+  lastAttempt: 0,
+  speechBlockedUntil: 0,
+  promise: null
+};
+
+let voiceAudio = null;
+let voiceAudioUrl = null;
+let voicePendingPlay = false;
+let voiceBusy = false;
+let voiceRequestToken = 0;
+let voiceAudioText = "";
+let voiceAudioFailed = false;
+
+function voiceStatusConfigured(data) {
+  if (typeof data === "boolean") return data;
+  if (!data || typeof data !== "object") return null;
+  const boolKeys = [
+    "configured", "is_configured", "enabled", "available", "ready", "ok",
+    "has_api_key", "api_key_configured", "elevenlabs_configured"
+  ];
+  for (const key of boolKeys) {
+    if (typeof data[key] === "boolean") return data[key];
+  }
+  for (const key of ["elevenlabs", "config", "configuration", "voice"]) {
+    if (data[key] && typeof data[key] === "object") {
+      const nested = voiceStatusConfigured(data[key]);
+      if (nested !== null) return nested;
+    }
+  }
+  const state = String(data.status || data.state || "").toLowerCase();
+  if (["ok", "configured", "ready", "enabled", "active", "available"].includes(state)) return true;
+  if (["error", "disabled", "missing", "not_configured", "unconfigured", "unavailable"].includes(state)) return false;
+  return null;
+}
+
+function voiceModelFromStatus(data) {
+  if (!data || typeof data !== "object") return null;
+  const keys = ["model_id", "modelId", "default_model_id", "defaultModelId", "elevenlabs_model_id", "model"];
+  for (const key of keys) {
+    if (typeof data[key] === "string" && data[key].trim()) return data[key].trim();
+  }
+  for (const key of ["elevenlabs", "config", "configuration", "voice"]) {
+    if (data[key] && typeof data[key] === "object") {
+      const nested = voiceModelFromStatus(data[key]);
+      if (nested) return nested;
+    }
+  }
+  return null;
+}
+
+function normalizeVoiceEntries(data) {
+  if (!data) return [];
+  let raw = Array.isArray(data)
+    ? data
+    : (data.voices || data.items || data.data || data.results || []);
+  if (!Array.isArray(raw) && raw && typeof raw === "object") {
+    raw = raw.voices || raw.items || Object.values(raw);
+  }
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set();
+  const out = [];
+  raw.forEach((v) => {
+    if (!v || typeof v !== "object") return;
+    const id = String(v.voice_id || v.voiceId || v.id || "").trim();
+    const name = String(v.name || v.voice_name || v.display_name || v.label || id).trim();
+    if (!id || !name || seen.has(id)) return;
+    seen.add(id);
+    out.push({
+      id,
+      name,
+      language: String(v.language || v.locale || v.lang || (v.labels && (v.labels.language || v.labels.locale)) || "").trim(),
+      modelId: v.model_id || v.modelId || null,
+      previewUrl: v.preview_url || v.previewUrl || null
+    });
+  });
+  return out;
+}
+
+let voiceSelectBound = false;
+function renderVoiceOptions() {
+  const sel = $("#voiceSelect");
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = "";
+  const auto = document.createElement("option");
+  auto.value = "";
+  auto.textContent = appLang === "en" ? "Automatic voice" : "Voce automată";
+  sel.appendChild(auto);
+  (voiceService.voices || []).forEach((v) => {
+    const option = document.createElement("option");
+    option.value = v.id;
+    option.textContent = v.name + (v.language ? " · " + v.language : "");
+    sel.appendChild(option);
+  });
+  if (current && (voiceService.voices || []).some(v => v.id === current)) sel.value = current;
+  sel.hidden = !voiceService.voices.length || voiceService.configured === false;
+  if (!voiceSelectBound) {
+    sel.addEventListener("change", () => stopSpeech());
+    voiceSelectBound = true;
+  }
+}
+
+async function loadVoiceOptions(force = false) {
+  if (voiceService.promise) return voiceService.promise;
+  if (!force && voiceService.state === "ready") {
+    renderVoiceOptions();
+    return voiceService;
+  }
+  if (!force && voiceService.state === "unavailable" && Date.now() - voiceService.lastAttempt < 30000) {
+    renderVoiceOptions();
+    return voiceService;
+  }
+
+  voiceService.state = "loading";
+  voiceService.lastAttempt = Date.now();
+  voiceService.promise = (async () => {
+    const [statusRes, voicesRes] = await Promise.allSettled([
+      VoiceApi.status(),
+      VoiceApi.voices()
+    ]);
+    if (statusRes.status === "fulfilled") {
+      voiceService.configured = voiceStatusConfigured(statusRes.value);
+      voiceService.modelId = voiceModelFromStatus(statusRes.value);
+    } else {
+      console.warn("[AradLens voice] status indisponibil:", statusRes.reason && statusRes.reason.kind);
+    }
+    if (voicesRes.status === "fulfilled") {
+      voiceService.voices = normalizeVoiceEntries(voicesRes.value);
+    } else {
+      console.warn("[AradLens voice] lista vocilor indisponibilă:", voicesRes.reason && voicesRes.reason.kind);
+      voiceService.voices = [];
+    }
+    voiceService.state = (statusRes.status === "rejected" && voicesRes.status === "rejected")
+      ? "unavailable"
+      : "ready";
+    renderVoiceOptions();
+    return voiceService;
+  })().catch((e) => {
+    voiceService.state = "unavailable";
+    console.warn("[AradLens voice] inițializare eșuată:", e && e.kind);
+    renderVoiceOptions();
+    return voiceService;
+  }).finally(() => {
+    voiceService.promise = null;
+  });
+  return voiceService.promise;
+}
+
+function buildVoiceText(t) {
+  if (!t) return "";
+  const cardVisible = cardEl && cardEl.style.display === "block";
+  const content = cardVisible
+    ? (($("#cardDesc") || {}).textContent || "")
+    : (t.apiDesc || t.descriere || "");
+  let text = String(content).replace(/\s+/g, " ").trim();
+  if (text && !/[.!?]$/.test(text)) text += ".";
+  if (text.length > 4800) {
+    text = text.slice(0, 4797);
+    const cut = text.lastIndexOf(" ");
+    if (cut > 0) text = text.slice(0, cut);
+    text += "…";
+  }
+  return text;
+}
+
+function setVoiceUi(state) {
+  const speak = $("#speakBtn");
+  const stop = $("#stopSpeakBtn");
+  if (speak) {
+    speak.textContent = appLang === "en" ? "Listen" : "Ascultă";
+    speak.disabled = state === "loading" || state === "playing";
+    speak.setAttribute("aria-busy", state === "loading" ? "true" : "false");
+  }
+  if (stop) {
+    stop.textContent = appLang === "en" ? "Stop" : "Oprește";
+    stop.hidden = state === "idle";
+  }
+}
+
+function releaseVoiceAudio() {
+  if (voiceAudio) {
+    try { voiceAudio.pause(); } catch (e) {}
+    voiceAudio.onended = null;
+    voiceAudio.onerror = null;
+    voiceAudio.removeAttribute("src");
+    try { voiceAudio.load(); } catch (e) {}
+    voiceAudio = null;
+  }
+  if (voiceAudioUrl) {
+    URL.revokeObjectURL(voiceAudioUrl);
+    voiceAudioUrl = null;
+  }
+  voicePendingPlay = false;
+}
+
+function finishVoicePlayback() {
+  if (voiceAudio) {
+    const d = voiceAudio.duration;
+    if (d === 0 || (isFinite(d) && d <= 0.05)) {
+      console.warn("[AradLens voice] durată audio invalidă la final:", d);
+      fallbackFromVoiceAudio("Audio invalid de la serviciul vocal. Folosesc vocea browserului.");
+      return;
+    }
+  }
+  releaseVoiceAudio();
+  voiceAudioText = "";
+  setVoiceUi("idle");
+}
+
+function fallbackFromVoiceAudio(message) {
+  if (voiceAudioFailed) return;
+  voiceAudioFailed = true;
+  const text = voiceAudioText;
+  releaseVoiceAudio();
+  setVoiceUi("idle");
+  if (message) showStatus(message);
+  if (text) speakWithBrowser(text, appLang === "en" ? "en" : "ro");
+}
+
+function attemptVoicePlay() {
+  if (!voiceAudio) return;
+  let playback;
+  try {
+    playback = voiceAudio.play();
+  } catch (e) {
+    fallbackFromVoiceAudio("Audio invalid de la serviciul vocal. Folosesc vocea browserului.");
+    return;
+  }
+  setVoiceUi("playing");
+  if (playback && typeof playback.catch === "function") {
+    playback.then(() => {
+      voicePendingPlay = false;
+      setVoiceUi("playing");
+    }).catch((err) => {
+      if (err && err.name === "NotAllowedError") {
+        voicePendingPlay = true;
+        setVoiceUi("pending");
+        showStatus("Apasă din nou pentru a reda audio.");
+      } else {
+        fallbackFromVoiceAudio("Audio invalid de la serviciul vocal. Folosesc vocea browserului.");
+      }
+    });
+  }
+}
+
+function playVoiceBlob(blob, text) {
+  releaseVoiceAudio();
+  voiceAudioText = text || "";
+  voiceAudioFailed = false;
+  if (!blob || blob.size < 512) {
+    console.warn("[AradLens voice] audio prea mic:", blob ? blob.size : 0, "bytes", blob ? blob.type : "");
+    fallbackFromVoiceAudio("Audio invalid de la serviciul vocal. Folosesc vocea browserului.");
+    return;
+  }
+  voiceAudioUrl = URL.createObjectURL(blob);
+  voiceAudio = new Audio(voiceAudioUrl);
+  voiceAudio.preload = "auto";
+  voiceAudio.onended = finishVoicePlayback;
+  voiceAudio.onerror = () => {
+    console.warn("[AradLens voice] redare eșuată", voiceAudio && voiceAudio.error && voiceAudio.error.code);
+    fallbackFromVoiceAudio("Audio invalid de la serviciul vocal. Folosesc vocea browserului.");
+  };
+  voiceAudio.addEventListener("loadedmetadata", () => {
+    if (!voiceAudio) return;
+    const d = voiceAudio.duration;
+    if (d === 0 || (isFinite(d) && d <= 0.05)) {
+      console.warn("[AradLens voice] durată audio invalidă:", d);
+      fallbackFromVoiceAudio("Audio invalid de la serviciul vocal. Folosesc vocea browserului.");
+    }
+  });
+  attemptVoicePlay();
 }
 
 let roVoice = null;
-function pickRoVoice(){
+let enVoice = null;
+function pickRoVoice() {
   try {
     if (!("speechSynthesis" in window)) return null;
     const vs = speechSynthesis.getVoices() || [];
     roVoice = vs.find(v => (v.lang || "").toLowerCase().startsWith("ro")) || null;
-  } catch (e) { roVoice = null; }
+    enVoice = vs.find(v => (v.lang || "").toLowerCase().startsWith("en")) || null;
+  } catch (e) { roVoice = null; enVoice = null; }
   return roVoice;
 }
 if ("speechSynthesis" in window) {
@@ -4359,23 +4818,99 @@ if ("speechSynthesis" in window) {
   window.addEventListener("voiceschanged", pickRoVoice);
 }
 
-function toggleSpeech(){
-  if (!("speechSynthesis" in window)){
+function stopSpeech() {
+  voiceRequestToken++;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  releaseVoiceAudio();
+  voiceAudioText = "";
+  voiceAudioFailed = false;
+  voiceBusy = false;
+  setVoiceUi("idle");
+}
+
+function speakWithBrowser(text, lang) {
+  if (!("speechSynthesis" in window)) {
+    setVoiceUi("idle");
     showStatus("Vocea nu merge în acest browser.");
     return;
   }
-  if (speechSynthesis.speaking){ stopSpeech(); return; }
-  const t = target;
-  const parts = [t.apiName || t.nume, t.categorie && t.categorie.name, t.apiDesc || t.descriere].filter(Boolean);
-  const text = parts.join(". ") + ".";
+  if (speechSynthesis.speaking) { stopSpeech(); return; }
+  const language = lang === "en" ? "en" : "ro";
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "ro-RO"; u.rate = 1.0; u.pitch = 1.0;
-  const v = roVoice || pickRoVoice();
-  if (v) u.voice = v;
-  u.onend = u.onerror = () => { $("#speakBtn").textContent = "Ascultă"; };
+  u.lang = language === "en" ? "en-GB" : "ro-RO"; u.rate = 1.0; u.pitch = 1.0;
+  if ((language === "en" && !enVoice) || (language === "ro" && !roVoice)) {
+    try { pickRoVoice(); } catch (e) {}
+  }
+  const v = language === "en" ? enVoice : roVoice;
+  if (v && (v.lang || "").toLowerCase().startsWith(language)) u.voice = v;
+  u.onend = u.onerror = () => setVoiceUi("idle");
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
-  $("#speakBtn").textContent = "Stop";
+  setVoiceUi("playing");
+}
+
+async function toggleSpeech() {
+  if (voiceBusy) return;
+  if (voiceAudio && !voiceAudio.paused) { stopSpeech(); return; }
+  if (voicePendingPlay && voiceAudio) { attemptVoicePlay(); return; }
+
+  stopSpeech();
+  const text = buildVoiceText(target);
+  if (!text) {
+    showStatus("Nu există text de citit.");
+    return;
+  }
+
+  const language = appLang === "en" ? "en" : "ro";
+  const defaults = VOICE_DEFAULTS[language] || VOICE_DEFAULTS.ro;
+  const requestToken = voiceRequestToken;
+  voiceBusy = true;
+  setVoiceUi("loading");
+
+  let svc = voiceService;
+  if (svc.state === "idle" || svc.state === "loading") {
+    svc = await loadVoiceOptions();
+  } else if (svc.state === "unavailable" && Date.now() - svc.lastAttempt > 30000) {
+    svc = await loadVoiceOptions(true);
+  }
+  if (requestToken !== voiceRequestToken) return;
+
+  // Even when status/voices are blocked (e.g. the live API currently returns
+  // 401), make one speech attempt with the supplied defaults; a 401/network
+  // failure is caught and the browser voice takes over.
+  const apiAllowed = svc.configured !== false && Date.now() >= (svc.speechBlockedUntil || 0);
+  if (apiAllowed) {
+    try {
+      const body = { text, language };
+      const sel = $("#voiceSelect");
+      const chosenId = sel && !sel.hidden ? sel.value : "";
+      const selectedVoice = (svc.voices || []).find(v => v.id === chosenId);
+      const voiceId = selectedVoice ? selectedVoice.id : defaults.voice_id;
+      if (voiceId) body.voice_id = voiceId;
+      const modelId = svc.modelId || (selectedVoice && selectedVoice.modelId) || defaults.model_id;
+      if (modelId) body.model_id = modelId;
+      const blob = await VoiceApi.speech(body);
+      if (requestToken !== voiceRequestToken) return;
+      voiceService.speechBlockedUntil = 0;
+      voiceBusy = false;
+      playVoiceBlob(blob, text);
+      return;
+    } catch (e) {
+      if (requestToken !== voiceRequestToken) return;
+      voiceBusy = false;
+      console.warn("[AradLens voice] sinteza a eșuat:", e && e.kind);
+      if (e && e.kind === "validation") {
+        showStatus(e.message);
+        setVoiceUi("idle");
+        return;
+      }
+      voiceService.speechBlockedUntil = Date.now() + 30000;
+      showStatus("Vocea API nu este disponibilă. Folosesc vocea browserului.");
+    }
+  }
+
+  voiceBusy = false;
+  speakWithBrowser(text, language);
 }
 
 /* --- Foto istoric vs. actual: instantaneu din cameră + foto de arhivă --- */
@@ -4448,6 +4983,7 @@ function updateArLabel(az, phrase, meta){
 $("#detailsBtn").onclick = openCard;
 $("#cardClose").onclick   = closeCard;
 $("#speakBtn").onclick    = toggleSpeech;
+$("#stopSpeakBtn").onclick = stopSpeech;
 $("#photoBtn").onclick    = openPhoto;
 $("#cmpClose").onclick    = closePhoto;
 $("#cmpRange").oninput    = e => setCmpPos(e.target.value);
@@ -5119,6 +5655,8 @@ function closeStoryLoreModal() {
   const modal = $("#storyLoreModal");
   if (modal) modal.style.display = "none";
 }
+const loreCloseBtn = $("#loreCloseBtn");
+if (loreCloseBtn) loreCloseBtn.onclick = closeStoryLoreModal;
 
 function openRewardModal(chapter) {
   const modal = $("#rewardModal");
@@ -5187,6 +5725,7 @@ function enterCaptureMode(landmark) {
   const titleEl = $("#csTitle");
   if (titleEl) titleEl.textContent = activeCaptureLandmark.nume;
 
+  document.body.classList.add("capture-active");
   const captureScreen = $("#captureScreen");
   if (captureScreen) captureScreen.style.display = "flex";
 
@@ -5197,6 +5736,7 @@ function exitCaptureMode() {
   const cam = $("#cam");
   if (cam) cam.classList.remove("camera-clear");
 
+  document.body.classList.remove("capture-active");
   const captureScreen = $("#captureScreen");
   if (captureScreen) captureScreen.style.display = "none";
 
@@ -5448,8 +5988,25 @@ function closeAlbum() {
   $("#albumModal").style.display = "none";
 }
 
+let albumArchiveExpanded = false;
+let albumThenPick = null;
+
+function archivePhotoPool(landmark) {
+  const pool = [];
+  if (landmark.foto) {
+    pool.push({ src: landmark.foto, credit: landmark.fotoCredit || "Foto din arhivă" });
+  }
+  (landmark.imagini || []).forEach((img) => {
+    const src = LocationsApi.imageUrl(img);
+    if (!pool.some(p => p.src === src)) pool.push({ src, credit: "Arhiva AradLens" });
+  });
+  return pool;
+}
+
 function selectAlbumLandmark(idx) {
   selectedAlbumIndex = idx;
+  albumArchiveExpanded = false;
+  albumThenPick = null;
   renderAlbumCompare();
   $("#albumCompareModal").style.display = "flex";
 }
@@ -5467,11 +6024,16 @@ function renderAlbumCompare() {
   $("#albumLandmarkTitle").textContent = name;
   $("#albumLandmarkMeta").textContent = metaFor(landmark) || "Loc din Arad";
 
+  const pool = archivePhotoPool(landmark);
+  if (!albumThenPick || !pool.some(p => p.src === albumThenPick.src)) {
+    albumThenPick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  }
+
   const thenBox = $("#albumThenBox");
-  if (landmark.foto) {
+  if (albumThenPick) {
     thenBox.innerHTML = `
-      <img src="${landmark.foto}" alt="${name}" class="cmp-card-img">
-      <div class="cmp-card-credit">${landmark.fotoCredit || "Foto din arhivă"}</div>
+      <img src="${esc(albumThenPick.src)}" alt="${esc(name)} — Atunci" class="cmp-card-img">
+      <div class="cmp-card-credit">${esc(albumThenPick.credit)}</div>
     `;
   } else {
     thenBox.innerHTML = `
@@ -5483,45 +6045,40 @@ function renderAlbumCompare() {
 
   const nowBox = $("#albumNowBox");
   const userPhoto = userCapturedPhotos[landmark.nume];
-  const apiImg = (landmark.imagini || [])[0];
   if (userPhoto && userPhoto.dataUrl) {
     const dateFormatted = userPhoto.timestamp ? new Date(userPhoto.timestamp).toLocaleString(trLocale(), {
       day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
     }) : "";
     nowBox.innerHTML = `
       <img src="${userPhoto.dataUrl}" alt="Poza ta" class="cmp-card-img" style="border: 1.5px solid var(--accent-green);">
-      <div style="font-size:12px;font-weight:700;color:var(--accent-green);margin-top:4px;">Poza ta</div>
-      <div class="cmp-card-credit">${dateFormatted ? dateFormatted : ""}${userPhoto.sessionOnly ? ", doar acum" : ""}</div>
-      ${apiImg ? `<div class="cmp-inline-archive"><img src="${LocationsApi.imageUrl(apiImg)}" alt="${esc(name)} din arhiva site-ului"><span>Din arhiva AradLens</span></div>` : ""}
+      <div class="cmp-card-credit"><span class="cmp-you">Poza ta</span>${dateFormatted ? " · " + dateFormatted : ""}${userPhoto.sessionOnly ? ", doar acum" : ""}</div>
     `;
   } else {
-    if (apiImg) {
-      nowBox.innerHTML = `
-        <img src="${LocationsApi.imageUrl(apiImg)}" alt="${name}" class="cmp-card-img">
-        <div class="cmp-card-credit">Foto din arhiva AradLens</div>
-      `;
-    } else {
-      nowBox.innerHTML = `
-        <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-        <div class="cmp-placeholder-text">Nicio poză încă</div>
-        <div class="cmp-placeholder-sub">Apropie-te la 200 m și fă o poză.</div>
-      `;
-    }
+    nowBox.innerHTML = `
+      <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <div class="cmp-placeholder-text">Nicio poză încă</div>
+      <div class="cmp-placeholder-sub">Apropie-te la 200 m și fă o poză.</div>
+    `;
   }
 
+  const rest = pool.filter(p => !albumThenPick || p.src !== albumThenPick.src);
+  const seeMoreBtn = $("#albumSeeMoreBtn");
   const archiveStrip = $("#albumArchiveStrip");
   const archiveRow = $("#albumArchiveStripRow");
-  const archiveImgs = Array.isArray(landmark.imagini) ? landmark.imagini : [];
+  if (seeMoreBtn) {
+    seeMoreBtn.hidden = rest.length === 0;
+    seeMoreBtn.textContent = albumArchiveExpanded ? "Ascunde pozele" : "Vezi mai multe poze";
+    seeMoreBtn.setAttribute("aria-expanded", String(albumArchiveExpanded));
+    seeMoreBtn.onclick = () => {
+      albumArchiveExpanded = !albumArchiveExpanded;
+      renderAlbumCompare();
+    };
+  }
   if (archiveStrip && archiveRow) {
-    if (archiveImgs.length > 1) {
-      archiveRow.innerHTML = archiveImgs.map((img, i) =>
-        `<img src="${LocationsApi.imageUrl(img)}" alt="${esc(name)} din arhiva site-ului, imaginea ${i + 1}" width="96" height="72" decoding="async">`
-      ).join("");
-      archiveStrip.hidden = false;
-    } else {
-      archiveRow.innerHTML = "";
-      archiveStrip.hidden = true;
-    }
+    archiveRow.innerHTML = rest.map((p, i) =>
+      `<img src="${esc(p.src)}" alt="${esc(name)} din arhiva site-ului, imaginea ${i + 1}" width="96" height="72" decoding="async">`
+    ).join("");
+    archiveStrip.hidden = rest.length === 0 || !albumArchiveExpanded;
   }
 }
 
@@ -5532,7 +6089,12 @@ function guideToSelectedLandmark() {
 
 $("#albumBtn").onclick = openAlbum;
 $("#albumCloseBtn").onclick = closeAlbum;
-$("#albumBackBtn").onclick = closeAlbum;
+const albumCompareCloseBtn = $("#albumCompareCloseBtn");
+if (albumCompareCloseBtn) {
+  albumCompareCloseBtn.onclick = () => {
+    $("#albumCompareModal").style.display = "none";
+  };
+}
 $("#albumGuideBtn").onclick = guideToSelectedLandmark;
 
 /* =====================================================================
@@ -5596,7 +6158,76 @@ async function apiRequest(path, { timeoutMs = 0 } = {}) {
   return data;
 }
 
-/* Punctele publice folosite de site: doar GET. */
+/* POST binar pentru voce: răspunsul de succes este MP3, nu JSON. */
+const VOICE_TIMEOUT_MS = 8000;
+const VOICE_SPEECH_TIMEOUT_MS = 30000;
+
+async function apiPostVoiceSpeech(body, { timeoutMs = VOICE_SPEECH_TIMEOUT_MS } = {}) {
+  const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+  let res;
+  try {
+    res = await fetch(API_PREFIX + "/voice/speech", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "audio/mpeg" },
+      body: JSON.stringify(body),
+      signal: ctrl ? ctrl.signal : undefined
+    });
+  } catch (e) {
+    if (timer) clearTimeout(timer);
+    if (e && e.name === "AbortError") {
+      throw { kind: "timeout", message: "Serviciul vocal nu a răspuns la timp. Încearcă din nou." };
+    }
+    if (!navigator.onLine) throw { kind: "offline", message: "Ești offline." };
+    throw { kind: "network", message: "Nu merge conexiunea. Încearcă din nou." };
+  }
+
+  if (!res.ok) {
+    let data = null;
+    const ct = res.headers.get("content-type") || "";
+    if (ct.indexOf("json") !== -1) {
+      try { data = await res.json(); } catch (e) {}
+    }
+    if (timer) clearTimeout(timer);
+    if (res.status === 422) {
+      const fields = data && Array.isArray(data.detail)
+        ? data.detail.map(d => (d && d.loc ? d.loc.join(".") : "") + (d && d.msg ? ": " + d.msg : "")).join("; ")
+        : "validation";
+      console.warn("[AradLens voice] 422:", fields);
+      throw { kind: "validation", message: "Textul nu a putut fi citit. Încearcă din nou." };
+    }
+    if (res.status === 401 || res.status === 403) {
+      console.warn("[AradLens voice] serviciul cere autentificare (", res.status, ")");
+      throw { kind: "unavailable", message: "Serviciul vocal nu este disponibil momentan." };
+    }
+    if (res.status === 429) {
+      throw { kind: "busy", message: "Serviciul vocal este ocupat. Încearcă din nou în câteva secunde." };
+    }
+    console.warn("[AradLens voice] eroare", res.status);
+    throw { kind: "http", message: "Serviciul vocal nu a răspuns. Încearcă din nou." };
+  }
+
+  const ct = res.headers.get("content-type") || "";
+  if (ct.indexOf("audio") === -1) {
+    if (timer) clearTimeout(timer);
+    throw { kind: "server", message: "Răspuns neașteptat de la serviciul vocal." };
+  }
+
+  try {
+    const blob = await res.blob();
+    if (!blob || blob.size === 0) {
+      throw { kind: "server", message: "Serviciul vocal nu a trimis audio." };
+    }
+    return blob;
+  } catch (e) {
+    if (e && e.kind) throw e;
+    throw { kind: "network", message: "Audio nu a putut fi descărcat. Încearcă din nou." };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/* Punctele publice folosite de site: GET, plus singurul POST vocal. */
 const ApiHealth = { check: () => apiRequest("/health", { timeoutMs: API_HEALTH_TIMEOUT_MS }) };
 const CategoriesApi = {
   list: () => apiRequest("/categories"),
@@ -5610,6 +6241,11 @@ const LocationsApi = {
 const ToursApi = {
   list: () => apiRequest("/tours"),
   get:  (id) => apiRequest("/tours/" + id)
+};
+const VoiceApi = {
+  status: () => apiRequest("/voice/status", { timeoutMs: VOICE_TIMEOUT_MS }),
+  voices: () => apiRequest("/voice/voices", { timeoutMs: VOICE_TIMEOUT_MS }),
+  speech: (body) => apiPostVoiceSpeech(body)
 };
 
 /* =====================================================================
@@ -5767,7 +6403,10 @@ function bindCategoriesUI() {
 
 /* ---------- UI: pagina unei locații (doar citire) ---------- */
 let locBound = false;
-let locStandalone = false;   // deschisă dintr-o apăsare lungă pe busolă
+let locView = "list";          // "list" | "preview" | "detail"
+let locReturnView = "list";    // where the detail back arrow returns
+let locPreviewObjective = null;
+let locPreviewData = null;
 
 function setLocState(msg, kind) {
   const el = $("#locState");
@@ -5786,11 +6425,16 @@ function setLocErrorState(msg, retryFn) {
   if (retry) retry.onclick = retryFn || backToLocList;
 }
 
-function locationInfo(loc) {
-  const imgs = (loc.images || []).map(id => `
+function locImagesMarkup(loc, limit) {
+  const ids = (loc.images || []).slice(0, limit || undefined);
+  return ids.map(id => `
     <span class="loc-img-wrap">
-      <img src="${LocationsApi.imageUrl(id)}" alt="Poza ${esc(loc.name)}">
+      <img src="${LocationsApi.imageUrl(id)}" alt="Poza ${esc(loc.name)}" loading="eager" decoding="async">
     </span>`).join("");
+}
+
+function locationInfo(loc, limit) {
+  const imgs = locImagesMarkup(loc, limit);
   const cat = loc.category ? `<span class="loc-chip">${esc(loc.category.name)}</span>` : "";
   const desc = loc.description ? `<p class="loc-desc">${esc(loc.description)}</p>` : "";
   return { imgs, cat, desc };
@@ -5808,7 +6452,7 @@ function locationFromObjective(o) {
 }
 
 function locationCard(loc) {
-  const info = locationInfo(loc);
+  const info = locationInfo(loc, 3);
   const street = `<span class="loc-coords">${esc(streetForLocation(loc))}</span>`;
   return `<div class="loc-card-top"><span class="loc-name">${esc(loc.name)}</span>${info.cat}</div>
     ${street}${info.desc}${info.imgs}
@@ -5851,14 +6495,30 @@ async function loadLocations() {
   }
 }
 
+function setLocHeader(view) {
+  locView = view;
+  const right = $("#locCloseBtn");
+  if (!right) return;
+  if (view === "detail") {
+    right.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>';
+    right.setAttribute("aria-label", "Înapoi");
+    right.title = "Înapoi";
+  } else {
+    right.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    right.setAttribute("aria-label", "Închide");
+    right.title = "Închide";
+  }
+}
+
 function showLocList() {
-  locStandalone = false;
+  locReturnView = "list";
+  $("#locPreview").style.display = "none";
   $("#locDetail").style.display = "none";
   $("#locDetailBody").innerHTML = "";
   $("#locList").style.display = "";
   $("#locCount").style.display = locItems.length ? "block" : "none";
   $("#locTitleText").textContent = "Locații";
-  $("#locBackBtn").textContent = "Toate locațiile";
+  setLocHeader("list");
 }
 
 /* Pagina locației: se desenează imediat din datele preîncărcate, apoi se
@@ -5887,14 +6547,75 @@ function paintLocDetail(loc, objective) {
   }
 }
 
-async function openLocDetail(id, opts) {
-  opts = opts || {};
-  locStandalone = Boolean(opts.standalone);
+/* Primul nivel al apăsării lungi: o fișă scurtă, cu pozele pe un singur rând. */
+function paintLocPreview(loc, objective) {
+  const info = locationInfo(loc, 3);
+  const cat = loc.category || null;
+  const total = (loc.images || []).length;
+  const extra = Math.max(0, total - 3);
+  $("#locPreview").innerHTML = `
+    <div class="loc-detail-head">
+      <span class="loc-detail-name">${esc(loc.name)}</span>
+      ${cat ? `<span class="loc-chip">${esc(cat.name)}</span>` : ""}
+      <span class="loc-coords">${esc(streetForLocation(loc))}</span>
+    </div>
+    ${loc.description ? `<p class="loc-desc loc-preview-desc">${esc(loc.description)}</p>` : ""}
+    ${total ? `<div class="loc-imgs">${info.imgs}</div>${extra ? `<div class="loc-preview-more">+${extra} ${extra === 1 ? "poză" : "poze"} în fișă</div>` : ""}` : ""}
+    <div class="album-actions" style="margin-top:16px;">
+      <button class="album-action-btn primary" id="locPreviewOpenBtn" type="button">Vezi locația</button>
+    </div>`;
+  const openBtn = $("#locPreviewOpenBtn");
+  if (openBtn) {
+    openBtn.onclick = () => {
+      if (objective && objective.apiId != null) {
+        openLocDetail(objective.apiId, { returnTo: "preview" });
+      } else {
+        locReturnView = "preview";
+        $("#locPreview").style.display = "none";
+        $("#locDetail").style.display = "block";
+        $("#locTitleText").textContent = "Fișa obiectivului";
+        paintLocDetail(loc, objective || null);
+        setLocHeader("detail");
+      }
+    };
+  }
+}
+
+function showLocPreview(objective) {
+  if (!objective) return;
+  const id = objective.apiId != null ? objective.apiId : null;
+  const cached = id != null ? locItems.find(l => Number(l.id) === Number(id)) : null;
+  const loc = (locPreviewData && id != null && Number(locPreviewData.id) === Number(id))
+    ? locPreviewData
+    : (cached || locationFromObjective(objective));
+  locPreviewObjective = objective;
+  locPreviewData = Object.assign({}, loc);
+  $("#locationsModal").style.display = "flex";
   $("#locList").style.display = "none";
   $("#locCount").style.display = "none";
+  $("#locDetail").style.display = "none";
+  $("#locPreview").style.display = "block";
+  $("#locTitleText").textContent = "Fișa obiectivului";
+  setLocState("");
+  paintLocPreview(locPreviewData, objective);
+  setLocHeader("preview");
+  if (id != null) {
+    LocationsApi.get(Number(id)).then((fresh) => {
+      locPreviewData = Object.assign({}, cached || {}, fresh);
+      if (locView === "preview") paintLocPreview(locPreviewData, objective);
+    }).catch(() => {});
+  }
+}
+
+async function openLocDetail(id, opts) {
+  opts = opts || {};
+  locReturnView = opts.returnTo || "list";
+  $("#locList").style.display = "none";
+  $("#locCount").style.display = "none";
+  $("#locPreview").style.display = "none";
   $("#locDetail").style.display = "block";
-  $("#locTitleText").textContent = locStandalone ? "Fișa obiectivului" : "Pagina locației";
-  $("#locBackBtn").textContent = locStandalone ? "Închide" : "Toate locațiile";
+  $("#locTitleText").textContent = locReturnView === "preview" ? "Fișa obiectivului" : "Pagina locației";
+  setLocHeader("detail");
 
   const cached = locItems.find(l => Number(l.id) === Number(id)) || null;
   if (cached) {
@@ -5913,6 +6634,9 @@ async function openLocDetail(id, opts) {
     const merged = Object.assign({}, cached || {}, loc, { category: cat || loc.category });
     setLocState("");
     paintLocDetail(merged, objectiveForLocation(merged));
+    if (locReturnView === "preview") {
+      locPreviewData = Object.assign({}, locPreviewData || {}, merged);
+    }
   } catch (e) {
     if (!cached) {
       setLocErrorState((e && e.message) || "Eroare necunoscută la încărcare.", () => openLocDetail(id, opts));
@@ -5920,40 +6644,38 @@ async function openLocDetail(id, opts) {
   }
 }
 
-/* Apăsare lungă pe o oprire din busolă → pagina locației, instant. */
+/* Apăsare lungă pe o oprire din busolă → fișa scurtă, instant. */
 function openLocationPage(objective) {
-  if (!objective) return;
-  locStandalone = true;
-  $("#locationsModal").style.display = "flex";
-  $("#locList").style.display = "none";
-  $("#locCount").style.display = "none";
-  $("#locDetail").style.display = "block";
-  $("#locTitleText").textContent = "Fișa obiectivului";
-  $("#locBackBtn").textContent = "Închide";
-  setLocState("");
-  paintLocDetail(locationFromObjective(objective), objective);
-  if (objective.apiId != null) openLocDetail(objective.apiId, { standalone: true });
+  showLocPreview(objective);
 }
 
 function closeLocationsModal() {
   $("#locationsModal").style.display = "none";
-  locStandalone = false;
+  locPreviewObjective = null;
+  locView = "list";
+  locReturnView = "list";
 }
 
 function bindLocationsUI() {
   if (locBound) return;
   locBound = true;
-  $("#locCloseBtn").onclick = closeLocationsModal;
-  $("#locBackBtn").onclick = () => {
-    if (locStandalone) { closeLocationsModal(); return; }
-    showLocList();
-    setLocState("");
+  $("#locCloseBtn").onclick = () => {
+    if (locView === "detail") {
+      if (locReturnView === "preview" && locPreviewObjective) {
+        showLocPreview(locPreviewObjective);
+      } else {
+        showLocList();
+        setLocState("");
+      }
+      return;
+    }
+    closeLocationsModal();
   };
   $("#locList").addEventListener("click", e => {
     const btn = e.target.closest("button[data-act=detail]");
     if (!btn) return;
     const li = btn.closest(".loc-card");
-    if (li) openLocDetail(Number(li.dataset.id));
+    if (li) openLocDetail(Number(li.dataset.id), { returnTo: "list" });
   });
 }
 
@@ -6596,7 +7318,7 @@ $("#startBtn").onclick = async () => {
 
   function targets() {
     return document.querySelectorAll(
-      "#rail .ring, .start-foot, .modal-card, #albumModal, #card, .cm-card, .api-gate-card, .album-detail"
+      "#rail .ring, .start-foot, .modal-card, #card, .cm-card, .api-gate-card, .album-detail"
     );
   }
   function attachAll() {
@@ -6722,10 +7444,13 @@ const I18N_RULES = [
   [/^(\d+) locații, (.+)$/, (m, n, rest) => `${n} locations, ${rest}`],
   [/^(\d+) locație, (.+)$/, (m, n, rest) => `${n} location, ${rest}`],
   [/^Din (.+)$/, (m, d) => `Since ${d}`],
+  [/^(.+) din arhiva site-ului, imaginea (\d+)$/, (m, n, i) => `${n} from the site archive, image ${i}`],
   [/^Poza (.+)$/, (m, x) => `Photo of ${x}`],
   [/^(.+), (.+), deschide Atunci \/ Acum$/, (m, n, s) => `${n}, ${s}, open Then / Now`],
   [/^(\d+) \/ (\d+) opriri$/, (m, a, b) => `${a} / ${b} stops`],
   [/^(\d+) \/ (\d+) locuri$/, (m, a, b) => `${a} / ${b} places`],
+  [/^\+(\d+) poză în fișă$/, (m, n) => `+${n} photo in the page`],
+  [/^\+(\d+) poze în fișă$/, (m, n) => `+${n} photos in the page`],
   [/^(\d+) poze pe acest dispozitiv$/, (m, n) => `${n} photos on this device`],
   [/^(\d+) poză pe acest dispozitiv$/, (m, n) => `${n} photo on this device`],
   [/^(\d+) fotografii$/, (m, n) => `${n} photos`],
