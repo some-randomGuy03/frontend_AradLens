@@ -149,9 +149,24 @@
     position:absolute; left:0; right:0; bottom:calc(14px + env(safe-area-inset-bottom));
     text-align:center; color:#fff; font-size:10px; opacity:.55; padding:0 16px; z-index:2;
   }
+
+  /* Placeholder Desktop */
+  #desktopPlaceholder {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0d3b66; color: #fff;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px;
+  }
+  #desktopPlaceholder h2 { font-size: 26px; margin-bottom: 12px; }
+  #desktopPlaceholder p { font-size: 16px; opacity: 0.9; max-width: 400px; line-height: 1.5; }
 </style>
 </head>
 <body>
+
+<div id="desktopPlaceholder">
+  <h2>Experiență AR</h2>
+  <p>Această aplicație este concepută pentru a fi explorată pe teren. Te rugăm să o accesezi de pe un telefon mobil.</p>
+</div>
 
 <video id="cam" autoplay muted playsinline></video>
 
@@ -280,6 +295,26 @@ const $ = s => document.querySelector(s);
 const statusBar = $("#status");
 function showStatus(msg){ statusBar.textContent = msg; statusBar.style.display = "block"; }
 function hideStatus(){ statusBar.style.display = "none"; }
+
+/* ---------- Detectare Dispozitiv (Mobil / Desktop) ---------- */
+let isMobile = false;
+let isDesktop = true;
+
+function checkDeviceType() {
+  const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia("(pointer: coarse)").matches;
+  const isSmallScreen = window.innerWidth <= 1024;
+  isMobile = hasTouch && isSmallScreen;
+  isDesktop = !isMobile;
+  
+  const desktopPlaceholder = document.getElementById('desktopPlaceholder');
+  if (desktopPlaceholder) {
+    desktopPlaceholder.style.display = isDesktop ? 'flex' : 'none';
+  }
+}
+
+checkDeviceType();
+window.addEventListener('resize', checkDeviceType);
+window.addEventListener('orientationchange', checkDeviceType);
 
 /* ---------- Construiește pastilele de selecție ---------- */
 const pillsEl = $("#pills");
