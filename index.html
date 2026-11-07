@@ -172,25 +172,82 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Șirul de opriri: puncte de salt pe marginea dreaptă, oprită activă alungită */
+  /* Busola de jos: cadran arcuit, înclinat ca o busolă reală, pe care se glisează
+     stânga/dreapta dintr-o parte în alta; oprirea din dreptul indicatorului de sus
+     este cea selectată. Fiecare roză are acul spre direcția reperului față de cameră.
+     În Mod Poveste pașii încuiați se estompează și primesc lacăt, cei finalizați
+     capătă inel turcoaz. */
   #snapRail {
-    position: absolute; right: 12px; bottom: 18%;
-    display: flex; flex-direction: column; gap: 2px; z-index: 2; align-items: center;
+    position: relative; width: 100%; max-width: 560px; margin: 6px auto 0;
+    height: 108px;
+    overflow: hidden; overflow: clip;
+    touch-action: none; -webkit-user-select: none; user-select: none;
+    cursor: grab;
+    transform: perspective(760px) rotateX(13deg);
+    transform-origin: 50% 100%;
   }
-  .snap-dot {
-    width: 44px; height: 44px; padding: 0; border: none; background: none;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  .band-anim .compass-stop,
+  .band-anim .cb-scale-tick { transition: transform .34s cubic-bezier(.22,.61,.36,1), opacity .34s ease; }
+  .cb-reticle {
+    position: absolute; left: 50%; top: 0; width: 13px; height: 8px; margin-left: -6.5px;
+    background: var(--amber); z-index: 3; pointer-events: none;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
-  .snap-dot::before {
-    content: ""; display: block; width: 10px; height: 10px; border-radius: 6px;
-    border: 1px solid rgba(246,242,233,.5);
-    background: rgba(246,242,233,.35);
-    transition: background .2s ease, height .2s ease, border-color .2s ease;
+  .cb-scale-tick {
+    position: absolute; left: 50%; top: 3px; width: 1px; height: 5px; margin-left: -.5px;
+    background: rgba(246,242,233,.3); pointer-events: none;
   }
-  .snap-dot[aria-current="true"]::before {
-    background: var(--amber); border-color: var(--amber);
-    height: 28px;
+  .cb-scale-tick.major { height: 9px; background: rgba(246,242,233,.5); }
+  .compass-stop {
+    position: absolute; left: 50%; top: 15px; width: 104px; margin-left: -52px;
+    -webkit-appearance: none; appearance: none;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 0; border: 0; background: none;
+    color: var(--bone); cursor: pointer; will-change: transform;
   }
+  .compass-stop .cb-dial {
+    display: block; width: 40px; height: 40px;
+    transition: transform .15s ease;
+  }
+  .compass-stop:active .cb-dial { transform: scale(.93); }
+  .compass-stop svg { display: block; width: 100%; height: 100%; }
+  .cb-halo { fill: none; stroke: var(--amber); stroke-width: 1; opacity: 0; transition: opacity .2s ease; }
+  .cb-ring { fill: rgba(5,7,10,.42); stroke: rgba(246,242,233,.42); stroke-width: 1.2; transition: stroke .2s ease; }
+  .cb-tick { stroke: rgba(246,242,233,.3); stroke-width: 1; }
+  .cb-tick.major { stroke: rgba(246,242,233,.55); }
+  .cb-ahead { fill: rgba(246,242,233,.45); }
+  .cb-rot { transition: opacity .3s ease; }
+  .cb-tip { fill: rgba(246,242,233,.5); }
+  .cb-tail { fill: rgba(246,242,233,.2); }
+  .cb-hub { fill: var(--bone); opacity: .75; }
+  .cb-lock { display: none; fill: none; stroke: rgba(246,242,233,.62); stroke-width: 1.1; stroke-linecap: round; }
+  .compass-stop.no-dir .cb-rot { opacity: .28; }
+  .cb-name {
+    font-size: 10px; font-weight: 600; line-height: 1.2; text-align: center;
+    color: var(--bone); opacity: .82; width: 100%;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cb-dist { font-size: 10px; font-weight: 700; line-height: 1; opacity: .55; font-variant-numeric: tabular-nums; }
+  .compass-stop[aria-current="true"] .cb-halo { opacity: .55; }
+  .compass-stop[aria-current="true"] .cb-ring { stroke: var(--amber); stroke-width: 1.6; }
+  .compass-stop[aria-current="true"] .cb-tick.major { stroke: rgba(232,163,61,.8); }
+  .compass-stop[aria-current="true"] .cb-ahead,
+  .compass-stop[aria-current="true"] .cb-tip { fill: var(--amber); }
+  .compass-stop[aria-current="true"] .cb-tail { fill: rgba(232,163,61,.32); }
+  .compass-stop[aria-current="true"] .cb-hub { fill: var(--amber); opacity: 1; }
+  .compass-stop[aria-current="true"] .cb-dial { filter: drop-shadow(0 0 6px rgba(232,163,61,.4)); }
+  .compass-stop[aria-current="true"] .cb-name { color: var(--amber); opacity: 1; }
+  .compass-stop[aria-current="true"] .cb-dist { color: var(--amber); opacity: .95; }
+  /* Mod Poveste: pași încuiți (viitori) și pași finalizați */
+  .compass-stop.locked .cb-rot { opacity: .12; }
+  .compass-stop.locked .cb-lock { display: block; }
+  .compass-stop.locked .cb-ring { stroke: rgba(246,242,233,.24); }
+  .compass-stop.locked .cb-tick.major { stroke: rgba(246,242,233,.3); }
+  .compass-stop.locked .cb-name,
+  .compass-stop.locked .cb-dist { opacity: .5; }
+  .compass-stop.completed .cb-ring { stroke: rgba(47,158,140,.8); }
+  .compass-stop.completed .cb-hub { fill: #2f9e8c; opacity: 1; }
+  .compass-stop.completed .cb-name { opacity: .78; }
 
   /* Blocul de legendă, stânga-jos, pe unicul scrim inferior */
   .bottom {
@@ -200,7 +257,7 @@
   }
   #caption {
     border: 1px solid transparent;
-    border-radius: 12px; padding: 10px 12px; margin: 0 68px 10px 0;
+    border-radius: 12px; padding: 10px 12px; margin: 0 0 10px 0;
     transition: background .3s ease;
   }
   #caption .cap-author {
@@ -228,7 +285,7 @@
     color: var(--amber-ink);
   }
   .scrim-row {
-    border-top: 1px solid var(--hud-hairline); padding-top: 10px; margin-right: 68px;
+    border-top: 1px solid var(--hud-hairline); padding-top: 10px;
   }
   .dist { text-align: left; white-space: nowrap; }
   .dist .sep { font-size: 15px; font-weight: 700; color: var(--bone); font-variant-numeric: tabular-nums; }
@@ -316,7 +373,7 @@
     background: var(--amber); color: var(--amber-ink); font-size: 13px; font-weight: 700; text-align: center;
     padding: 8px 12px; display: none; font-variant-numeric: tabular-nums;
   }
-  .hint { text-align:left; font-size:12px; opacity:.75; margin:6px 68px 0 0; padding: 0; color: var(--bone); }
+  .hint { text-align:left; font-size:12px; opacity:.75; margin:10px 0 0; padding: 0; color: var(--bone); }
 
   /* Butoane mici reutilizabile — pastilă de scrim cu tipar os;
      peste obiectiv rămân întunecate în ambele teme, din proiectare */
@@ -929,15 +986,6 @@
   .rbc-title { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
   .rbc-desc { font-size: 12px; color: var(--text-muted); line-height: 1.35; margin-bottom: 4px; }
   .rbc-meta { font-size: 11px; font-weight: 700; color: var(--amber); }
-
-  /* Snap dot locked & completed states */
-  .snap-dot.locked { opacity: .45; }
-  .snap-dot.locked::before {
-    background: rgba(246,242,233,.15) !important; border-color: rgba(246,242,233,.3) !important;
-  }
-  .snap-dot.completed::before {
-    background: #14655a !important; border-color: var(--amber) !important;
-  }
 </style>
 </head>
 <body>
@@ -1337,7 +1385,6 @@
         </button>
   </nav>
   <div id="captureDistLabel" aria-hidden="true">—</div>
-  <div id="snapRail" role="group" aria-label="Traseu: alege oprirea"></div>
 
   <div class="bottom">
     <div id="caption">
@@ -1358,7 +1405,8 @@
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
       <button id="flipBtn" class="btn debug-only">Inversează 180°</button>
     </div>
-    <div class="hint">Alege oprirea din dreapta.</div>
+    <div class="hint">Glisează busola pentru a alege oprirea.</div>
+    <nav id="snapRail" role="group" aria-label="Busolă traseu: alege oprirea"></nav>
   </div>
 </div>
 
@@ -1926,111 +1974,285 @@ function updateRouteSteps(){
   if (b) b.textContent = t;
 }
 
-function renderRouteDots(){
-  const rail = $("#snapRail");
-  if (!rail) return;
-  rail.innerHTML = "";
+/* ---------- Busola de jos: cadran arcuit, glisant ----------
+   Mod Poveste: oprirea = un pas din capitol (pașii viitori sunt încuiați,
+   cei parcurși sunt finalizați). Mod Liber: oprirea = un reper din traseu.
+   activeWheelIndex ține indexul opririi (= pasul, în Mod Poveste). */
+const BAND_SLOT = 108;      // distanța dintre două opriri pe bandă (px)
+const BAND_SAG = 26;        // cât coboară capetele arcului la marginea benzii (px)
 
+let bandOffset = 0;          // poziția benzii; index * BAND_SLOT = oprirea centrată
+let bandEls = [];            // elementele de pe bandă: { el, tx, isStop, step, repereIndex, locked }
+let bandStopCount = REPERE.length;
+let bandHalfWidth = 180;     // jumătatea lățimii vizibile (pentru estompare)
+let bandDrag = null;         // gestul de glisare în curs
+let bandAnimTimer = null;
+let bandWheelTimer = null;
+let bandSuppressClickUntil = 0;
+
+/* Opririle de pe bandă, în ordinea traseului, cu starea lor din poveste. */
+function bandStops(){
+  const stops = [];
   if (isStoryMode()) {
     const ch = getActiveChapter();
     const prog = getActiveChapterProgress();
-
-    ch.landmarkIndices.forEach((rIdx, stepIdx) => {
-      const r = REPERE[rIdx];
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "snap-dot";
-      b.dataset.step = stepIdx;
-      b.dataset.repereIndex = rIdx;
-
-      const isCurrent = (stepIdx === prog.currentStep && !prog.completed);
-      const isPast = (stepIdx < prog.currentStep || prog.completed);
-      const isFuture = (stepIdx > prog.currentStep && !prog.completed);
-
-      if (isCurrent) {
-        b.setAttribute("aria-current", "true");
-        b.title = `Pasul ${stepIdx + 1}: ${r.nume} (${r.an}) - Obiectiv activ`;
-        b.setAttribute("aria-label", `Obiectiv curent: ${r.nume} (${r.an})`);
-      } else if (isPast) {
-        b.classList.add("completed");
-        b.setAttribute("aria-current", "false");
-        b.title = `${r.nume} (${r.an}) - Finalizat`;
-        b.setAttribute("aria-label", `Pas finalizat: ${r.nume} (${r.an})`);
-      } else {
-        b.classList.add("locked");
-        b.setAttribute("aria-current", "false");
-        b.title = `🔒 ${r.nume} (${r.an}) - Încuiat`;
-        b.setAttribute("aria-label", `Reper încuiat în timp`);
-      }
-
-      b.addEventListener("click", () => {
-        if (isFuture) {
-          showStoryLockedToast(getCurrentStoryLandmark());
-        } else {
-          selectTargetByIndex(rIdx, false);
-          document.querySelectorAll(".snap-dot").forEach(d => d.setAttribute("aria-current", "false"));
-          b.setAttribute("aria-current", "true");
-        }
+    ch.landmarkIndices.forEach((rIdx, step) => {
+      stops.push({
+        repereIndex: rIdx,
+        step,
+        locked: step > prog.currentStep && !prog.completed,
+        completed: step < prog.currentStep || prog.completed
       });
-      rail.appendChild(b);
     });
   } else {
-    // Mod Liber
-    REPERE.forEach((r, i) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "snap-dot";
-      b.dataset.index = i;
-      b.setAttribute("aria-current", i === activeWheelIndex ? "true" : "false");
-      b.setAttribute("aria-label", `Oprirea ${i + 1} din ${REPERE.length}: ${r.nume}`);
-      b.title = `${r.nume} (${r.an || ''})`;
-      b.addEventListener("click", () => {
-        selectTargetByIndex(i, true);
-      });
-      rail.appendChild(b);
-    });
+    REPERE.forEach((r, i) => stops.push({ repereIndex: i, step: i, locked: false, completed: false }));
   }
-
-  updateRouteSteps();
-  updateWheelDistances();
+  return stops;
 }
 
-/* Compat wrapper: keeps the old name working (console / future callers). */
-function setWheelActiveIndex(idx, animate = true) {
-  const N = REPERE.length;
-  activeWheelIndex = Math.min(N - 1, Math.max(0, idx | 0));
-  if (!isStoryMode()) {
-    document.querySelectorAll(".snap-dot").forEach(d => {
-      d.setAttribute("aria-current", String(Number(d.dataset.index) === activeWheelIndex));
-    });
-  }
-  updateRouteSteps();
+function bandMaxOffset(){ return Math.max(0, (bandStopCount - 1) * BAND_SLOT); }
+
+function bandClamp(v){ return Math.max(0, Math.min(bandMaxOffset(), v)); }
+
+/* Raza arcului: aleasă astfel încât curbura să aibă aceeași adâncime pe orice
+   lățime de ecran (căderea la marginea benzii = BAND_SAG). */
+function bandCurveR(){ return Math.max(320, (bandHalfWidth * bandHalfWidth) / (2 * BAND_SAG)); }
+
+/* Curbura cadranului: căderea (px) și rotirea tangentă (grade) la abaterea dx. */
+function bandDrop(dx){
+  const r = bandCurveR();
+  return Math.min(BAND_SAG * 1.3, (dx * dx) / (2 * r));
 }
 
-function updateWheelDistances() {
+function bandArcDeg(dx){ return Math.atan2(dx, bandCurveR()) * 57.2958; }
+
+/* Oprirea evidențiată: pasul curent din poveste (sau cel ales, dacă e deblocat),
+   respectiv oprirea activă în Mod Liber. */
+function bandActiveStep(){
   if (isStoryMode()) {
     const ch = getActiveChapter();
-    ch.landmarkIndices.forEach((rIdx, stepIdx) => {
-      const r = REPERE[rIdx];
-      const dot = document.querySelector(`.snap-dot[data-step="${stepIdx}"]`);
-      if (!dot) return;
-      let label = `Pasul ${stepIdx + 1}: ${r.nume} (${r.an})`;
-      if (userLat != null && userLon != null && hasValidCoords(r)) {
-        label += `, ${formatDistance(distance(userLat, userLon, r.lat, r.lon))}`;
-      }
-      dot.setAttribute("aria-label", label);
-    });
-  } else {
-    REPERE.forEach((r, i) => {
-      const dot = document.querySelector(`.snap-dot[data-index="${i}"]`);
-      if (!dot) return;
-      let label = `Oprirea ${i + 1} din ${REPERE.length}: ${r.nume}`;
-      if (userLat != null && userLon != null && hasValidCoords(r)) {
-        label += `, ${formatDistance(distance(userLat, userLon, r.lat, r.lon))}`;
-      }
-      dot.setAttribute("aria-label", label);
-    });
+    const prog = getActiveChapterProgress();
+    const maxStep = prog.completed ? ch.landmarkIndices.length - 1 : prog.currentStep;
+    const targetStep = ch.landmarkIndices.indexOf(REPERE.indexOf(target));
+    if (targetStep >= 0 && targetStep <= maxStep) return targetStep;
+    return Math.min(maxStep, Math.max(0, activeWheelIndex));
   }
+  return Math.min(Math.max(0, bandStopCount - 1), Math.max(0, activeWheelIndex));
+}
+
+/* Așază toate elementele pe arc, în funcție de poziția curentă a benzii. */
+function renderBand(){
+  const fade = Math.max(150, bandHalfWidth + 24);
+  bandEls.forEach(item => {
+    const dx = item.tx - bandOffset;
+    const adx = Math.abs(dx);
+    const drop = bandDrop(dx).toFixed(1);
+    const rot = bandArcDeg(dx).toFixed(2);
+    let tf = `translateX(${dx.toFixed(1)}px) translateY(${drop}px) rotate(${rot}deg)`;
+    if (item.isStop){
+      const scale = (item.step === activeWheelIndex && !item.locked ? 1.08 : 1) * Math.max(0.74, 1 - adx / 1100);
+      tf += ` scale(${scale.toFixed(3)})`;
+    }
+    item.el.style.transform = tf;
+    let op = Math.min(1, Math.max(0, 1 - Math.pow(adx / fade, 1.6)) * 1.35);
+    if (item.locked) op *= 0.55;   // pașii încuiți se citesc mai slab
+    item.el.style.opacity = op.toFixed(2);
+    item.el.style.visibility = op < 0.05 ? "hidden" : "";
+  });
+}
+
+/* Animația de așezare (snap): tranziție CSS scurtă, pornită doar la eliberare. */
+function bandAnimate(){
+  const rail = $("#snapRail");
+  if (!rail) return;
+  rail.classList.add("band-anim");
+  if (bandAnimTimer) clearTimeout(bandAnimTimer);
+  bandAnimTimer = setTimeout(() => {
+    rail.classList.remove("band-anim");
+    bandAnimTimer = null;
+  }, 380);
+}
+
+function centerBandOnIndex(i, animate){
+  bandOffset = bandClamp(i * BAND_SLOT);
+  if (animate) bandAnimate();
+  renderBand();
+}
+
+function updateBandHalfWidth(){
+  const rail = $("#snapRail");
+  bandHalfWidth = Math.max(120, (rail ? rail.clientWidth : 320) / 2);
+}
+
+/* Cadranul unui reper: inel, diviziuni cardinale, ac de direcție și lacăt
+   pentru pașii încuiați. Triunghiul de sus = direcția camerei (sus = în față). */
+function compassDialMarkup(){
+  return `<svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+    <circle class="cb-halo" cx="22" cy="22" r="21"/>
+    <circle class="cb-ring" cx="22" cy="22" r="16.5"/>
+    <g class="cb-ticks">
+      <line class="cb-tick major" x1="22" y1="5.5" x2="22" y2="9.5"/>
+      <line class="cb-tick major" x1="38.5" y1="22" x2="34.5" y2="22"/>
+      <line class="cb-tick major" x1="22" y1="38.5" x2="22" y2="34.5"/>
+      <line class="cb-tick major" x1="5.5" y1="22" x2="9.5" y2="22"/>
+      <line class="cb-tick" x1="33.67" y1="10.33" x2="32.18" y2="11.82"/>
+      <line class="cb-tick" x1="33.67" y1="33.67" x2="32.18" y2="32.18"/>
+      <line class="cb-tick" x1="10.33" y1="33.67" x2="11.82" y2="32.18"/>
+      <line class="cb-tick" x1="10.33" y1="10.33" x2="11.82" y2="11.82"/>
+    </g>
+    <path class="cb-ahead" d="M22 .8 L25.8 5.4 L18.2 5.4 Z"/>
+    <g class="cb-rot" transform="rotate(0 22 22)">
+      <path class="cb-tip" d="M22 8.6 L25.6 22 L18.4 22 Z"/>
+      <path class="cb-tail" d="M22 35.4 L25.6 22 L18.4 22 Z"/>
+    </g>
+    <g class="cb-lock">
+      <rect x="18.4" y="21.2" width="7.2" height="5.8" rx="1.3"/>
+      <path d="M20 21.2v-1.7a2 2 0 0 1 4 0v1.7"/>
+    </g>
+    <circle class="cb-hub" cx="22" cy="22" r="2"/>
+  </svg>`;
+}
+
+function renderCompassBand(){
+  const rail = $("#snapRail");
+  if (!rail) return;
+  rail.innerHTML = "";
+  bandEls = [];
+
+  const stops = bandStops();
+  bandStopCount = stops.length;
+
+  // Indicatorul fix: oprirea din dreptul lui este cea selectată.
+  const reticle = document.createElement("span");
+  reticle.className = "cb-reticle";
+  reticle.setAttribute("aria-hidden", "true");
+  rail.appendChild(reticle);
+
+  // Scara cadranului: gradații curbate de-a lungul arcului.
+  const step = 18;
+  const from = -Math.round(BAND_SLOT / 2), to = bandMaxOffset() + Math.round(BAND_SLOT / 2);
+  let k = 0;
+  for (let tx = from; tx <= to; tx += step, k++){
+    const t = document.createElement("span");
+    t.className = "cb-scale-tick" + (k % 3 === 0 ? " major" : "");
+    t.setAttribute("aria-hidden", "true");
+    rail.appendChild(t);
+    bandEls.push({ el: t, tx, isStop: false });
+  }
+
+  stops.forEach(s => {
+    const r = REPERE[s.repereIndex];
+    if (!r) return;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "compass-stop no-dir" + (s.locked ? " locked" : "") + (s.completed ? " completed" : "");
+    b.dataset.step = s.step;
+    b.dataset.index = s.repereIndex;
+    b.dataset.repereIndex = s.repereIndex;
+    b.setAttribute("aria-current", "false");
+    b.title = `${r.nume} (${r.an || ''})`;
+    b.innerHTML = `<span class="cb-dial">${compassDialMarkup()}</span><span class="cb-name"></span><span class="cb-dist"></span>`;
+    b.querySelector(".cb-name").textContent = r.nume;
+    b.querySelector(".cb-dist").textContent = "—";
+    b.addEventListener("click", () => {
+      if (Date.now() < bandSuppressClickUntil) return;   // click încheiat după o glisare
+      if (s.locked) { showStoryLockedToast(getCurrentStoryLandmark()); return; }
+      if (isStoryMode()) {
+        setWheelActiveIndex(s.step, true);
+        selectTargetByIndex(s.repereIndex, false);
+      } else {
+        selectTargetByIndex(s.repereIndex, true);
+      }
+    });
+    rail.appendChild(b);
+    bandEls.push({ el: b, tx: s.step * BAND_SLOT, isStop: true, step: s.step, repereIndex: s.repereIndex, locked: s.locked });
+  });
+
+  updateBandHalfWidth();
+  setWheelActiveIndex(bandActiveStep(), false);
+}
+
+/* Compat: numele vechi rămâne funcțional (apeluri din updateStoryUI etc.). */
+function renderRouteDots(){ renderCompassBand(); }
+
+function setWheelActiveIndex(idx, animate = true) {
+  let step = Math.max(0, idx | 0);
+  if (isStoryMode()) {
+    // Pașii încuiați (viitori) nu pot fi selectați: pasul se limitează la cel curent.
+    const ch = getActiveChapter();
+    const prog = getActiveChapterProgress();
+    const maxStep = prog.completed ? ch.landmarkIndices.length - 1 : prog.currentStep;
+    step = Math.min(step, maxStep);
+  } else {
+    step = Math.min(bandStopCount - 1, step);
+  }
+  activeWheelIndex = step;
+  document.querySelectorAll(".compass-stop").forEach(d => {
+    const s = Number(d.dataset.step);
+    d.setAttribute("aria-current", String(s === step && !d.classList.contains("locked")));
+  });
+  updateRouteSteps();
+  updateBandData();
+  // În timpul glisării banda urmează degetul; altfel se așază singură pe oprirea activă.
+  if (bandDrag) renderBand();
+  else centerBandOnIndex(step, animate);
+}
+
+/* Compat: vechiul nume actualizează etichetele și distanțele benzii. */
+function updateWheelDistances(){ updateBandData(); }
+
+/* Selectează oprirea din dreptul indicatorului în timpul glisării.
+   Pașii încuiați nu pot fi selectați (doar banda glisează peste ei). */
+function liveSelectNearestStop(){
+  const idx = Math.max(0, Math.min(bandStopCount - 1, Math.round(bandOffset / BAND_SLOT)));
+  if (idx === activeWheelIndex) return;
+  const el = document.querySelector(`.compass-stop[data-step="${idx}"]`);
+  if (!el || el.classList.contains("locked")) return;
+  const rIdx = Number(el.dataset.repereIndex);
+  setWheelActiveIndex(idx);
+  selectTargetByIndex(rIdx, false);
+}
+
+/* Rozele si distantele din banda: acul arata directia fata de camera
+   (0 = in fata), distanta apare cand exista pozitie GPS valida. */
+function updateBandData(){
+  document.querySelectorAll(".compass-stop").forEach(el => {
+    const rIdx = Number(el.dataset.repereIndex);
+    const r = REPERE[rIdx];
+    if (!r) return;
+    const hasPos = userLat != null && userLon != null && hasValidCoords(r);
+    const distTxt = hasPos ? formatDistance(distance(userLat, userLon, r.lat, r.lon)) : "—";
+
+    const distEl = el.querySelector(".cb-dist");
+    if (distEl) {
+      const txt = (isStoryMode() && r.an) ? `${r.an} · ${distTxt}` : distTxt;
+      if (distEl.textContent !== txt) distEl.textContent = txt;
+    }
+
+    let label;
+    if (isStoryMode()) {
+      const stepNum = Number(el.dataset.step) + 1;
+      const state = el.classList.contains("locked") ? "Încuiat"
+                  : (el.classList.contains("completed") ? "Finalizat" : "Obiectiv activ");
+      label = `Pasul ${stepNum}: ${r.nume} (${r.an}) - ${state}`;
+    } else {
+      label = `Oprirea ${rIdx + 1} din ${REPERE.length}: ${r.nume}`;
+    }
+    if (hasPos) label += `, ${distTxt}`;
+    el.setAttribute("aria-label", label);
+
+    const rotEl = el.querySelector(".cb-rot");
+    if (!rotEl) return;
+    if (hasPos && heading != null) {
+      let rel = bearing(userLat, userLon, r.lat, r.lon) - heading;
+      rel = ((rel + 540) % 360) - 180;   // [-180, 180]: 0 = chiar in fata
+      rotEl.setAttribute("transform", `rotate(${rel.toFixed(1)} 22 22)`);
+      el.classList.remove("no-dir");
+    } else {
+      rotEl.setAttribute("transform", "rotate(0 22 22)");
+      el.classList.add("no-dir");
+    }
+  });
 }
 
 function selectTargetByIndex(i, shouldUpdateWheel = true) {
@@ -2064,7 +2286,8 @@ function initRouteDots(){
   updateStoryUI();
 }
 
-/* Arrow keys walk the ordered route (clamped at both ends, no wrap). */
+/* Arrow keys walk the ordered route (clamped at both ends, no wrap).
+   În Mod Poveste nu se poate sări peste pașii încuiați. */
 (function(){
   const rail = $("#snapRail");
   if (!rail) return;
@@ -2072,20 +2295,109 @@ function initRouteDots(){
     if (e.key !== "ArrowRight" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowUp") return;
     e.preventDefault();
     const dir = (e.key === "ArrowRight" || e.key === "ArrowDown") ? 1 : -1;
-    if (isStoryMode()) {
-      const ch = getActiveChapter();
-      const prog = getActiveChapterProgress();
-      const nextStep = Math.min(prog.currentStep, Math.max(0, activeWheelIndex + dir));
-      activeWheelIndex = nextStep;
-      selectTargetByIndex(ch.landmarkIndices[nextStep], false);
-    } else {
-      const next = Math.min(REPERE.length - 1, Math.max(0, activeWheelIndex + dir));
-      selectTargetByIndex(next, true);
-      const btn = rail.querySelector(`.snap-dot[data-index="${next}"]`);
-      if (btn) btn.focus();
-    }
+    const stops = bandStops();
+    let next = Math.min(stops.length - 1, Math.max(0, activeWheelIndex + dir));
+    while (next !== activeWheelIndex && stops[next] && stops[next].locked) next -= dir;   // sari peste pașii încuiați
+    const s = stops[next];
+    if (!s) return;
+    setWheelActiveIndex(next, true);
+    selectTargetByIndex(s.repereIndex, false);
+    const btn = rail.querySelector(`.compass-stop[data-step="${next}"]`);
+    if (btn) btn.focus({ preventScroll: true });
   });
 })();
+
+/* Glisarea cadranului: tragi stânga/dreapta, oprirea din dreptul indicatorului
+   se selectează; la eliberare banda se așază pe cea mai apropiată oprire. */
+(function(){
+  const rail = $("#snapRail");
+  if (!rail) return;
+
+  function detach(){
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
+  }
+
+  function nearestStep(){
+    return Math.max(0, Math.min(bandStopCount - 1, Math.round(bandOffset / BAND_SLOT)));
+  }
+
+  function stopEl(idx){
+    return document.querySelector(`.compass-stop[data-step="${idx}"]`);
+  }
+
+  function onMove(e){
+    if (!bandDrag) return;
+    const dx = e.clientX - bandDrag.x0;
+    if (Math.abs(dx) > 6) bandDrag.moved = true;
+    let next = bandDrag.offset0 - dx;
+    const max = bandMaxOffset();
+    // Rezistență elastică la capetele traseului.
+    if (next < 0) next *= 0.32;
+    else if (next > max) next = max + (next - max) * 0.32;
+    const dt = Math.max(1, e.timeStamp - bandDrag.lastT);
+    bandDrag.vel = (next - bandOffset) / dt;   // px/ms
+    bandDrag.lastT = e.timeStamp;
+    bandOffset = next;
+    renderBand();
+    liveSelectNearestStop();
+    if (bandDrag.moved && e.cancelable) e.preventDefault();
+  }
+
+  function onUp(){
+    if (!bandDrag) return;
+    const moved = bandDrag.moved;
+    const vel = bandDrag.vel || 0;
+    bandDrag = null;
+    detach();
+    // Inerție scurtă, apoi așezare pe cea mai apropiată oprire.
+    const projected = bandClamp(bandOffset + vel * 130);
+    const idx = Math.max(0, Math.min(bandStopCount - 1, Math.round(projected / BAND_SLOT)));
+    const el = stopEl(idx);
+    if (isStoryMode() && el && el.classList.contains("locked")) {
+      // Reticul pe un pas încuiat: rămâne oprirea deblocată și explicăm de ce.
+      setWheelActiveIndex(bandActiveStep(), true);
+      showStoryLockedToast(getCurrentStoryLandmark());
+    } else if (el) {
+      setWheelActiveIndex(idx, true);
+      selectTargetByIndex(Number(el.dataset.repereIndex), false);
+    } else {
+      setWheelActiveIndex(bandActiveStep(), true);
+    }
+    if (moved) bandSuppressClickUntil = Date.now() + 320;
+  }
+
+  rail.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    bandDrag = { x0: e.clientX, offset0: bandOffset, moved: false, vel: 0, lastT: e.timeStamp };
+    rail.classList.remove("band-anim");
+    if (bandAnimTimer){ clearTimeout(bandAnimTimer); bandAnimTimer = null; }
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  });
+
+  /* Rotița mouse-ului (desktop) glisează cadranul, cu așezare după scurt timp. */
+  rail.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    bandOffset = bandClamp(bandOffset + d * 0.5);
+    renderBand();
+    liveSelectNearestStop();
+    if (bandWheelTimer) clearTimeout(bandWheelTimer);
+    bandWheelTimer = setTimeout(() => {
+      bandWheelTimer = null;
+      const idx = nearestStep();
+      const el = stopEl(idx);
+      if (isStoryMode() && el && el.classList.contains("locked")) setWheelActiveIndex(bandActiveStep(), true);
+      else setWheelActiveIndex(idx, true);
+    }, 140);
+  }, { passive: false });
+})();
+
+window.addEventListener("resize", () => { updateBandHalfWidth(); renderBand(); });
+window.addEventListener("orientationchange", () => { updateBandHalfWidth(); renderBand(); });
 
 initRouteDots();
 

@@ -10,7 +10,7 @@ No framework, no bundler, no backend. One HTML file served as static content.
 
 | File | Purpose |
 |---|---|
-| `index.html` (1916 lines, ~78 KB) | The entire app. `<style>` in `<head>`, body markup lines ~530–810, single `<script>` lines ~810–1916 |
+| `index.html` (2427 lines, ~108 KB) | The entire app. `<style>` in `<head>` (lines 8–714), body markup lines ~716–1035, single `<script>` lines ~1036–2425 |
 | `primaria-1901.jpg` | Only historic asset. Used by `REPERE[2].foto` (Primăria Arad, 1901) |
 | `docker-compose.yml` | `web: nginx:alpine`, maps repo root read-only to `/usr/share/nginx/html`, host port `8010:80` |
 | `deploy.sh` | Server-side: `git pull` + `docker compose down/build/up -d` |
@@ -24,7 +24,7 @@ and two `Mobile*isDesktop*` files (accidental `man less` dumps, 1.6 KB / 16 KB).
 ## 2. `index.html` — UI layers (bottom to top)
 
 1. `<video id="cam">` — live camera background. Blurred/dim by default (`opacity .28, blur(6px)`), class `camera-clear` removes the filter in capture mode.
-2. `#overlay` — main AR HUD: `.top` (brand `AradLens`, `#targetName`, `#diag` compass readout, `#themeToggleBtn`, `#compassWarningBadge`), `.center` (empty — arrow was removed), `.bottom` (`#distNum` distance, `#arrived`, `#coords`, `#detailsBtn`, `#flipBtn` 180° debug, `#scrollWheelContainer` landmark carousel).
+2. `#overlay` — main AR HUD: `.top` (brand `AradLens`, `#routeStep` "1 / 5", `#compassWarningBadge`, `#diag` debug readout), `.center` (`#steerArrow` chevron + `#steerEdge` degree readout when the target is behind), `#rail` action rings (`#detailsBtn`, `#photoCaptureBtn`, `#albumBtn`, `#themeToggleBtn`), `#captureDistLabel`, `.bottom`: `#caption`/`#arLabel` (target name, "Mergi spre …" phrase, distance), `#distNum` + `#routeStepBottom`, `#coords`/`#flipBtn` (debug only), `.hint` and `#snapRail` — the bottom **compass band** (curved, draggable stop selector; see §4).
 3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (schematic SVG map `mapPin0-4` + Then/Now cards `#albumThenBox/#albumNowBox`), `#arLabel` floating AR tag, `#albumBtn` / `#photoCaptureBtn` FABs, `#status` bar.
 
 Theming: CSS variables on `:root` + `body.light-theme` override. Persisted in `localStorage["aradlens_theme"]` via `applyTheme()` / `toggleTheme()`.
@@ -63,7 +63,8 @@ Startup (`#startBtn.onclick`, must be a tap for iOS motion permission):
 Per-frame (`scheduleUpdate()` → `update()`, throttled):
 `bearing(userLat/Lon → target)` + `distance()` (haversine) vs smoothed `heading`
 → `#distNum` (`formatDistance`), `#targetName`, `#diag`, `#arLabel`
-(`updateArLabel(az)` positions label by relative angle and `cameraPitch`).
+(`updateArLabel(az)` writes the direction phrase + edge indicator for `|az| > 85°`)
+plus `updateBandData()` (band distances and needle angles).
 `checkLandmarkProximity()` fires `#proximityToast` once per session per landmark
 (`notifiedLandmarksInSession` Set) when within 50 m.
 
@@ -74,8 +75,7 @@ for the `#flipBtn` 180° debug flip. `showCompassWarning()` explains the
 HTTPS + permission + reload checklist.
 
 Key functions by area:
-- Wheel carousel: `initWheel`, `updateWheelPositions`, `setWheelActiveIndex`,
-  pointer handlers `onWheelPointerDown/Move/Up`, `selectTargetByIndex`, `updateWheelDistances`.
+- Bottom compass band (`#snapRail`): `renderCompassBand` (scale ticks + one `compass-stop` button per landmark: dial SVG from `compassDialMarkup`, name, distance), `renderBand` (arc placement — `bandDrop`/`bandArcDeg` give the sag + rotation per element, opacity fades outward), pointer drag handlers + `wheel` (`bandOffset`, rubber band at the ends), `liveSelectNearestStop` / snap on release, `setWheelActiveIndex` (compat name; sets `aria-current` and re-centres the tape), `updateBandData` (distances + needle angle `bearing − heading`, 0° = dead ahead), `selectTargetByIndex`.
 - Info/audio: `openCard/closeCard`, `toggleSpeech/stopSpeech` (Web Speech API, `ro-RO`), `snapshotNow` (video → canvas), `setCmpPos/openPhoto/closePhoto`.
 - Capture: `enterCaptureMode/exitCaptureMode` (toggles `#captureScreen` + `camera-clear`), `executePhotoCapture` (flash + canvas → localStorage + modal), `showCaptureFeedback/hideCaptureModal`.
 - Album: `openAlbum/closeAlbum`, `selectAlbumLandmark` (exposed on `window` for SVG `onclick`), `renderAlbum` (pins + Then/Now boxes), `guideToSelectedLandmark` (selects target, closes album).

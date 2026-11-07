@@ -1,9 +1,9 @@
 # AGENTS.md — AradLens_frontend
 
-Single-file static AR tourism app for Arad. All app code lives in `index.html` (~1900 lines, inline CSS + JS). No package.json, no build, no tests.
+Single-file static AR tourism app for Arad. All app code lives in `index.html` (~2400 lines, inline CSS + JS). No package.json, no build, no tests.
 
 ## Structure
-- `index.html` — entire app: UI, CSS (`<style>`), logic (single `<script>` at ~line 810). Entry data: `const REPERE` (~line 820, 5 landmarks with lat/lon; only Primăria has full metadata + `foto`).
+- `index.html` — entire app: UI, CSS (`<style>` lines 8–714), logic (single `<script>` at ~line 1036). Entry data: `const REPERE` (~line 1045, 5 landmarks with lat/lon; only Primăria has full metadata + `foto`).
 - `primaria-1901.jpg` — only historic photo asset, referenced by `REPERE[2].foto`.
 - `fonts/` — self-hosted OFL display face (AradLens Display) + license; must be committed or `@font-face` 404s in prod.
 - `docker-compose.yml` + `deploy.sh` — prod serving only.
