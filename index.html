@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0e12">
 <title>AradLens</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0e12'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='system-ui,sans-serif' font-size='34' font-weight='800' fill='%23c8b088'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0.1' y1='0' x2='0.75' y2='1'%3E%3Cstop offset='0' stop-color='%23fff6e6'/%3E%3Cstop offset='0.38' stop-color='%23d8c2a0'/%3E%3Cstop offset='0.62' stop-color='%238fa6b6'/%3E%3Cstop offset='1' stop-color='%231d2f3a'/%3E%3C/linearGradient%3E%3CradialGradient id='s' cx='0.32' cy='0.18' r='0.55'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='0.95'/%3E%3Cstop offset='1' stop-color='%23fff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230b0e12'/%3E%3Ccircle cx='32' cy='32' r='19' fill='url(%23g)'/%3E%3Ccircle cx='32' cy='32' r='19' fill='url(%23s)'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f6f2e9' stroke-opacity='0.5' stroke-width='1.4'/%3E%3Cpath d='M18.5 27a15.5 15.5 0 0 1 8.5-9' fill='none' stroke='%23fff' stroke-opacity='0.9' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-title" content="AradLens">
+<meta name="description" content="AradLens — plimbare AR prin obiectivele istorice ale Aradului: atunci și acum, pe strada ta.">
 <style>
   /* Display voice: Fraunces (SIL OFL 1.1, self-hosted latin + latin-ext woff2,
      variabil 100–900, cu axă optică opsz aplicată automat după mărime).
@@ -136,14 +138,37 @@
     letter-spacing: 0.02em; color: var(--amber);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .theme-toggle-btn {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: rgba(246,242,233,.95); border: 1px solid rgba(23,17,6,.5);
-    color: var(--amber-ink); display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: transform .15s ease, background .2s ease;
+  /* Comutator temă: capsulă verticală compactă cu două poziții (soare sus, lună jos),
+     prima pe șină, imediat sub contorul de traseu. Maneta întunecată alunecă între
+     cele două sloturi; gliful activ e luminos, cel inactiv estompat. */
+  .theme-switch {
+    width: 46px; height: 48px; padding: 0; position: relative;
+    background: none; border: 0; cursor: pointer;
+    transition: transform .15s ease;
   }
-  .theme-toggle-btn:active { transform: scale(.92); }
-  .theme-toggle-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; }
+  .theme-switch:active { transform: scale(.94); }
+  .theme-switch .ts-track {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 28px; height: 42px; border-radius: 20px;
+    background: rgba(246,242,233,.95); border: 1px solid rgba(23,17,6,.5);
+  }
+  .theme-switch .ts-knob {
+    position: absolute; top: 1px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(23,17,6,.88);
+    transform: translateY(20px);                               /* întuneric: luna activă */
+    transition: transform .18s cubic-bezier(.4,0,.2,1);
+  }
+  body.light-theme .theme-switch .ts-knob { transform: translateY(0); }   /* lumină: soarele activ */
+  .theme-switch .ts-icon {
+    position: absolute; left: 50%; width: 13px; height: 13px;
+    margin-left: -7px; fill: none; stroke: currentColor; stroke-width: 2.4;
+    transition: color .18s ease;
+  }
+  .theme-switch .ts-sun { top: 5px; color: rgba(23,17,6,.55); }
+  .theme-switch .ts-moon { bottom: 5px; color: var(--bone); }
+  body.light-theme .theme-switch .ts-sun { color: var(--bone); }
+  body.light-theme .theme-switch .ts-moon { color: rgba(23,17,6,.6); }
 
   /* Zona centrală: un singur chevron subțire — direcția live, chihlimbarie */
   .center { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; pointer-events: none; }
@@ -162,13 +187,14 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Șina dreaptă: cele 4 gesturi, inele de 52px, fără a părăsi obiectivul */
+  /* Șina dreaptă: acțiunile reperului — inele compacte de 46px, un
+     comutator de temă întâi, fără a părăsi obiectivul */
   #rail {
     position: absolute; right: 14px; top: 22%;
-    display: flex; flex-direction: column; gap: 12px; z-index: 2; align-items: center;
+    display: flex; flex-direction: column; gap: 9px; z-index: 2; align-items: center;
   }
   #rail .ring {
-    width: 52px; height: 52px; border-radius: 50%;
+    width: 46px; height: 46px; border-radius: 50%;
     border: 1px solid rgba(23,17,6,.5);
     background: rgba(246,242,233,.95);
     color: var(--amber-ink);
@@ -186,20 +212,19 @@
   }
   .rail-state-dot.is-story { opacity: 1; }
   #rail .ring:active { transform: scale(.92); }
-  #rail .ring svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
+  #rail .ring svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
   #rail .ring:disabled { opacity: .55; cursor: default; }
   #rail .ring.capture-ready {
     border-color: var(--amber-deep);
     animation: shutterPulse 1.6s ease-in-out infinite;
   }
-  #captureDistLabel {
-    position: absolute; right: 76px; top: 22%; z-index: 2;
-    margin-top: 58px; font-size: 12px; font-weight: 700; color: var(--amber-ink);
-    background: rgba(246,242,233,.95); border: 1px solid rgba(23,17,6,.45);
-    border-radius: 2px; padding: 4px 10px; pointer-events: none; white-space: nowrap;
-    font-variant-numeric: tabular-nums;
+  /* Ecrane scurte: șina se comprimă să nu calce peste banda busolei de jos. */
+  @media (max-height: 720px) and (min-height: 630px) {
+    #rail { top: 19%; gap: 7px; }
+    #rail .ring { width: 44px; height: 44px; }
+    #rail .ring svg { width: 19px; height: 19px; }
+    .theme-switch { width: 44px; height: 46px; }
   }
-
   /* Busola de jos: cadran arcuit, înclinat ca o busolă reală, pe care se glisează
      stânga/dreapta dintr-o parte în alta; oprirea din dreptul indicatorului de sus
      este cea selectată. Fiecare roză are acul spre direcția reperului față de cameră.
@@ -1088,9 +1113,756 @@
     /* Flash alb pur decorativ: omis la mișcare redusă. */
     #captureFlash { opacity: 0 !important; }
   }
+  /* Modalul Categorii — listă publică din /api, gestionare după autentificare */
+  .cat-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .cat-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 2px; border-bottom: 1px solid var(--border-color);
+    min-height: 44px; font-variant-numeric: tabular-nums;
+  }
+  .cat-item:last-child { border-bottom: 0; }
+  .cat-name { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--text-main); }
+  .cat-item-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .cat-link {
+    background: transparent; border: 0; padding: 0;
+    font-size: 12px; font-weight: 700; color: var(--accent-green); cursor: pointer;
+    min-height: 44px; display: inline-flex; align-items: center;
+  }
+  .cat-link.danger { color: var(--amber-deep); }
+  .cat-btn {
+    border: 1px solid var(--border-color); background: transparent;
+    color: var(--text-main); border-radius: 10px; padding: 8px 16px; min-height: 44px;
+    font-weight: 700; font-size: 13px; cursor: pointer; font-variant-numeric: tabular-nums;
+  }
+  .cat-btn.primary { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); }
+  .cat-btn:disabled { opacity: .55; cursor: default; }
+  .cat-input {
+    width: 100%; background: var(--bg-modal); border: 1px solid var(--border-color);
+    color: var(--text-main); border-radius: 10px; padding: 10px 12px; min-height: 44px;
+    font-size: 14px; font-variant-numeric: tabular-nums; font-family: inherit;
+  }
+  .cat-input:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 2px; }
+  .cat-create { display: flex; gap: 8px; margin: 4px 0 12px; }
+  .cat-create .cat-input { flex: 1; min-width: 0; }
+  .cat-login {
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 14px;
+    background: var(--bg-modal); border: 1px solid var(--border-color); border-radius: 12px;
+  }
+  .cat-login-title {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--text-muted);
+  }
+  .cat-login-actions { display: flex; gap: 8px; }
+  .cat-note { font-size: 11px; line-height: 1.35; color: var(--text-muted); margin: 0; }
+  .cat-state { font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 10px 2px; }
+  .cat-state.cat-error {
+    color: var(--amber-deep); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .cat-admin-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cat-admin-note {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--accent-green);
+  }
+  .cat-count { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .cat-rename-row { display: flex; gap: 6px; flex: 1; align-items: center; }
+  .cat-rename-row .cat-input { flex: 1; min-width: 0; min-height: 40px; padding: 6px 10px; font-size: 13px; }
+
+  /* Modalul Locații — listă publică din /api, gestionare după autentificare */
+  .loc-list { list-style: none; margin: 0; padding: 0; }
+  .loc-card {
+    padding: 14px 2px; border-bottom: 1px solid var(--border-color);
+    display: flex; flex-direction: column; font-variant-numeric: tabular-nums;
+  }
+  .loc-card:last-child { border-bottom: 0; }
+  .loc-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .loc-name { font-family: var(--display); font-size: 17px; font-weight: 600; color: var(--text-main); }
+  .loc-chip {
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+    border: 1px solid var(--border-color); border-radius: 999px; padding: 3px 10px;
+    color: var(--text-muted); flex-shrink: 0;
+  }
+  .loc-coords { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
+  .loc-desc { font-size: 13px; line-height: 1.45; color: var(--text-main); margin: 6px 0 0; }
+  .loc-imgs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .loc-img-wrap {
+    position: relative; width: 84px; height: 64px;
+    border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
+    background: var(--bg-modal);
+  }
+  .loc-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .loc-img-del {
+    position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; padding: 0;
+    border: 0; border-radius: 50%; background: rgba(246,242,233,.95); color: var(--amber-deep);
+    font-size: 11px; font-weight: 800; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .loc-img-confirm {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px; padding: 4px;
+    background: rgba(246,242,233,.97); text-align: center;
+    font-size: 9px; font-weight: 800; color: var(--text-main);
+  }
+  .loc-img-confirm span { line-height: 1.2; }
+  .loc-img-confirm .cat-link { min-height: 20px; font-size: 10px; }
+  .loc-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+  .loc-photo-input { margin-top: 8px; font-size: 12px; color: var(--text-muted); max-width: 100%; }
+  .loc-form {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 14px; background: var(--bg-modal);
+    border: 1px solid var(--border-color); border-radius: 12px;
+  }
+  .loc-form-title {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--text-muted);
+  }
+  .loc-row2 { display: flex; gap: 8px; }
+  .loc-row2 .cat-input { flex: 1; min-width: 0; }
+  textarea.cat-input { resize: vertical; min-height: 60px; }
+  select.cat-input { appearance: auto; }
+
+  /* Poarta API (verificarea /health înainte de interfață) */
+  #apiGate {
+    position: fixed; inset: 0; z-index: 80; display: none;
+    align-items: center; justify-content: center;
+    background: var(--bg-main); padding: 16px;
+  }
+  .api-gate-card { text-align: center; max-width: 360px; width: 100%; color: var(--text-main); }
+  .api-gate-brand { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+  .api-gate-title {
+    font-family: var(--display); font-size: 15px; font-weight: 600;
+    color: var(--text-main); margin: 6px 0 0;
+  }
+  .api-gate-spinner {
+    width: 30px; height: 30px; margin: 16px auto;
+    border: 2px solid var(--border-color); border-top-color: var(--amber);
+    border-radius: 50%; animation: apigate-spin .9s linear infinite;
+  }
+  @keyframes apigate-spin { to { transform: rotate(360deg); } }
+  .api-gate-text { font-size: 13px; line-height: 1.45; color: var(--text-muted); margin: 0 0 14px; }
+
+  /* Detaliu locație / tur (doar citire) */
+  .loc-detail-head { display: flex; flex-direction: column; gap: 4px; margin: 12px 0 6px; }
+  .loc-detail-name { font-family: var(--display); font-size: 20px; font-weight: 600; color: var(--text-main); }
+  .loc-detail-sec {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+    color: var(--text-muted); margin: 14px 0 6px;
+  }
+
+  /* =====================================================================
+     STRATUL „LIQUID GLASS” (iOS 26) + ARCURI SPRING
+     ---------------------------------------------------------------------
+     O singură rețetă de sticlă pentru toată aplicația: umplutură translucidă
+     + backdrop blur/saturare, muchie de 1px, higlight specular sus, umbră
+     interioară jos, umbră exterioară offset. Regula de aur a stratului:
+     UN SINGUR backdrop-filter pe fiecare ramură de stivuire — blur peste
+     blur nu funcționează în Safari și arde GPU-ul pe telefon.
+     ===================================================================== */
+  :root {
+    --glass-blur: 26px;
+    --glass-sat: 185%;
+    --glass-tint: rgba(18, 23, 30, .46);
+    --glass-tint-thick: rgba(16, 20, 27, .70);
+    --glass-tint-thin: rgba(30, 38, 48, .26);
+    --glass-edge: rgba(255, 255, 255, .16);
+    --glass-edge-strong: rgba(255, 255, 255, .28);
+    --glass-hairline: rgba(255, 255, 255, .12);
+    --glass-inner-hi: rgba(255, 255, 255, .26);
+    --glass-inner-lo: rgba(0, 0, 0, .34);
+    --glass-side-hi: rgba(255, 255, 255, .10);
+    --glass-shadow: 0 18px 48px rgba(0, 0, 0, .46), 0 2px 8px rgba(0, 0, 0, .32);
+    /* Rezervă pentru „transparență redusă”: sticlă fără blur, dar cu luciu. */
+    --glass-solid: rgba(17, 22, 29, .95);
+    --glass-veil: rgba(8, 11, 15, .97);
+    /* Bara lipită din album trebuie să acopere complet ce trece pe sub ea. */
+    --bar-solid: #0b0e13;
+    --glass-sheen:
+      linear-gradient(158deg,
+        rgba(255, 255, 255, .20) 0%,
+        rgba(255, 255, 255, .06) 24%,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(255, 255, 255, .05) 78%,
+        rgba(255, 255, 255, .13) 100%);
+    /* Lentila optică: doar în interiorul mărcii, nu ca accent de interfață. */
+    --optic-warm: rgba(255, 198, 148, .55);
+    --optic-cool: rgba(148, 212, 255, .50);
+    --optic-violet: rgba(198, 168, 255, .42);
+    /* Arcuri: echivalentul Apple spring(response:dampingFraction:) în CSS.
+       Rămân cubic-bezier (un singur overshoot) pentru că `animation`/`transition`
+       scrise prin var() resping linear() în Chromium — se pierde complet
+       animația. Duratele sunt cele Apple: .35s/.30s/.50s/.45s. */
+    --spring: cubic-bezier(.32, .72, 0, 1);            /* standard, response .35 / ζ .80 */
+    --spring-snappy: cubic-bezier(.22, .68, 0, 1);     /* snappy, response .30 / ζ .85 */
+    --spring-bouncy: cubic-bezier(.34, 1.4, .64, 1);   /* bouncy, response .50 / ζ .60 */
+    --spring-soft: cubic-bezier(.32, .72, 0, 1);       /* sheet, fără overshoot vizibil */
+    --dur-press: 100ms;
+    --dur-spring: 475ms;
+    --dur-snappy: 420ms;
+    --dur-sheet: 600ms;
+  }
+  body.light-theme {
+    --glass-tint: rgba(255, 255, 255, .58);
+    --glass-tint-thick: rgba(255, 255, 255, .76);
+    --glass-tint-thin: rgba(255, 255, 255, .44);
+    --glass-edge: rgba(255, 255, 255, .80);
+    --glass-edge-strong: rgba(255, 255, 255, .96);
+    --glass-hairline: rgba(23, 17, 6, .14);
+    --glass-inner-hi: rgba(255, 255, 255, .92);
+    --glass-inner-lo: rgba(23, 17, 6, .10);
+    --glass-side-hi: rgba(255, 255, 255, .55);
+    --glass-shadow: 0 18px 44px rgba(23, 17, 6, .18), 0 2px 8px rgba(23, 17, 6, .10);
+    --glass-solid: rgba(252, 250, 245, .96);
+    --glass-veil: rgba(246, 242, 233, .98);
+    --bar-solid: #f7f3ea;
+    --glass-sheen:
+      linear-gradient(158deg,
+        rgba(255, 255, 255, .88) 0%,
+        rgba(255, 255, 255, .34) 30%,
+        rgba(255, 255, 255, .10) 58%,
+        rgba(255, 255, 255, .46) 100%);
+  }
+
+  /* ---------- 1. Marca: lentila optică ---------- */
+  .top .brand {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: 0.01em; color: var(--bone);
+  }
+  .brand-word { display: inline-flex; }
+  .brand-word-tail { opacity: .72; }
+  .brand-lens {
+    position: relative; flex: 0 0 auto; display: block;
+    width: 27px; height: 27px; border-radius: 50%;
+    overflow: hidden; isolation: isolate;
+    /* Substratul: fotografia de arhivă stă sub sticlă. */
+    background-image: url("primaria-1901.jpg");
+    background-size: 230%; background-position: 60% 34%;
+    filter: saturate(.82) contrast(1.06) brightness(.96);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, .45),
+      inset 0 2px 3px rgba(255, 255, 255, .55),
+      inset 0 -4px 9px rgba(0, 0, 0, .50),
+      0 2px 8px rgba(0, 0, 0, .45);
+  }
+  .brand-lens::before {
+    /* Reflexia speculară a lentilei + o urmă de difracție rece. */
+    content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: 2;
+    background:
+      radial-gradient(58% 48% at 30% 20%, rgba(255, 255, 255, .95) 0%, rgba(255, 255, 255, 0) 62%),
+      radial-gradient(90% 78% at 80% 88%, var(--optic-cool) 0%, rgba(255, 255, 255, 0) 58%),
+      radial-gradient(70% 60% at 14% 84%, var(--optic-warm) 0%, rgba(255, 255, 255, 0) 60%);
+    mix-blend-mode: screen; opacity: .9;
+  }
+  .brand-lens::after {
+    /* Inelul cromatic: lumina se descompune pe muchia lentilei. */
+    content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: 3;
+    background: conic-gradient(from 200deg,
+      var(--optic-warm), var(--optic-cool), var(--optic-violet),
+      var(--optic-warm), var(--optic-cool), var(--optic-warm));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.4px), #000 calc(100% - 1.6px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2.4px), #000 calc(100% - 1.6px));
+    opacity: .85; pointer-events: none;
+  }
+  .brand-lens-flare {
+    position: absolute; inset: -45%; z-index: 4; pointer-events: none;
+    background: linear-gradient(112deg, transparent 40%, rgba(255, 255, 255, .9) 50%, transparent 60%);
+    transform: translateX(-130%);
+    animation: lensSweep 7s var(--spring-soft) infinite;
+  }
+  @keyframes lensSweep {
+    0%, 58%   { transform: translateX(-130%); }
+    82%, 100% { transform: translateX(130%); }
+  }
+  .brand-lens-lg { width: 38px; height: 38px; }
+  .brand-lens-lg::after { -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); }
+  .start-brand {
+    display: flex; align-items: center; gap: 11px;
+    font-family: var(--display); font-size: clamp(22px, 5.4vw, 26px); font-weight: 600;
+    letter-spacing: 0.01em; color: var(--bone);
+  }
+
+  /* ---------- 2. Comutatorul de temă: capsulă orizontală de sticlă ---------- */
+  .theme-switch {
+    width: 56px; height: 34px; padding: 0; margin: 0 -5px;
+    position: relative; background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform var(--dur-press) var(--spring);
+  }
+  .theme-switch:active { transform: scale(.94); }
+  .theme-switch .ts-track {
+    position: relative; left: auto; top: auto; transform: translateZ(0);
+    display: block; width: 56px; height: 30px; border-radius: 999px;
+    background-color: rgba(18, 23, 30, .40);
+    background-image: var(--glass-sheen);
+    border: .5px solid rgba(255, 255, 255, .24);
+    -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.08);
+    backdrop-filter: blur(16px) saturate(180%) brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .30),
+      inset 0 -1px 0 rgba(0, 0, 0, .30),
+      0 6px 16px rgba(0, 0, 0, .38);
+  }
+  .theme-switch .ts-knob {
+    position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+    border-radius: 50%; background: rgba(246, 242, 233, .94);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .9);
+    transform: translateX(26px);
+    transition: transform var(--dur-spring) var(--spring);
+    z-index: 1;
+  }
+  body.light-theme .theme-switch .ts-knob { transform: translateX(0); }
+  .theme-switch .ts-slot {
+    position: absolute; top: 50%; width: 24px; height: 24px; margin-top: -12px;
+    display: flex; align-items: center; justify-content: center; z-index: 2;
+    color: rgba(246, 242, 233, .62);
+    transition: color 260ms ease;
+  }
+  .theme-switch .ts-slot svg { width: 14px; height: 14px; display: block; }
+  .theme-switch .ts-slot-sun { left: 3px; }
+  .theme-switch .ts-slot-moon { right: 3px; }
+  body:not(.light-theme) .theme-switch .ts-slot-moon { color: rgba(28, 20, 9, .82); }
+  body.light-theme .theme-switch .ts-slot-sun { color: rgba(28, 20, 9, .82); }
+  body.light-theme .theme-switch .ts-slot-moon { color: rgba(23, 17, 6, .45); }
+
+  /* ---------- 3. Șina de acțiuni: inele de sticlă ---------- */
+  #rail { width: 46px; }
+  #rail .ring {
+    border: .5px solid rgba(255, 255, 255, .22);
+    background-color: rgba(18, 23, 30, .34);
+    background-image: var(--glass-sheen);
+    color: var(--bone);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.06);
+    backdrop-filter: blur(20px) saturate(180%) brightness(1.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .34),
+      inset 1px 0 0 rgba(255, 255, 255, .12),
+      inset -1px 0 0 rgba(255, 255, 255, .12),
+      inset 0 -2px 6px rgba(0, 0, 0, .32),
+      0 8px 22px rgba(0, 0, 0, .38);
+    transform: translateZ(0);
+    transition: transform var(--dur-press) var(--spring-snappy),
+                box-shadow 240ms ease, border-color 240ms ease;
+  }
+  #rail .ring:active { transform: scale(.92); }
+  #rail .ring:disabled { opacity: .5; }
+  #rail .ring.capture-ready {
+    border-color: var(--amber);
+    animation: shutterPulse 1.6s ease-in-out infinite;
+  }
+  .rail-state-dot { box-shadow: 0 0 0 2px rgba(18, 23, 30, .55); }
+
+  /* ---------- 4. Legenda de jos: card de sticlă plutitor ---------- */
+  #caption {
+    background-color: rgba(14, 18, 24, .40);
+    background-image: var(--glass-sheen);
+    border: .5px solid rgba(255, 255, 255, .18);
+    border-radius: 18px;
+    -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(1.05);
+    backdrop-filter: blur(22px) saturate(180%) brightness(1.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .26),
+      inset 1px 0 0 rgba(255, 255, 255, .10),
+      inset -1px 0 0 rgba(255, 255, 255, .10),
+      inset 0 -3px 10px rgba(0, 0, 0, .22),
+      0 12px 30px rgba(0, 0, 0, .34);
+    transform: translateZ(0);
+    transition: background-color 300ms ease;
+  }
+  body.has-arrived #caption { background-image: none; border-color: rgba(0, 0, 0, .12); }
+
+  /* ---------- 5. Busola: rozete de sticlă ---------- */
+  .cb-ring {
+    fill: rgba(255, 255, 255, .10);
+    stroke: rgba(255, 255, 255, .38);
+    stroke-width: 1.1;
+  }
+  .compass-stop.is-held .cb-dial { transform: scale(1.14); }
+  .compass-stop.is-held .cb-halo { opacity: .9; }
+  .compass-stop.is-held .cb-ring { stroke: var(--amber); stroke-width: 1.8; }
+  .band-anim .compass-stop,
+  .band-anim .cb-scale-tick {
+    transition: transform 520ms var(--spring), opacity 320ms ease;
+  }
+
+  /* ---------- 6. Straturi modale: voal + foaie de sticlă ---------- */
+  /* Voalul NU primește blur: blur peste blur e nesigur în Safari și lasă
+     foaia fără efect. Doar foaia filtrează fundalul. */
+  .full-modal {
+    background: rgba(6, 8, 11, .58);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    animation: veilIn 260ms ease both;
+  }
+  @keyframes veilIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-card {
+    background-color: var(--glass-tint-thick);
+    background-image: var(--glass-sheen);
+    /* Safari 18.2+ nu aplică backdrop-filter: var(...) și nu cade pe rezervă
+       (WebKit 289149), deci filtrul se scrie literal, nu prin token. */
+    -webkit-backdrop-filter: blur(30px) saturate(170%) brightness(1.05);
+    backdrop-filter: blur(30px) saturate(170%) brightness(1.05);
+    border: .5px solid var(--glass-edge);
+    border-radius: 28px;
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 1px 0 0 var(--glass-side-hi),
+      inset -1px 0 0 var(--glass-side-hi),
+      inset 0 -1px 0 var(--glass-inner-lo),
+      var(--glass-shadow);
+    transform: translateZ(0);
+    animation: sheetIn var(--dur-spring) var(--spring) both;
+  }
+  @keyframes sheetIn {
+    from { opacity: 0; transform: translateY(22px) scale(.955); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes stopIn {
+    from { opacity: 0; transform: translateY(16px) scale(.92); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  #albumModal {
+    background-color: rgba(10, 13, 18, .82);
+    background-image:
+      radial-gradient(90% 60% at 8% 0%, rgba(120, 176, 220, .12), rgba(0, 0, 0, 0) 62%),
+      radial-gradient(80% 55% at 100% 4%, rgba(200, 176, 136, .13), rgba(0, 0, 0, 0) 58%);
+    -webkit-backdrop-filter: blur(34px) saturate(155%);
+    backdrop-filter: blur(34px) saturate(155%);
+    animation: veilIn 300ms ease both;
+  }
+  body.light-theme #albumModal {
+    background-color: rgba(246, 242, 233, .88);
+    background-image:
+      radial-gradient(90% 60% at 8% 0%, rgba(120, 176, 220, .16), rgba(255, 255, 255, 0) 62%),
+      radial-gradient(80% 55% at 100% 4%, rgba(200, 176, 136, .22), rgba(255, 255, 255, 0) 58%);
+  }
+  .album-header { border-bottom-color: var(--glass-hairline); }
+
+  /* Headerul rămâne fix sus, iar pastilele de modul stau lipite sub el:
+     altfel auto-derularea la deschidere ascundea exact navigarea între
+     trasee. Doar coloana de opriri derulează. */
+  #albumModal {
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+  #albumMapTab {
+    flex: 1; min-height: 0; overflow-y: auto;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    scroll-padding-top: 84px;
+    scrollbar-width: thin;
+  }
+  #albumModuleBar {
+    position: sticky; top: 0; z-index: 3;
+    margin: 0 -2px 8px; padding: 8px 2px 10px;
+    background-color: var(--bar-solid);
+    background-image: var(--glass-sheen);
+    border-bottom: 1px solid var(--glass-hairline);
+  }
+  #albumModuleBar::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 16px;
+    background-color: var(--bar-solid);
+    -webkit-mask-image: linear-gradient(180deg, #000, rgba(0, 0, 0, 0));
+    mask-image: linear-gradient(180deg, #000, rgba(0, 0, 0, 0));
+    pointer-events: none;
+  }
+
+  /* ---------- 7. Harta pe module: card, pastile, noduri de sticlă ---------- */
+  .level-box {
+    background-color: var(--glass-tint);
+    background-image: var(--glass-sheen);
+    border: 1px solid var(--glass-edge);
+    border-radius: 22px;
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 0 -1px 0 var(--glass-inner-lo),
+      0 14px 34px rgba(0, 0, 0, .30);
+  }
+  .level-chipbar { gap: 8px; }
+  .level-chip {
+    border-radius: 999px;
+    border: 1px solid var(--glass-edge);
+    background-color: var(--glass-tint-thin);
+    color: var(--text-main);
+    box-shadow: inset 0 1px 0 var(--glass-inner-hi);
+    transition: transform var(--dur-press) var(--spring), background-color 240ms ease, color 240ms ease, border-color 240ms ease;
+  }
+  .level-chip:active { transform: scale(.95); }
+  .level-chip.active {
+    background-color: var(--amber);
+    background-image: none;
+    border-color: rgba(0, 0, 0, .16);
+    color: var(--amber-ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 4px 14px rgba(200, 176, 136, .32);
+  }
+  .level-track::before {
+    border-left: 2px dashed var(--glass-hairline);
+  }
+  .level-node {
+    background-color: var(--glass-tint-thin);
+    background-image: radial-gradient(120% 100% at 30% 0%, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0) 58%);
+    border: 1px solid var(--glass-edge);
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 0 -6px 14px rgba(0, 0, 0, .22),
+      0 8px 18px rgba(0, 0, 0, .28);
+    transition: transform var(--dur-press) var(--spring), box-shadow 260ms ease;
+  }
+  .level-stop.done .level-node {
+    background-color: rgba(20, 101, 90, .62);
+    background-image: radial-gradient(120% 100% at 30% 0%, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0) 58%);
+    border-color: rgba(47, 158, 140, .8);
+    color: var(--bone);
+  }
+  .level-stop.current .level-node {
+    background-color: var(--amber);
+    background-image: radial-gradient(120% 100% at 30% 0%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 60%);
+    border-color: rgba(0, 0, 0, .14);
+    color: var(--amber-ink);
+  }
+  #albumLevelTrack .level-stop {
+    animation: stopIn 540ms var(--spring) both;
+  }
+  #albumLevelTrack .level-stop:nth-last-child(1) { animation-delay: 30ms; }
+  #albumLevelTrack .level-stop:nth-last-child(2) { animation-delay: 70ms; }
+  #albumLevelTrack .level-stop:nth-last-child(3) { animation-delay: 110ms; }
+  #albumLevelTrack .level-stop:nth-last-child(4) { animation-delay: 150ms; }
+  #albumLevelTrack .level-stop:nth-last-child(5) { animation-delay: 190ms; }
+  #albumLevelTrack .level-stop:nth-last-child(6) { animation-delay: 230ms; }
+  #albumLevelTrack .level-stop:nth-last-child(7) { animation-delay: 270ms; }
+  #albumLevelTrack .level-stop:nth-last-child(n+8) { animation-delay: 300ms; }
+  .album-detail {
+    background-color: var(--glass-tint-thick);
+    background-image: var(--glass-sheen);
+    border: .5px solid var(--glass-edge);
+    border-radius: 26px;
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 1px 0 0 var(--glass-side-hi),
+      inset -1px 0 0 var(--glass-side-hi),
+      inset 0 -1px 0 var(--glass-inner-lo),
+      var(--glass-shadow);
+    transform: translateZ(0);
+    animation: sheetIn var(--dur-spring) var(--spring) both;
+  }
+  .album-action-btn { border-radius: 16px; }
+  .album-action-btn.primary { box-shadow: 0 10px 26px rgba(0, 0, 0, .38); }
+  .album-action-btn.secondary {
+    background-color: var(--glass-tint-thin);
+    border: 1px solid var(--glass-edge);
+    box-shadow: inset 0 1px 0 var(--glass-inner-hi);
+  }
+
+  /* ---------- 8. Liste: un singur recipient de sticlă, rânduri rare ---------- */
+  .loc-list, .cat-list {
+    background-color: var(--glass-tint-thin);
+    border: 1px solid var(--glass-edge);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 var(--glass-inner-hi);
+  }
+  .loc-card { padding: 14px 16px; border-bottom: 1px solid var(--glass-hairline); }
+  .cat-item { padding: 12px 16px; border-bottom: 1px solid var(--glass-hairline); }
+  .cat-item:last-child, .loc-card:last-child { border-bottom: 0; }
+  .loc-chip {
+    background-color: var(--glass-tint-thin);
+    border-color: var(--glass-edge);
+    color: var(--text-main);
+  }
+
+  /* ---------- 9. Fișa reperului și confirmările ---------- */
+  #card {
+    background-color: var(--glass-tint-thick);
+    background-image: var(--glass-sheen);
+    -webkit-backdrop-filter: blur(30px) saturate(170%) brightness(1.05);
+    backdrop-filter: blur(30px) saturate(170%) brightness(1.05);
+    border-top: .5px solid var(--glass-edge);
+    border-radius: 26px 26px 0 0;
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 0 -1px 0 var(--glass-inner-lo),
+      var(--glass-shadow);
+    transform: translateZ(0);
+  }
+  #captureModal {
+    background: rgba(6, 8, 11, .60);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .cm-card {
+    background-color: var(--glass-tint-thick);
+    background-image: var(--glass-sheen);
+    -webkit-backdrop-filter: blur(28px) saturate(170%) brightness(1.05);
+    backdrop-filter: blur(28px) saturate(170%) brightness(1.05);
+    border: .5px solid var(--glass-edge);
+    border-radius: 26px;
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 0 -1px 0 var(--glass-inner-lo),
+      var(--glass-shadow);
+    transform: translateZ(0);
+    animation: sheetIn var(--dur-spring) var(--spring) both;
+  }
+  #compassWarning, #proximityToast {
+    background-color: rgba(18, 23, 30, .70);
+    background-image: var(--glass-sheen);
+    border: .5px solid var(--glass-edge-strong);
+    border-radius: 22px;
+    -webkit-backdrop-filter: blur(26px) saturate(180%) brightness(1.05);
+    backdrop-filter: blur(26px) saturate(180%) brightness(1.05);
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      var(--glass-shadow);
+    transform: translateZ(0);
+  }
+  body.light-theme #compassWarning, body.light-theme #proximityToast {
+    background-color: rgba(255, 255, 255, .80);
+    color: var(--amber-ink);
+    border-color: rgba(23, 17, 6, .18);
+  }
+  body.light-theme #compassWarning .cw-title,
+  body.light-theme #compassWarning .cw-body,
+  body.light-theme #proximityToast .pt-title,
+  body.light-theme #proximityToast .pt-content,
+  body.light-theme #proximityToast .pt-close,
+  body.light-theme #compassWarning .cw-close { color: var(--amber-ink); }
+
+  /* ---------- 10. Poarta, startul, ecranul desktop ---------- */
+  #apiGate {
+    background-color: var(--bg-main);
+    background-image:
+      linear-gradient(180deg, rgba(5, 7, 10, .74) 0%, rgba(5, 7, 10, .93) 100%),
+      url("primaria-1901.jpg");
+    background-size: cover, cover;
+    background-position: center, center;
+  }
+  body.light-theme #apiGate {
+    background-color: var(--bone);
+    background-image:
+      linear-gradient(180deg, rgba(246, 242, 233, .90) 0%, rgba(246, 242, 233, .97) 100%),
+      url("primaria-1901.jpg");
+  }
+  .api-gate-card {
+    background-color: var(--glass-tint-thick);
+    background-image: var(--glass-sheen);
+    -webkit-backdrop-filter: blur(26px) saturate(175%) brightness(1.05);
+    backdrop-filter: blur(26px) saturate(175%) brightness(1.05);
+    border: .5px solid var(--glass-edge);
+    border-radius: 28px;
+    padding: 26px 22px 22px;
+    box-shadow:
+      inset 0 1px 0 var(--glass-inner-hi),
+      inset 1px 0 0 var(--glass-side-hi),
+      inset -1px 0 0 var(--glass-side-hi),
+      inset 0 -1px 0 var(--glass-inner-lo),
+      var(--glass-shadow);
+    transform: translateZ(0);
+    animation: sheetIn 520ms var(--spring) both;
+  }
+  body.light-theme .api-gate-card { color: var(--amber-ink); }
+  body.light-theme .api-gate-text,
+  body.light-theme .api-gate-title { color: var(--amber-ink); }
+
+  .start-foot {
+    background-color: rgba(12, 16, 21, .42);
+    background-image: var(--glass-sheen);
+    border: .5px solid rgba(255, 255, 255, .18);
+    border-radius: 24px;
+    padding: 14px;
+    -webkit-backdrop-filter: blur(26px) saturate(180%) brightness(1.05);
+    backdrop-filter: blur(26px) saturate(180%) brightness(1.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .26),
+      inset 1px 0 0 rgba(255, 255, 255, .10),
+      inset -1px 0 0 rgba(255, 255, 255, .10),
+      0 18px 44px rgba(0, 0, 0, .46);
+    transform: translateZ(0);
+  }
+  body.light-theme .start-foot {
+    background-color: rgba(255, 255, 255, .62);
+    border-color: rgba(255, 255, 255, .9);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .95),
+      0 18px 44px rgba(23, 17, 6, .18);
+  }
+  #startBtn {
+    border-radius: 16px;
+    transition: transform var(--dur-press) var(--spring), box-shadow 240ms ease;
+  }
+  #startBtn:active { transform: scale(.97); }
+
+  /* ---------- 11. Micro-interacțiuni spring ---------- */
+  .btn, .cat-btn, .card-x, .album-close-btn, .modal-close-btn,
+  .cat-link, .cs-cancel-btn {
+    transition: transform var(--dur-press) var(--spring),
+                background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  }
+  .btn:active, .cat-btn:active, .card-x:active, .album-close-btn:active,
+  .modal-close-btn:active, .cs-cancel-btn:active { transform: scale(.95); }
+  .cat-link:active { transform: scale(.96); }
+  .mode-select-card, .chapter-card, .reward-badge-card {
+    border-radius: 20px;
+    background-color: var(--glass-tint-thin);
+    border: 1px solid var(--glass-edge);
+    box-shadow: inset 0 1px 0 var(--glass-inner-hi);
+    transition: transform 260ms var(--spring), border-color 200ms ease, background-color 200ms ease;
+  }
+  .level-stop.current .level-node,
+  .chapter-card.active-chapter { animation: none; }
+  .reward-icon-huge { animation: popBounce 0.6s var(--spring-bouncy); }
+
+  /* ---------- 12. Rezerve: transparență redusă / fără backdrop-filter ---------- */
+  /* Windows cu „efecte de transparență” oprite raportează exact această
+     preferință, deci rezerva trebuie să arate bine, nu ca un panou plat:
+     pierdem blurul, păstrăm luciul, muchia de 1px și umbrele interioare. */
+  @media (prefers-reduced-transparency: reduce) {
+    #rail .ring, .theme-switch .ts-track, #caption, .modal-card, #card,
+    .cm-card, #compassWarning, #proximityToast, .level-box,
+    .loc-list, .cat-list, .start-foot, .api-gate-card, .album-detail {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      background-color: var(--glass-solid) !important;
+      background-image: var(--glass-sheen) !important;
+    }
+    #albumModal {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      background-color: var(--glass-veil) !important;
+    }
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    #rail .ring, .theme-switch .ts-track, #caption, .modal-card, #card,
+    .cm-card, #compassWarning, #proximityToast, .level-box,
+    .loc-list, .cat-list, .start-foot, .api-gate-card, .album-detail {
+      background-color: var(--glass-solid);
+      background-image: var(--glass-sheen);
+    }
+    #albumModal { background-color: var(--glass-veil); }
+  }
+  /* Safari nu cunoaște prefers-reduced-transparency, așa că „mai mult contrast”
+     e a doua poartă pentru aceeași rezervă. */
+  @media (prefers-contrast: more) {
+    #rail .ring, .theme-switch .ts-track, #caption, .modal-card, #card,
+    .cm-card, #compassWarning, #proximityToast, .level-box,
+    .loc-list, .cat-list, .start-foot, .api-gate-card, .album-detail {
+      background-color: var(--glass-solid);
+      border-color: var(--glass-edge-strong);
+    }
+  }
+
 </style>
 </head>
 <body>
+
+<!-- Poarta API: /health prin proxy-ul /api, înainte de a arăta interfața -->
+<div id="apiGate" role="dialog" aria-modal="true" aria-live="polite" aria-labelledby="apiGateTitle">
+  <div class="api-gate-card">
+    <div class="api-gate-brand">AradLens</div>
+    <h2 id="apiGateTitle" class="api-gate-title">Se conectează la arhivă…</h2>
+    <div class="api-gate-spinner" id="apiGateSpinner" aria-hidden="true"></div>
+    <p id="apiGateText" class="api-gate-text">Se verifică disponibilitatea serverului…</p>
+    <button class="cat-btn primary" id="apiGateRetry" type="button" style="display:none;">Încearcă din nou</button>
+  </div>
+</div>
 
 <div id="desktopPlaceholder">
   <h1>Experiență AR</h1>
@@ -1173,8 +1945,8 @@
 <div id="albumModal" role="dialog" aria-modal="true" aria-labelledby="albumTitle">
   <div class="album-header">
     <div>
-      <h2 id="albumTitle">Album &amp; Hartă Arad</h2>
-      <p>Traseu pe module · atingi o oprire și deschizi comparația Atunci / Acum</p>
+      <h2 id="albumTitle">Album · Hartă · Trasee</h2>
+      <p>Traseele din arhivă, pe module · atinge o oprire pentru Atunci / Acum</p>
     </div>
     <button class="album-close-btn" id="albumCloseBtn">Închide</button>
   </div>
@@ -1221,6 +1993,75 @@
     <div class="album-actions">
       <button class="album-action-btn primary" id="albumGuideBtn">Ghidează spre acest reper în AR</button>
       <button class="album-action-btn secondary" id="albumBackBtn">Închide</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Categorii (API AradLens) — listă publică, doar citire -->
+<div id="categoriesModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="catTitleText">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h2 id="catTitleText">Categorii</h2>
+        <p>Clasele obiectivelor din arhiva centrală AradLens</p>
+      </div>
+      <button class="modal-close-btn" id="catCloseBtn" aria-label="Închide">✕</button>
+    </div>
+
+    <div id="catState" class="cat-state" role="status" aria-live="polite" style="display:none;"></div>
+
+
+    <ul class="cat-list" id="catList"></ul>
+    <div class="cat-count" id="catCount" style="display:none;"></div>
+
+  </div>
+</div>
+
+<!-- Modal: Locații (API AradLens) — listă publică, doar citire; atinge o locație pentru detaliu -->
+<div id="locationsModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="locTitleText">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h2 id="locTitleText">Locații</h2>
+        <p>Obiectivele din arhiva centrală AradLens, cu poze și categorii</p>
+      </div>
+      <button class="modal-close-btn" id="locCloseBtn" aria-label="Închide">✕</button>
+    </div>
+
+    <div id="locState" class="cat-state" role="status" aria-live="polite" style="display:none;"></div>
+
+
+    <ul class="loc-list" id="locList"></ul>
+    <div class="cat-count" id="locCount" style="display:none;"></div>
+
+    <div id="locDetail" style="display:none;">
+      <button class="cat-link" id="locBackBtn" type="button">← Toate locațiile</button>
+      <div id="locDetailBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tururi (API AradLens) — listă publică, doar citire; atinge un tur pentru detaliu -->
+<div id="toursModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="tourTitleText">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h2 id="tourTitleText">Tururi</h2>
+        <p>Trasee ghidate prin obiectivele din arhiva centrală</p>
+      </div>
+      <button class="modal-close-btn" id="tourCloseBtn" aria-label="Închide">✕</button>
+    </div>
+
+    <div id="tourState" class="cat-state" role="status" aria-live="polite" style="display:none;"></div>
+
+    <div id="tourListWrap">
+      <ul class="loc-list" id="tourList"></ul>
+      <div class="cat-count" id="tourCount" style="display:none;"></div>
+    </div>
+
+    <div id="tourDetail" style="display:none;">
+      <button class="cat-link" id="tourBackBtn" type="button">← Toate tururile</button>
+      <div id="tourDetailBody"></div>
     </div>
   </div>
 </div>
@@ -1350,15 +2191,18 @@
   </div>
 </div>
 
-<!-- Fundalul live: pe dispozitiv real arata imaginea camerei. In testele headless cu
-     --use-fake-device-for-media-stream, Chromium deseneaza peste cadre un tipar de test
-     (cronometru verde + cerc mobil) — nu este continut DOM si nu se stilizeaza din CSS. -->
+<!-- Fundalul live: pe dispozitiv real arată imaginea camerei. În testele headless cu
+     --use-fake-device-for-media-stream, Chromium desenează peste cadre un tipar de test
+     (cronometru verde + cerc mobil) — nu este conținut DOM și nu se stilizează din CSS. -->
 <video id="cam" autoplay muted playsinline aria-hidden="true"></video>
 
 <div id="overlay">
   <div class="top">
     <div class="top-row">
-      <div class="brand">AradLens</div>
+      <div class="brand">
+        <span class="brand-lens" aria-hidden="true"><span class="brand-lens-flare"></span></span>
+        <span class="brand-word">Arad<span class="brand-word-tail">Lens</span></span>
+      </div>
       <div class="top-actions">
         <div class="route-step tnum" id="routeStep" aria-live="polite">1 / 5</div>
         <button id="compassWarningBadge" aria-label="Avertisment busolă" title="Avertisment busolă: apasă pentru detalii">
@@ -1385,6 +2229,29 @@
     <div id="steerEdge" aria-hidden="true"></div>
   </div>
   <nav id="rail" aria-label="Acțiuni reper">
+    <button id="themeToggleBtn" class="theme-switch" type="button" role="switch" aria-checked="false" aria-label="Temă deschisă" title="Comută tema lumină / întuneric">
+      <span class="ts-track" aria-hidden="true">
+        <span class="ts-knob"></span>
+        <span class="ts-slot ts-slot-sun">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4.4"/>
+            <line x1="12" y1="2.2" x2="12" y2="4.2"/>
+            <line x1="12" y1="19.8" x2="12" y2="21.8"/>
+            <line x1="4.4" y1="4.4" x2="5.8" y2="5.8"/>
+            <line x1="18.2" y1="18.2" x2="19.6" y2="19.6"/>
+            <line x1="2.2" y1="12" x2="4.2" y2="12"/>
+            <line x1="19.8" y1="12" x2="21.8" y2="12"/>
+            <line x1="4.4" y1="19.6" x2="5.8" y2="18.2"/>
+            <line x1="18.2" y1="5.8" x2="19.6" y2="4.4"/>
+          </svg>
+        </span>
+        <span class="ts-slot ts-slot-moon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.4 14.2A8.6 8.6 0 1 1 9.8 3.6a7 7 0 0 0 10.6 10.6z"/>
+          </svg>
+        </span>
+      </span>
+    </button>
     <button id="gamemodeRailBtn" class="ring" aria-label="Mod de joc &amp; Capitole" title="Mod de joc &amp; Capitole">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -1400,31 +2267,14 @@
     <circle cx="12" cy="13" r="4"/>
   </svg>
 </button>
-    <button id="albumBtn" class="ring" aria-label="Deschide albumul și harta" title="Deschide albumul și harta">
+    <button id="albumBtn" class="ring" aria-label="Deschide albumul, harta și traseele" title="Album · hartă · trasee">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
     <circle cx="8.5" cy="8.5" r="1.5"/>
     <polyline points="21 15 16 10 5 21"/>
   </svg>
 </button>
-    <button id="themeToggleBtn" class="theme-toggle-btn ring" aria-label="Comută modul de lumină / întuneric" title="Comută modul de lumină / întuneric">
-          <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
   </nav>
-  <div id="captureDistLabel" aria-hidden="true">—</div>
 
   <div class="bottom">
     <div id="caption">
@@ -1441,11 +2291,11 @@
         <div class="arrived" id="arrived">Ai ajuns la destinație!</div>
       </div>
     </div>
-    <div id="coords" class="debug-only" style="text-align:center;font-size:12px;opacity:.7;font-variant-numeric:tabular-nums;margin-bottom:8px;">lat: — · lon: —</div>
+    <div id="coords" class="debug-only" style="text-align:center;font-size:12px;opacity:.7;font-variant-numeric:tabular-nums;margin-bottom:8px;">stradă: —</div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
       <button id="flipBtn" class="btn debug-only">Inversează 180°</button>
     </div>
-    <div class="hint">Glisează busola pentru a alege oprirea.</div>
+    <div class="hint">Glisează busola pentru a alege oprirea · ține apăsat pe o oprire pentru fișa locației</div>
     <nav id="snapRail" role="group" aria-label="Busolă traseu: alege oprirea"></nav>
   </div>
 </div>
@@ -1485,12 +2335,15 @@
   <div class="start-photo" aria-hidden="true"><img src="primaria-1901.jpg" alt="" width="1100" height="834"></div>
   <div class="start-scrim" aria-hidden="true"></div>
   <div class="start-inner">
-    <div class="start-brand">AradLens</div>
+    <div class="start-brand">
+      <span class="brand-lens brand-lens-lg" aria-hidden="true"><span class="brand-lens-flare"></span></span>
+      <span class="brand-word">Arad<span class="brand-word-tail">Lens</span></span>
+    </div>
 
     <div class="start-head">
-      <h1>O plimbă prin istoria Aradului.</h1>
+      <h1>O plimbare prin istoria Aradului.</h1>
       <p class="start-promise">AradLens îți arată ce era aici înainte: cinci obiective istorice din centrul Aradului, de la 1865 la 1913.</p>
-      <p class="start-detail">Fiecare obiectiv are fișă și poveste, iar traseul îl parcurgi liber sau în Poveste, pe capitole, cu diplome de Cronicar la final. Pentru Primăria, de exemplu, clădirea din 1901 se așază lângă cea de azi.</p>
+      <p class="start-detail">Fiecare obiectiv are fișă și poveste, iar traseul îl parcurgi liber sau în Poveste, pe capitole, cu diplome de Cronicar la final. La Primărie, de exemplu, clădirea din 1901 se așază lângă cea de azi.</p>
       <p class="start-credit">Fotografie de fundal: Primăria Arad, 1901 — Fortepan / Schoch Frigyes (domeniu public)</p>
     </div>
 
@@ -1586,6 +2439,136 @@ const REPERE = [
     loreSnippet: "1865: Punctul de pornire al spiritualității și identității arădene."
   }
 ];
+
+/* =====================================================================
+   STRĂZI ȘI OBIECTIVE DIN ARHIVĂ
+   ---------------------------------------------------------------------
+   Coordonatele nu se mai afișează: fiecare obiectiv e anunțat prin
+   strada pe care îl găsești. Adresele de mai jos sunt reale (Wikipedia /
+   CNIPT Arad); pentru obiectivele care vin doar din API, strada e luată
+   din descrierea oficială, iar dacă lipsește, rămâne „Arad”.
+   ===================================================================== */
+const STRAZI_REPERE = {
+  turnul:    "Str. P. I. Ceaikovski 11",
+  palatul:   "Piața George Enescu 1",
+  primaria:  "Bd. Revoluției 75",
+  teatru:    "Bd. Revoluției 103",
+  catedrala: "Piața Catedralei 15"
+};
+REPERE.forEach(r => { if (!r.strada) r.strada = STRAZI_REPERE[r.id] || ""; });
+
+/* Adrese pentru obiectivele care nu au strada în descrierea API. */
+const STRAZI_API_ID = {
+  7: "Str. Aeroportului 1",
+  9: "Bd. Revoluției · Piața Podgoria"
+};
+
+/* Numele din API ↔ numele din REPERE (aceeași clădire, altă formulare). */
+const ALIAS_API = {
+  "primaria": "primaria arad",
+  "teatrul slavici": "teatrul i slavici"
+};
+
+function normalizeName(s) {
+  return String(s == null ? "" : s)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const STREET_RE = /\b(bd\.?|bulevardul|str\.?|strada|pia[tț]a|pia[tț]a|cal\.?|calea|aleea|[sș]oseaua|soseaua)\s+([^,.;()]{2,44})/i;
+
+/* Strada unui obiectiv: câmp explicit → tabelă pe id API → tabelă pe nume →
+   descrierea oficială → „Arad”. Niciodată coordonate. */
+function streetFor(o) {
+  if (!o) return "Arad";
+  if (o.strada) return o.strada;
+  if (o.apiId && STRAZI_API_ID[o.apiId]) return STRAZI_API_ID[o.apiId];
+  const byName = STRAZI_REPERE[o.id];
+  if (byName) return byName;
+  const hay = [o.apiDesc, o.descriere].filter(Boolean).join(" ");
+  const m = hay.match(STREET_RE);
+  if (m) return (m[1].replace(/\.$/, "") + " " + m[2]).replace(/\s+/g, " ").trim().replace(/^./, c => c.toUpperCase());
+  return "Arad";
+}
+
+/* Un obiectiv nou (există doar în API): îl adăugăm la traseu ca să apară
+   în selectorul cu busola, în album și în fișe. */
+function addApiOnlyObjective(loc) {
+  const cat = loc.category ? loc.category.name : "";
+  const entry = {
+    id: "loc-" + loc.id,
+    apiId: loc.id,
+    nume: String(loc.name || "Obiectiv Arad"),
+    lat: Number(loc.latitude),
+    lon: Number(loc.longitude),
+    an: null,
+    anNumeric: 9000 + Number(loc.id || 0),
+    epoca: "",
+    arhitect: "",
+    stil: cat,
+    descriere: loc.description || "",
+    apiDesc: loc.description || "",
+    imagini: Array.isArray(loc.images) ? loc.images.slice() : [],
+    categorie: loc.category || null,
+    strada: STRAZI_API_ID[loc.id] || ""
+  };
+  entry.strada = streetFor(entry);
+  REPERE.push(entry);
+  return entry;
+}
+
+/* Îmbină lista din GET /locations cu traseul local. Idempotent: îl poți
+   chema de mai multe ori (preload, reîncărcare, retry). */
+function applyApiLocations(list) {
+  if (!Array.isArray(list) || !list.length) return 0;
+  let added = 0;
+  list.forEach(loc => {
+    if (!loc || loc.id == null) return;
+    let found = REPERE.find(r => r.apiId === loc.id);
+    if (!found) {
+      const key = ALIAS_API[normalizeName(loc.name)] || normalizeName(loc.name);
+      found = REPERE.find(r => !r.apiId && normalizeName(r.nume) === key);
+    }
+    if (found) {
+      found.apiId = loc.id;
+      found.apiName = String(loc.name || found.nume);
+      found.lat = Number(loc.latitude);
+      found.lon = Number(loc.longitude);
+      found.apiDesc = loc.description || found.apiDesc || "";
+      found.imagini = Array.isArray(loc.images) ? loc.images.slice() : (found.imagini || []);
+      found.categorie = loc.category || found.categorie || null;
+      if (!found.strada) found.strada = STRAZI_API_ID[loc.id] || "";
+      found.strada = streetFor(found);
+    } else {
+      addApiOnlyObjective(loc);
+      added++;
+    }
+  });
+  return added;
+}
+
+/* Obiectivul din traseu corespunzător unei locații API. */
+function objectiveForLocation(loc) {
+  if (!loc) return null;
+  let r = REPERE.find(x => x.apiId === loc.id);
+  if (r) return r;
+  const key = normalizeName(loc.name);
+  r = REPERE.find(x => normalizeName(x.nume) === key || normalizeName(x.apiName || "") === key);
+  if (r) return r;
+  return addApiOnlyObjective(loc);
+}
+
+/* Strada unei locații API, fără efecte secundare (nu adaugă obiective). */
+function streetForLocation(loc) {
+  if (!loc) return "Arad";
+  const key = normalizeName(loc.name);
+  const r = REPERE.find(x => x.apiId === loc.id) ||
+            REPERE.find(x => normalizeName(x.nume) === key);
+  if (r) return streetFor(r);
+  return streetFor({ apiId: loc.id, apiDesc: loc.description || "", nume: loc.name });
+}
 
 /* =====================================================================
    CAPITOLELE CRONICII ISTORICE (MODUL POVESTE / LORE)
@@ -1724,8 +2707,14 @@ function getCurrentStoryLandmark() {
 }
 
 let target = REPERE[0];
-let userLat = null, userLon = null;
-let lastAccuracy = null;
+
+/* Colectările din arhiva centrală, preîncărcate o singură dată de poarta API.
+   Declarate sus: render-urile anticipate le citesc înainte de partea de jos. */
+let locItems = [];
+let tourItems = [];
+let catItems = [];
+
+let userLat = null, userLon = null;let lastAccuracy = null;
 let bearingToTarget = null;  // direcția geografică spre reper
 
 let heading = null;          // direcția în care privește telefonul (0 = Nord), netezită
@@ -1784,11 +2773,10 @@ function applyTheme(theme) {
   document.body.classList.toggle("light-theme", isLight);
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor) metaThemeColor.setAttribute("content", isLight ? "#f6f2e9" : "#0b0e12");
-  const iconSun = $("#themeIconSun");
-  const iconMoon = $("#themeIconMoon");
-  if (iconSun && iconMoon) {
-    iconSun.style.display = isLight ? "block" : "none";
-    iconMoon.style.display = isLight ? "none" : "block";
+  const sw = document.getElementById("themeToggleBtn");
+  if (sw) {
+    sw.setAttribute("aria-checked", isLight ? "true" : "false");
+    sw.setAttribute("aria-label", isLight ? "Temă deschisă" : "Temă întunecată");
   }
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
@@ -2165,6 +3153,35 @@ function compassDialMarkup(){
   </svg>`;
 }
 
+/* Apăsare lungă pe o oprire. Mișcarea degetului (>8px) anulează gestul, ca
+   glisarea benzii să rămână glisare; meniul contextual al sistemului e oprit. */
+function bindLongPress(el, onLongPress, delayMs = 460) {
+  let timer = null, startX = 0, startY = 0;
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  el.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    startX = e.clientX; startY = e.clientY;
+    cancel();
+    timer = setTimeout(() => {
+      timer = null;
+      el.classList.add("is-held");
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) {}
+      onLongPress();
+    }, delayMs);
+  });
+  el.addEventListener("pointermove", e => {
+    if (!timer) return;
+    if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) cancel();
+  });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev =>
+    el.addEventListener(ev, () => {
+      cancel();
+      setTimeout(() => el.classList.remove("is-held"), 160);
+    })
+  );
+  el.addEventListener("contextmenu", e => e.preventDefault());
+}
+
 function renderCompassBand(){
   const rail = $("#snapRail");
   if (!rail) return;
@@ -2202,7 +3219,7 @@ function renderCompassBand(){
     b.dataset.index = s.repereIndex;
     b.dataset.repereIndex = s.repereIndex;
     b.setAttribute("aria-current", "false");
-    b.title = `${r.nume} (${r.an || ''})`;
+    b.title = r.an ? `${r.nume} (${r.an})` : r.nume;
     b.innerHTML = `<span class="cb-dial">${compassDialMarkup()}</span><span class="cb-name"></span><span class="cb-dist"></span>`;
     b.querySelector(".cb-name").textContent = r.nume;
     b.querySelector(".cb-dist").textContent = "—";
@@ -2215,6 +3232,11 @@ function renderCompassBand(){
       } else {
         selectTargetByIndex(s.repereIndex, true);
       }
+    });
+    // Ține apăsat pe oprire → se deschide fișa locației (fosta pagină Locații).
+    bindLongPress(b, () => {
+      bandSuppressClickUntil = Date.now() + 520;
+      openLocationPage(r);
     });
     rail.appendChild(b);
     bandEls.push({ el: b, tx: s.step * BAND_SLOT, isStop: true, step: s.step, repereIndex: s.repereIndex, locked: s.locked });
@@ -2265,8 +3287,8 @@ function liveSelectNearestStop(){
   selectTargetByIndex(rIdx, false);
 }
 
-/* Rozele si distantele din banda: acul arata directia fata de camera
-   (0 = in fata), distanta apare cand exista pozitie GPS valida. */
+/* Rozele și distanțele din bandă: acul arată direcția față de cameră
+   (0 = în față), distanța apare când există poziție GPS validă. */
 function updateBandData(){
   document.querySelectorAll(".compass-stop").forEach(el => {
     const rIdx = Number(el.dataset.repereIndex);
@@ -2286,9 +3308,9 @@ function updateBandData(){
       const stepNum = Number(el.dataset.step) + 1;
       const state = el.classList.contains("locked") ? "Încuiat"
                   : (el.classList.contains("completed") ? "Finalizat" : "Obiectiv activ");
-      label = `Pasul ${stepNum}: ${r.nume} (${r.an}) - ${state}`;
+      label = `Pasul ${stepNum}: ${r.nume}${r.an ? " (" + r.an + ")" : ""} - ${state}`;
     } else {
-      label = `Oprirea ${rIdx + 1} din ${REPERE.length}: ${r.nume}`;
+      label = `Oprirea ${rIdx + 1} din ${bandStopCount}: ${r.nume}`;
     }
     if (hasPos) label += `, ${distTxt}`;
     el.setAttribute("aria-label", label);
@@ -2297,7 +3319,7 @@ function updateBandData(){
     if (!rotEl) return;
     if (hasPos && heading != null) {
       let rel = bearing(userLat, userLon, r.lat, r.lon) - heading;
-      rel = ((rel + 540) % 360) - 180;   // [-180, 180]: 0 = chiar in fata
+      rel = ((rel + 540) % 360) - 180;   // [-180, 180]: 0 = chiar în față
       rotEl.setAttribute("transform", `rotate(${rel.toFixed(1)} 22 22)`);
       el.classList.remove("no-dir");
     } else {
@@ -2472,8 +3494,8 @@ function openCard(){
   const t = target;
   if (!targetHasInfo(t)) return;
   $("#cardTitle").textContent = t.nume;
-  $("#cardMeta").textContent  = [t.stil, t.an, t.arhitect].filter(Boolean).join(" · ");
-  $("#cardDesc").textContent  = t.descriere;
+  $("#cardMeta").textContent  = [streetFor(t), t.stil, t.an].filter(Boolean).join(" · ");
+  $("#cardDesc").textContent  = t.descriere || t.apiDesc || "";
   $("#photoBtn").style.display = t.foto ? "" : "none";
   cardEl.style.display = "block";
   scheduleUpdate();
@@ -2565,16 +3587,16 @@ function setCaption(phrase, meta){
   }
 }
 
-/* Legenda AR: fraza de directie traieste in blocul de legenda, nu pluteste. */
+/* Legenda AR: fraza de direcție trăiește în blocul de legendă, nu plutește. */
 function updateArLabel(az, phrase, meta){
   const t = target;
-  // Reperul e in spate (|az|>85): pastram indicatorul de margine, legenda numeste directia.
+  // Reperul e în spate (|az|>85): păstrăm indicatorul de margine, legenda numește direcția.
   if (Math.abs(az) > 85){
     const side = az > 0 ? "\u2192" : "\u2190";
     const deg = Math.round(180 - Math.abs(az));
     if (steerEdge) { steerEdge.style.display = "block"; steerEdge.textContent = `${side} ${deg}\u00b0`; }
     if (steerArrow) steerArrow.style.display = "none";
-    setCaption(phrase, side === "\u2192" ? "Intoarce-te spre dreapta" : "Intoarce-te spre stanga");
+    setCaption(phrase, side === "\u2192" ? "Întoarce-te spre dreapta" : "Întoarce-te spre stânga");
     return;
   }
   if (steerEdge) steerEdge.style.display = "none";
@@ -2673,26 +3695,21 @@ function update(){
 /* ---------- Obturator conștient de proximitate ---------- */
 function updateShutterState(d){
   const btn = $("#photoCaptureBtn");
-  const lbl = $("#captureDistLabel");
   if (!btn) return;
   if (d == null || isNaN(d)) {
     btn.disabled = true;
     btn.classList.remove("capture-ready");
     readyNow = false; refreshArrived();
-    if (lbl) lbl.textContent = "—";
     return;
   }
   if (d <= PROXIMITY_RADIUS_METERS) {
     btn.disabled = false;
     btn.classList.add("capture-ready");
     readyNow = true; refreshArrived();
-    if (lbl) lbl.textContent = "Gata de fotografiat";
   } else {
     btn.disabled = true;
     btn.classList.remove("capture-ready");
     readyNow = false; refreshArrived();
-    const remain = Math.round(d - PROXIMITY_RADIUS_METERS);
-    if (lbl) lbl.textContent = `Mai ai ${remain} m`;
   }
 }
 
@@ -2717,7 +3734,7 @@ function startGeo(){
       lastAccuracy = (pos.coords.accuracy != null) ? pos.coords.accuracy : null;
       hideStatus();
       if (DEBUG_MODE) {
-        $("#coords").textContent = `lat: ${userLat.toFixed(5)} · lon: ${userLon.toFixed(5)} · precizie: ${Math.round(pos.coords.accuracy)}m`;
+        $("#coords").textContent = `stradă: ${streetFor(target)} · precizie GPS: ${Math.round(pos.coords.accuracy)}m`;
       }
       updateWheelDistances();
       checkLandmarkProximity(userLat, userLon);
@@ -3478,9 +4495,16 @@ function staticChapterProgress(id) {
 function getAlbumModule() {
   const autoId = (storyState.currentMode === "story") ? storyState.activeChapterId : "free";
   const id = albumModuleId || autoId;
+
+  // Traseele din arhivă (GET /tours) sunt module în aceeași hartă.
+  if (String(id).indexOf("tour:") === 0) {
+    const tid = Number(String(id).slice(5));
+    const tour = tourItems.find(t => Number(t.id) === tid);
+    if (tour) return { kind: "tour", id, tour, label: tour.name };
+  }
   const ch = CHAPTERS.find(c => c.id === id);
   if (ch) return { kind: "chapter", id: ch.id, chapter: ch, label: `${ch.numar} · ${ch.titlu}` };
-  return { kind: "free", id: "free", label: "Modul Liber · Traseul complet" };
+  return { kind: "free", id: "free", label: "Modul Liber · Toate obiectivele" };
 }
 
 function albumStops(mod) {
@@ -3492,18 +4516,34 @@ function albumStops(mod) {
              (i === prog.currentStep ? "current" : "locked")
     }));
   }
+  if (mod.kind === "tour") {
+    const locs = Array.isArray(mod.tour.locations) ? mod.tour.locations : [];
+    const seen = new Set();
+    const out = [];
+    locs.forEach(loc => {
+      const obj = objectiveForLocation(loc);
+      const idx = obj ? REPERE.indexOf(obj) : -1;
+      if (idx < 0 || seen.has(idx)) return;
+      seen.add(idx);
+      out.push({
+        idx, step: out.length,
+        state: userCapturedPhotos[REPERE[idx].nume] ? "done" : "open"
+      });
+    });
+    return out;
+  }
   return REPERE.map((_, i) => i)
-    .sort((a, b) => REPERE[a].anNumeric - REPERE[b].anNumeric)
-    .map(idx => ({ idx, step: null, state: userCapturedPhotos[REPERE[idx].nume] ? "done" : "open" }));
+    .sort((a, b) => (REPERE[a].anNumeric || 9000) - (REPERE[b].anNumeric || 9000))
+    .map((idx, i) => ({ idx, step: i, state: userCapturedPhotos[REPERE[idx].nume] ? "done" : "open" }));
 }
 
 function renderAlbumModuleBar() {
   const bar = $("#albumModuleBar");
   if (!bar) return;
   const mod = getAlbumModule();
-  const chips = [{ id: "free", label: "Liber" }].concat(
-    CHAPTERS.map(c => ({ id: c.id, label: c.numar.replace("Capitolul", "Cap.") }))
-  );
+  const chips = [{ id: "free", label: "Liber" }]
+    .concat(CHAPTERS.map(c => ({ id: c.id, label: c.numar.replace("Capitolul", "Cap.") })))
+    .concat(tourItems.map(t => ({ id: "tour:" + t.id, label: t.name })));
   bar.innerHTML = "";
   chips.forEach(c => {
     const b = document.createElement("button");
@@ -3511,6 +4551,7 @@ function renderAlbumModuleBar() {
     b.className = "level-chip" + (c.id === mod.id ? " active" : "");
     b.textContent = c.label;
     b.setAttribute("aria-pressed", c.id === mod.id ? "true" : "false");
+    b.title = c.label;
     b.onclick = () => { albumModuleId = c.id; renderAlbumModuleBar(); renderLevelMap(); };
     bar.appendChild(b);
   });
@@ -3529,27 +4570,33 @@ function renderLevelMap() {
     ? (staticChapterProgress(mod.chapter.id).completed
         ? "Capitol complet"
         : `Pasul ${Math.min(staticChapterProgress(mod.chapter.id).currentStep + 1, stops.length)} din ${stops.length}`)
-    : `${doneCount} / ${stops.length} fotografiate`;
+    : mod.kind === "tour"
+      ? `${doneCount} / ${stops.length} pe traseu`
+      : `${doneCount} / ${stops.length} fotografiate`;
 
   track.innerHTML = "";
   // Prima oprire stă jos: DOM-ul e invers (sus = ultima oprire), dezvoltare
   // în sus ca la selecția de niveluri din jocuri.
   [...stops].reverse().forEach((s2) => {
     const lm = REPERE[s2.idx];
+    if (!lm) return;
+    const ord = stops.indexOf(s2) + 1;
+    const nodeLabel = lm.an || ord;
     const b = document.createElement("button");
     b.type = "button";
     b.className = "level-stop " + s2.state;
     b.dataset.idx = s2.idx;
-    b.setAttribute("aria-label", `${lm.nume} (${lm.an}) — deschide comparația Atunci / Acum`);
+    b.setAttribute("aria-label", `${lm.nume}${lm.an ? " (" + lm.an + ")" : ""} — ${streetFor(lm)} — deschide comparația Atunci / Acum`);
     let sub;
     if (s2.state === "done") sub = "Fotografie în album";
     else if (s2.state === "current") sub = `Următoarea oprire · pasul ${s2.step + 1}`;
     else if (s2.state === "locked") sub = "Încuiată · se parcurge în ordine";
-    else sub = "Fără fotografie încă";
+    else if (mod.kind === "tour") sub = `Oprirea ${ord} · ${streetFor(lm)}`;
+    else sub = streetFor(lm);
     b.innerHTML = `
-      <span class="level-node">${s2.state === "locked" ? LEVEL_LOCK_SVG : ""}<span class="level-year">${lm.an}</span></span>
-      <span class="level-name">${lm.nume}</span>
-      <span class="level-sub">${sub}</span>`;
+      <span class="level-node">${s2.state === "locked" ? LEVEL_LOCK_SVG : ""}<span class="level-year">${esc(String(nodeLabel))}</span></span>
+      <span class="level-name">${esc(lm.nume)}</span>
+      <span class="level-sub">${esc(sub)}</span>`;
     b.onclick = () => selectAlbumLandmark(s2.idx);
     track.appendChild(b);
   });
@@ -3592,7 +4639,7 @@ function renderAlbumCompare() {
 
   // Titlu și metadate reper selectat
   $("#albumLandmarkTitle").textContent = landmark.nume;
-  const metaParts = [landmark.stil, landmark.an, landmark.arhitect].filter(Boolean);
+  const metaParts = [streetFor(landmark), landmark.stil, landmark.an].filter(Boolean);
   $("#albumLandmarkMeta").textContent = metaParts.length > 0 ? metaParts.join(" · ") : "Obiectiv istoric din Arad";
 
   // Zona „Atunci” (istoric)
@@ -3641,6 +4688,578 @@ $("#albumBtn").onclick = openAlbum;
 $("#albumCloseBtn").onclick = closeAlbum;
 $("#albumBackBtn").onclick = closeAlbum;
 $("#albumGuideBtn").onclick = guideToSelectedLandmark;
+
+/* =====================================================================
+   ARADLENS API — STRAT PUBLIC, DOAR-CITIRE
+   Sursa: https://api.aradlens.binarysquad.club (OpenAPI la /docs). Site-ul
+   public vorbește cu API-ul prin /api (același origin, reverse-proxy nginx):
+   API-ul nu publică anteturi CORS, deci accesul direct ar fi blocat.
+   Aici sunt DOAR apeluri GET (categorii, locații, tururi, imagini, /health);
+   scrierile, autentificarea și crearea conținutului se fac în site-ul de
+   administrare, nu aici.
+   ===================================================================== */
+const API_PREFIX = "/api";
+const API_HEALTH_TIMEOUT_MS = 8000;
+
+/* Fuga pentru ghilimele în HTML generat (datele vin din API). */
+function esc(v) {
+  return String(v).replace(/[&<>"']/g, c => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
+/* Cerere comună GET: JSON în ieșire, erori normalizate, timeout opțional.
+   Mesajele sunt prietenoase și nu scurg detalii interne; în consolă
+   notăm doar ce e folositor pentru depanare. */
+async function apiRequest(path, { timeoutMs = 0 } = {}) {
+  const ctrl = typeof AbortController !== "undefined" && timeoutMs > 0 ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+  let res;
+  try {
+    res = await fetch(API_PREFIX + path, { signal: ctrl ? ctrl.signal : undefined });
+  } catch (e) {
+    if (timer) clearTimeout(timer);
+    if (e && e.name === "AbortError") {
+      throw { kind: "timeout", message: "Serverul nu a răspuns la timp. Încearcă din nou." };
+    }
+    throw { kind: "network", message: "Nu m-am putut conecta la arhiva AradLens. Verifică conexiunea și încearcă din nou." };
+  }
+  if (timer) clearTimeout(timer);
+
+  let data = null;
+  const ct = res.headers.get("content-type") || "";
+  if (ct.indexOf("json") !== -1) {
+    try { data = await res.json(); } catch { data = null; }
+  }
+
+  if (!res.ok) {
+    if (!navigator.onLine) {
+      throw { kind: "offline", message: "Ești offline. Verifică conexiunea la internet și încearcă din nou." };
+    }
+    if (res.status === 404) {
+      throw { kind: "http", message: "Elementul căutat nu a fost găsit în arhivă. Poate lista s-a schimbat — reîmprospătează." };
+    }
+    console.warn("[AradLens API] eroare", res.status, "la", path);
+    const detail = (data && typeof data.detail === "string") ? data.detail : null;
+    throw { kind: "http", message: detail || "Serverul a răspuns cu eroarea " + res.status + ". Încearcă din nou." };
+  }
+
+  if (data === null) {
+    throw { kind: "server", message: "Răspuns neașteptat de la arhivă. Încearcă din nou." };
+  }
+  return data;
+}
+
+/* Punctele publice folosite de site: doar GET. */
+const ApiHealth = { check: () => apiRequest("/health", { timeoutMs: API_HEALTH_TIMEOUT_MS }) };
+const CategoriesApi = {
+  list: () => apiRequest("/categories"),
+  get:  (id) => apiRequest("/categories/" + id)
+};
+const LocationsApi = {
+  list:     ()    => apiRequest("/locations"),
+  get:      (id)  => apiRequest("/locations/" + id),
+  imageUrl: (img) => API_PREFIX + "/locations/images/" + img   // <img src> direct (fișier, nu JSON)
+};
+const ToursApi = {
+  list: () => apiRequest("/tours"),
+  get:  (id) => apiRequest("/tours/" + id)
+};
+
+/* =====================================================================
+   PREÎNCĂRCARE — toate paginile se pregătesc înainte de primul tap
+   ---------------------------------------------------------------------
+   Poarta așteaptă /health, apoi aduce o singură dată locațiile, tururile
+   și categoriile, îmbină obiectivele în traseu și desenează dinainte
+   fiecare listă. Butoanele deschid instant, fără spinner și fără gol.
+   ===================================================================== */
+let preloadPromise = null;
+
+async function preloadAppData() {
+  if (preloadPromise) return preloadPromise;
+  preloadPromise = (async () => {
+    const safe = (p, fallback) => p.catch(e => {
+      console.warn("[AradLens API] preload eșuat:", e && e.kind);
+      return fallback;
+    });
+    const [locs, tours, cats] = await Promise.all([
+      safe(LocationsApi.list(), []),
+      safe(ToursApi.list(), []),
+      safe(CategoriesApi.list(), [])
+    ]);
+
+    locItems = Array.isArray(locs) ? locs : [];
+    tourItems = Array.isArray(tours) ? tours : [];
+    catItems = Array.isArray(cats) ? cats : [];
+
+    // Obiectivele din arhivă intră în traseu (selectorul cu busola).
+    const added = applyApiLocations(locItems);
+
+    // Imaginile din arhivă se descarcă acum, ca fișele să apară pline.
+    locItems.forEach(l => (l.images || []).forEach(img => {
+      const im = new Image();
+      im.src = LocationsApi.imageUrl(img);
+    }));
+
+    // Desenăm dinainte fiecare pagină.
+    renderCatItems();
+    renderLocCards();
+    renderTourCards();
+    renderCompassBand();
+    renderAlbumModuleBar();
+    renderLevelMap();
+    updateBandData();
+    return { added };
+  })();
+  return preloadPromise;
+}
+
+/* =====================================================================
+   POARTA API — /health înainte de a arăta interfața
+   Reușită → poarta dispare. Eșec → mesaj clar + buton „Încearcă din nou”;
+   nu repetăm singuri la nesfârșit, nu lăsăm ecran gol.
+   ===================================================================== */
+function setApiGateState(mode, text) {
+  const gate = $("#apiGate");
+  gate.style.display = "flex";
+  $("#apiGateSpinner").style.display = mode === "loading" ? "block" : "none";
+  $("#apiGateRetry").style.display = mode === "error" ? "inline-flex" : "none";
+  $("#apiGateText").textContent = text || (mode === "loading"
+    ? "Se verifică disponibilitatea serverului…"
+    : "Serverul AradLens nu este momentan disponibil. Te rugăm să încerci din nou.");
+}
+
+async function runApiGate() {
+  setApiGateState("loading");
+  try {
+    const data = await ApiHealth.check();
+    if (!data || data.status !== "ok") {
+      throw { kind: "server", message: "Răspuns neașteptat de la arhivă." };
+    }
+    // Paginile se încarcă acum, nu la primul tap.
+    setApiGateState("loading", "Se pregătesc obiectivele, traseele și albumul…");
+    await preloadAppData();
+    $("#apiGate").style.display = "none";
+  } catch (e) {
+    console.warn("[AradLens API] /health a eșuat:", e && e.kind);
+    setApiGateState("error");
+  }
+}
+
+$("#apiGateRetry").onclick = runApiGate;
+
+/* ---------- UI: modalul Categorii (doar citire) ---------- */
+let catBound = false;
+
+function setCatState(msg, kind) {
+  const el = $("#catState");
+  if (!msg) { el.style.display = "none"; el.innerHTML = ""; return; }
+  el.className = "cat-state" + (kind === "error" ? " cat-error" : "");
+  el.innerHTML = `<span>${esc(msg)}</span>`;
+  el.style.display = "block";
+}
+
+function setCatErrorState(msg) {
+  const el = $("#catState");
+  el.className = "cat-state cat-error";
+  el.innerHTML = `<span>${esc(msg)}</span> <button class="cat-btn" id="catRetryBtn" type="button">Reîncearcă</button>`;
+  el.style.display = "block";
+  const retry = $("#catRetryBtn");
+  if (retry) retry.onclick = loadCategories;
+}
+
+function renderCatItems() {
+  const list = $("#catList");
+  const countEl = $("#catCount");
+  countEl.style.display = catItems.length ? "block" : "none";
+  countEl.textContent = catItems.length ? `Arhiva centrală: ${catItems.length === 1 ? "o categorie" : catItems.length + " categorii"}` : "";
+  list.innerHTML = "";
+  if (!catItems.length) {
+    list.innerHTML = `<li class="cat-item"><span class="cat-name" style="color:var(--text-muted);">Nicio categorie, încă.</span></li>`;
+    return;
+  }
+  catItems.forEach(item => {
+    const li = document.createElement("li");
+    li.className = "cat-item";
+    li.innerHTML = `<span class="cat-name">${esc(item.name)}</span>`;
+    list.appendChild(li);
+  });
+}
+
+async function loadCategories() {
+  setCatState("Se încarcă arhiva categoriilor…");
+  try {
+    const items = await CategoriesApi.list();
+    catItems = Array.isArray(items) ? items : [];
+    setCatState("");
+    renderCatItems();
+  } catch (e) {
+    setCatErrorState((e && e.message) || "Eroare necunoscută la încărcare.");
+  }
+}
+
+function openCategoriesModal() {
+  $("#categoriesModal").style.display = "flex";
+  loadCategories();
+}
+
+function closeCategoriesModal() {
+  $("#categoriesModal").style.display = "none";
+}
+
+function bindCategoriesUI() {
+  if (catBound) return;
+  catBound = true;
+  $("#catCloseBtn").onclick = closeCategoriesModal;
+}
+
+/* ---------- UI: pagina unei locații (doar citire) ---------- */
+let locBound = false;
+let locStandalone = false;   // deschisă dintr-o apăsare lungă pe busolă
+
+function setLocState(msg, kind) {
+  const el = $("#locState");
+  if (!msg) { el.style.display = "none"; el.innerHTML = ""; return; }
+  el.className = "cat-state" + (kind === "error" ? " cat-error" : "");
+  el.innerHTML = `<span>${esc(msg)}</span>`;
+  el.style.display = "block";
+}
+
+function setLocErrorState(msg, retryFn) {
+  const el = $("#locState");
+  el.className = "cat-state cat-error";
+  el.innerHTML = `<span>${esc(msg)}</span> <button class="cat-btn" id="locRetryBtn" type="button">Reîncearcă</button>`;
+  el.style.display = "block";
+  const retry = $("#locRetryBtn");
+  if (retry) retry.onclick = retryFn || backToLocList;
+}
+
+function locationInfo(loc) {
+  const imgs = (loc.images || []).map(id => `
+    <span class="loc-img-wrap">
+      <img src="${LocationsApi.imageUrl(id)}" alt="Poza ${esc(String(id))} — ${esc(loc.name)}">
+    </span>`).join("");
+  const cat = loc.category ? `<span class="loc-chip">${esc(loc.category.name)}</span>` : "";
+  const desc = loc.description ? `<p class="loc-desc">${esc(loc.description)}</p>` : "";
+  return { imgs, cat, desc };
+}
+
+/* Un obiectiv din traseu, adus la forma unei locații API. */
+function locationFromObjective(o) {
+  return {
+    id: o.apiId != null ? o.apiId : null,
+    name: o.apiName || o.nume,
+    description: o.apiDesc || o.descriere || "",
+    images: Array.isArray(o.imagini) ? o.imagini : [],
+    category: o.categorie || (o.stil ? { name: o.stil } : null)
+  };
+}
+
+function locationCard(loc) {
+  const info = locationInfo(loc);
+  const street = `<span class="loc-coords">${esc(streetForLocation(loc))}</span>`;
+  return `<div class="loc-card-top"><span class="loc-name">${esc(loc.name)}</span>${info.cat}</div>
+    ${street}${info.desc}${info.imgs}
+    <div class="loc-actions">
+      <button class="cat-link" data-act="detail" type="button">Vezi pagina locației →</button>
+    </div>`;
+}
+
+function renderLocCards() {
+  const list = $("#locList");
+  if (!list) return;
+  const countEl = $("#locCount");
+  countEl.style.display = locItems.length ? "block" : "none";
+  countEl.textContent = locItems.length ? `Arhiva centrală: ${locItems.length === 1 ? "o locație" : locItems.length + " locații"}` : "";
+  list.innerHTML = "";
+  if (!locItems.length) {
+    list.innerHTML = `<li class="loc-card"><span class="cat-name" style="color:var(--text-muted);">Nicio locație, încă.</span></li>`;
+    return;
+  }
+  locItems.forEach(loc => {
+    const li = document.createElement("li");
+    li.className = "loc-card";
+    li.dataset.id = loc.id;
+    li.innerHTML = locationCard(loc);
+    list.appendChild(li);
+  });
+}
+
+async function loadLocations() {
+  showLocList();
+  setLocState("Se încarcă locațiile…");
+  try {
+    const items = await LocationsApi.list();
+    locItems = Array.isArray(items) ? items : [];
+    applyApiLocations(locItems);
+    setLocState("");
+    renderLocCards();
+  } catch (e) {
+    setLocErrorState((e && e.message) || "Eroare necunoscută la încărcare.", loadLocations);
+  }
+}
+
+function showLocList() {
+  locStandalone = false;
+  $("#locDetail").style.display = "none";
+  $("#locDetailBody").innerHTML = "";
+  $("#locList").style.display = "";
+  $("#locCount").style.display = locItems.length ? "block" : "none";
+  $("#locTitleText").textContent = "Locații";
+  $("#locBackBtn").textContent = "← Toate locațiile";
+}
+
+/* Pagina locației: se desenează imediat din datele preîncărcate, apoi se
+   reîmprospătează discret din arhivă. Nu așteaptă niciodată rețeaua. */
+function paintLocDetail(loc, objective) {
+  const info = locationInfo(loc);
+  const cat = loc.category || null;
+  const obj = objective || null;
+  $("#locDetailBody").innerHTML = `
+    <div class="loc-detail-head">
+      <span class="loc-detail-name">${esc(loc.name)}</span>
+      ${cat ? `<span class="loc-chip">${esc(cat.name)}</span>` : ""}
+      <span class="loc-coords">${esc(streetForLocation(loc))}</span>
+    </div>
+    ${loc.description ? `<p class="loc-desc">${esc(loc.description)}</p>` : ""}
+    ${(loc.images || []).length ? `<div class="loc-detail-sec">Poze din arhivă</div><div class="loc-imgs">${info.imgs}</div>` : ""}
+    ${obj ? `<div class="album-actions" style="margin-top:16px;">
+      <button class="album-action-btn primary" id="locGuideBtn" type="button">Ghidează spre acest obiectiv în AR</button>
+    </div>` : ""}`;
+  const guide = $("#locGuideBtn");
+  if (guide && obj) {
+    guide.onclick = () => {
+      closeLocationsModal();
+      selectTargetByIndex(REPERE.indexOf(obj), true);
+    };
+  }
+}
+
+async function openLocDetail(id, opts) {
+  opts = opts || {};
+  locStandalone = Boolean(opts.standalone);
+  $("#locList").style.display = "none";
+  $("#locCount").style.display = "none";
+  $("#locDetail").style.display = "block";
+  $("#locTitleText").textContent = locStandalone ? "Fișa obiectivului" : "Pagina locației";
+  $("#locBackBtn").textContent = locStandalone ? "← Închide" : "← Toate locațiile";
+
+  const cached = locItems.find(l => Number(l.id) === Number(id)) || null;
+  if (cached) {
+    setLocState("");
+    paintLocDetail(cached, objectiveForLocation(cached));
+  } else {
+    setLocState("Se încarcă detaliile locației…");
+  }
+
+  try {
+    const loc = await LocationsApi.get(Number(id));
+    let cat = loc.category || null;
+    if (cat && cat.id) {
+      try { cat = await CategoriesApi.get(cat.id); } catch (e) { console.warn("[AradLens API] categoria nu s-a putut reverifica:", e && e.kind); }
+    }
+    const merged = Object.assign({}, cached || {}, loc, { category: cat || loc.category });
+    setLocState("");
+    paintLocDetail(merged, objectiveForLocation(merged));
+  } catch (e) {
+    if (!cached) {
+      setLocErrorState((e && e.message) || "Eroare necunoscută la încărcare.", () => openLocDetail(id, opts));
+    }
+  }
+}
+
+/* Apăsare lungă pe o oprire din busolă → pagina locației, instant. */
+function openLocationPage(objective) {
+  if (!objective) return;
+  locStandalone = true;
+  $("#locationsModal").style.display = "flex";
+  $("#locList").style.display = "none";
+  $("#locCount").style.display = "none";
+  $("#locDetail").style.display = "block";
+  $("#locTitleText").textContent = "Fișa obiectivului";
+  $("#locBackBtn").textContent = "← Închide";
+  setLocState("");
+  paintLocDetail(locationFromObjective(objective), objective);
+  if (objective.apiId != null) openLocDetail(objective.apiId, { standalone: true });
+}
+
+function closeLocationsModal() {
+  $("#locationsModal").style.display = "none";
+  locStandalone = false;
+}
+
+function bindLocationsUI() {
+  if (locBound) return;
+  locBound = true;
+  $("#locCloseBtn").onclick = closeLocationsModal;
+  $("#locBackBtn").onclick = () => {
+    if (locStandalone) { closeLocationsModal(); return; }
+    showLocList();
+    setLocState("");
+  };
+  $("#locList").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-act=detail]");
+    if (!btn) return;
+    const li = btn.closest(".loc-card");
+    if (li) openLocDetail(Number(li.dataset.id));
+  });
+}
+
+/* ---------- UI: modalul Tururi (doar citire: listă + detaliu) ---------- */
+let tourBound = false;
+
+function setTourState(msg, kind) {
+  const el = $("#tourState");
+  if (!msg) { el.style.display = "none"; el.innerHTML = ""; return; }
+  el.className = "cat-state" + (kind === "error" ? " cat-error" : "");
+  el.innerHTML = `<span>${esc(msg)}</span>`;
+  el.style.display = "block";
+}
+
+function setTourErrorState(msg, retryFn) {
+  const el = $("#tourState");
+  el.className = "cat-state cat-error";
+  el.innerHTML = `<span>${esc(msg)}</span> <button class="cat-btn" id="tourRetryBtn" type="button">Reîncearcă</button>`;
+  el.style.display = "block";
+  const retry = $("#tourRetryBtn");
+  if (retry) retry.onclick = retryFn || backToTourList;
+}
+
+function formatTourDate(v) {
+  const d = new Date(v);
+  if (!v || isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("ro-RO", { year: "numeric", month: "long", day: "numeric" });
+}
+
+function tourCard(tour) {
+  const date = formatTourDate(tour.created_at);
+  const count = (tour.location_ids || []).length;
+  const desc = tour.description ? `<p class="loc-desc">${esc(tour.description)}</p>` : "";
+  const meta = `<span class="loc-coords">${count} ${count === 1 ? "locație" : "locații"}${date ? " · " + esc(date) : ""}</span>`;
+  return `<div class="loc-card-top"><span class="loc-name">${esc(tour.name)}</span></div>
+    ${meta}${desc}
+    <div class="loc-actions">
+      <button class="cat-link" data-act="detail" type="button">Vezi turul →</button>
+    </div>`;
+}
+
+function locationInTour(loc) {
+  const info = locationInfo(loc);
+  const street = `<span class="loc-coords">${esc(streetForLocation(loc))}</span>`;
+  return `<div class="loc-detail-head">
+      <span class="loc-name">${esc(loc.name)}</span>
+      ${info.cat}
+    </div>
+    ${street}${info.desc}${info.imgs}`;
+}
+
+function renderTourCards() {
+  const list = $("#tourList");
+  const countEl = $("#tourCount");
+  countEl.style.display = tourItems.length ? "block" : "none";
+  countEl.textContent = tourItems.length ? `Arhiva centrală: ${tourItems.length === 1 ? "un tur" : tourItems.length + " tururi"}` : "";
+  list.innerHTML = "";
+  if (!tourItems.length) {
+    list.innerHTML = `<li class="loc-card"><span class="cat-name" style="color:var(--text-muted);">Niciun tur, încă.</span></li>`;
+    return;
+  }
+  tourItems.forEach(tour => {
+    const li = document.createElement("li");
+    li.className = "loc-card";
+    li.dataset.id = tour.id;
+    li.innerHTML = tourCard(tour);
+    list.appendChild(li);
+  });
+}
+
+async function loadTours() {
+  showTourList();
+  setTourState("Se încarcă tururile…");
+  try {
+    const items = await ToursApi.list();
+    tourItems = Array.isArray(items) ? items : [];
+    setTourState("");
+    renderTourCards();
+  } catch (e) {
+    setTourErrorState((e && e.message) || "Eroare necunoscută la încărcare.", loadTours);
+  }
+}
+
+function showTourList() {
+  $("#tourDetail").style.display = "none";
+  $("#tourDetailBody").innerHTML = "";
+  $("#tourListWrap").style.display = "";
+}
+
+/* Detaliu tur: GET /tours/{id} proaspăt din arhivă; picând, rămânem pe mesaj. */
+async function openTourDetail(id) {
+  $("#tourListWrap").style.display = "none";
+  $("#tourDetail").style.display = "block";
+  setTourState("Se încarcă turul…");
+  try {
+    const tour = await ToursApi.get(Number(id));
+    const date = formatTourDate(tour.created_at);
+    const stops = (tour.locations || []).map(locationInTour).join("");
+    setTourState("");
+    $("#tourDetailBody").innerHTML = `
+      <div class="loc-detail-head">
+        <span class="loc-detail-name">${esc(tour.name)}</span>
+        ${tour.description ? `<p class="loc-desc">${esc(tour.description)}</p>` : ""}
+        ${date ? `<span class="loc-coords">Din ${esc(date)}</span>` : ""}
+      </div>
+      ${(tour.locations || []).length
+        ? `<div class="loc-detail-sec">Obiectivele turului (${(tour.locations || []).length})</div>${stops}`
+        : `<p class="loc-desc" style="color:var(--text-muted);">Turul nu are, încă, obiective asociate.</p>`}`;
+  } catch (e) {
+    setTourErrorState((e && e.message) || "Eroare necunoscută la încărcare.", openTourDetail.bind(null, id));
+  }
+}
+
+function closeToursModal() {
+  $("#toursModal").style.display = "none";
+}
+
+function bindToursUI() {
+  if (tourBound) return;
+  tourBound = true;
+  $("#tourCloseBtn").onclick = closeToursModal;
+  $("#tourBackBtn").onclick = () => {
+    showTourList();
+    setTourState("");
+    $("#tourCount").style.display = tourItems.length ? "block" : "none";
+  };
+  $("#tourList").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-act=detail]");
+    if (!btn) return;
+    const li = btn.closest(".loc-card");
+    if (li) openTourDetail(Number(li.dataset.id));
+  });
+}
+
+/* ---------- legături + pornirea verificării de sănătate ---------- */
+/* Listele sunt deja descărcate și desenate de preload: deschiderea e instant,
+   iar rețeaua se atinge doar dacă preload-ul a picat. */
+function openLocationsModal() {
+  $("#locationsModal").style.display = "flex";
+  showLocList();
+  if (!locItems.length) { loadLocations(); return; }
+  setLocState("");
+  renderLocCards();
+}
+
+function openToursModal() {
+  $("#toursModal").style.display = "flex";
+  showTourList();
+  if (!tourItems.length) { loadTours(); return; }
+  setTourState("");
+  renderTourCards();
+}
+
+bindCategoriesUI();
+bindLocationsUI();
+bindToursUI();
+
+runApiGate();
 
 /* Butoane Mod de Joc & Capitole — releu pe șina din dreapta; eticheta de sus a fost eliminată */
 const gamemodeRailBtn = $("#gamemodeRailBtn");

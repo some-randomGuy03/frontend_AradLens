@@ -8,8 +8,8 @@
 <meta name="description" content="Document de decizie: zece concepții de redesign pentru HUD-ul AradLens, cu machete reale, specificatii, cost si cercetarea anexa.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0e12'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Georgia,serif' font-size='36' fill='%23007a6b'%3EA%3C/text%3E%3C/svg%3E">
 
-<!-- Fonturi propuse de conceptii (CDN Google Fonts). Nu sunt inca in repo.
-     Daca reteaua lipseste, fiecare conception cade pe stiva locala declarata in tabel. -->
+<!-- Fonturi propuse de concepții (CDN Google Fonts). Nu sunt încă în repo.
+     Dacă rețeaua lipsește, fiecare concepție cade pe stiva locală declarată în tabel. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Big+Shoulders+Display:wght@600;700&family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Libre+Caslon+Text:wght@400;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Spectral:wght@400;600;700&display=swap">
@@ -18,10 +18,10 @@
 /* ==========================================================================
    AradLens: document de concepții (docs/design/concepts.html)
    Document tipografic: hartie rece, cerneala, o singura linie de accent.
-   Fara emoji, fara gradiente, fara glass, fara umbre difuze, fara raze de 12 px.
+   Fără emoji, fără gradiente, fără glass, fără umbre difuze, fără raze de 12 px.
    ========================================================================== */
 
-/* --- Fata display: Fraunces, deja in repo (fonts/), alias "AradLens Display" --- */
+/* --- Fata display: Fraunces, deja în repo (fonts/), alias "AradLens Display" --- */
 @font-face {
   font-family: "AradLens Display";
   src: url("../../fonts/fraunces-latin-ext.woff2") format("woff2");
@@ -37,7 +37,7 @@
 
 :root{
   /* Sase trepte. Nici doua nu sunt la mai putin de 3 px una de alta. */
-  --t-micro:12px;   /* etichete mici, doar cu litere mari si spatiere */
+  --t-micro:12px;   /* etichete mici, doar cu litere mari și spațiere */
   --t-body:16px;
   --t-sub:20px;
   --t-title:26px;
@@ -87,7 +87,7 @@ a:hover{ color:var(--accent); }
 .tnum{ font-variant-numeric:tabular-nums slashed-zero; }
 ::selection{ background:var(--accent); color:#fff; }
 
-/* --- Prima linie: actiunea, nu contextul --- */
+/* --- Prima linie: acțiunea, nu contextul --- */
 .first{
   background:var(--accent); color:#fff;
   padding:10px var(--gut); font-size:var(--t-micro); letter-spacing:.02em;
@@ -255,7 +255,7 @@ h3.sec-sub{
 .mock-cap{ font-size:var(--t-micro); color:var(--ink-3); margin:8px 0 0; }
 .mock-cap b{ color:var(--ink-2); font-weight:600; }
 
-/* Tabele late: derulare orizontala in interior, fara scroll pe pagina. */
+/* Tabele late: derulare orizontală în interior, fără scroll pe pagină. */
 .tw{ overflow-x:auto; max-width:100%; margin:12px 0 0; -webkit-overflow-scrolling:touch; }
 .tw table{ margin:0; min-width:100%; }
 .tw thead th{ position:static; }
@@ -412,7 +412,7 @@ h3.sec-sub{
 .colophon code{ font-family:var(--mono); font-size:11px; }
 
 /* ==========================================================================
-   MACHETA 1: Fisa de Arhiva (hârtie rece, rigluri, accent oxblood)
+   MACHETA 1: Fișă de Arhivă (hârtie rece, rigluri, accent oxblood)
    ========================================================================== */
 .mk.c1 .mk-scene{ background:linear-gradient(180deg,#2b2f31 0%,#383c3d 38%,#2f3234 62%,#23262a 100%); }
 .mk.c1 .mk-scene::after{
@@ -448,7 +448,7 @@ h3.sec-sub{
 .mk.c1 .c1-hint{ font-size:12px; color:var(--ink-3); margin-top:6px; }
 
 /* ==========================================================================
-   MACHETA 2: Busola de Otel (instrument, alamă)
+   MACHETA 2: Busola de Oțel (instrument, alamă)
    ========================================================================== */
 .mk.c2 .mk-scene{ background:linear-gradient(180deg,#191d20 0%,#24282b 45%,#1b1e21 100%); }
 .mk.c2 .mk-scene::after{
@@ -478,7 +478,7 @@ h3.sec-sub{
 .mk.c2 .c2-rose svg{ width:168px; height:168px; }
 
 /* ==========================================================================
-   MACHETA 3: Cronica Tiparita (coloana de ziar, banda devine cronologie)
+   MACHETA 3: Cronica Tipărită (coloana de ziar, banda devine cronologie)
    ========================================================================== */
 .mk.c3 .mk-scene{ background:linear-gradient(180deg,#33383a 0%,#3d4243 42%,#2f3336 100%); }
 .mk.c3 .mk-scene::after{ content:""; position:absolute; inset:0; background:radial-gradient(120% 70% at 40% 30%,rgba(255,255,255,.10),rgba(0,0,0,.34) 80%); }
@@ -576,7 +576,7 @@ h3.sec-sub{
 .mk.c5 .c5-step{ font-size:12px; color:#a3a89e; font-variant-numeric:tabular-nums; }
 
 /* ==========================================================================
-   MACHETA 6: Terminal de Arhiva (fara serifa, rânduri de date)
+   MACHETA 6: Terminal de Arhivă (fără serifa, rânduri de date)
    ========================================================================== */
 .mk.c6 .mk-scene{ background:linear-gradient(180deg,#101315 0%,#16191c 50%,#0e1113 100%); }
 .mk.c6 .mk-top{ padding:12px 16px 8px; border-bottom:1px solid #333a3f; }
@@ -602,7 +602,7 @@ h3.sec-sub{
 .mk.c6 .c6-tab.on{ color:#f0a45c; background:#1d2226; border-color:#f0a45c; }
 
 /* ==========================================================================
-   MACHETA 7: Doar Directia (fara banda; o singura foaie jos)
+   MACHETA 7: Doar Direcția (fără bandă; o singură foaie jos)
    ========================================================================== */
 .mk.c7 .mk-scene{ background:linear-gradient(180deg,#2d3134 0%,#383d40 40%,#2a2e31 100%); }
 .mk.c7 .mk-scene::after{ content:""; position:absolute; inset:0; background:radial-gradient(120% 68% at 50% 28%,rgba(255,255,255,.12),rgba(0,0,0,.32) 80%); }
@@ -629,7 +629,7 @@ h3.sec-sub{
 .mk.c7 .c7-hint{ font-size:12px; color:#55595e; margin-top:10px; }
 
 /* ==========================================================================
-   MACHETA 8: Alb pe Vitrea (HUD alb peste camera)
+   MACHETA 8: Alb pe Vitrea (HUD alb peste cameră)
    ========================================================================== */
 .mk.c8 .mk-scene{ background:linear-gradient(180deg,#e9e7e0 0%,#f2f0ea 38%,#dedbd2 70%,#c9c6bd 100%); }
 .mk.c8 .mk-scene::after{ content:""; position:absolute; inset:0; background:radial-gradient(110% 60% at 50% 22%,rgba(255,255,255,.55),rgba(0,0,0,.10) 80%); }
@@ -657,7 +657,7 @@ h3.sec-sub{
 .mk.c8 .c8-cell.lock{ color:#6b6b66; }
 
 /* ==========================================================================
-   MACHETA 9: Semnul de Strada (placi emailate)
+   MACHETA 9: Semnul de Stradă (plăci emailate)
    ========================================================================== */
 .mk.c9 .mk-scene{ background:linear-gradient(180deg,#23282d 0%,#2c3238 46%,#1f2429 100%); }
 .mk.c9 .mk-scene::after{ content:""; position:absolute; inset:0; background:radial-gradient(115% 68% at 50% 30%,rgba(255,255,255,.08),rgba(0,0,0,.42) 82%); }
@@ -744,7 +744,7 @@ h3.sec-sub{
 <div class="first">
   <b>Actiunea ta:</b>
   <span>Citeste rezumatul de sub coperta</span><span class="sep">·</span>
-  <span>apoi apasa „Alege" la o conceptie si copiaza linia DECIZIE</span><span class="sep">·</span>
+  <span>apoi apasă „Alege" la o concepție și copiază linia DECIZIE</span><span class="sep">·</span>
   <span>~4 min</span>
 </div>
 
@@ -753,7 +753,7 @@ h3.sec-sub{
     <div class="cover-top">
       <div class="cover-mark">AradLens · document de decizie</div>
       <h1>Zece concepții<br>de redesign</h1>
-      <p class="cover-pos">Un ghid AR de plimbă prin Arad: obiectivul deschis, o bandă de opriri jos, o legendă pusă peste stradă. Aici se decide cum arată acea bandă și ce se renunță din jurul ei.</p>
+      <p class="cover-pos">Un ghid AR de plimbare prin Arad: obiectivul deschis, o bandă de opriri jos, o legendă pusă peste stradă. Aici se decide cum arată acea bandă și ce se renunță din jurul ei.</p>
       <p class="cover-count"><b>10</b> concepții · <b>10</b> machete reale la 390 × 844 px · <b>60</b> de verificări de audit anexate</p>
       <div class="cover-meta">
         <span>Data: <b>22 octombrie 2026</b></span>
@@ -771,7 +771,7 @@ h3.sec-sub{
     <div class="nav-scroll" id="navScroll">
       <a href="#rezumat">Sumar</a>
       <a href="#c1">1 Fișă de Arhivă</a>
-      <a href="#c2">2 Busola de Otel</a>
+      <a href="#c2">2 Busola de Oțel</a>
       <a href="#c3">3 Cronica Tipărită</a>
       <a href="#c4">4 Vitrina de Muzeu</a>
       <a href="#c5">5 Harta de Oraș</a>
@@ -794,20 +794,20 @@ h3.sec-sub{
   <div>
     <h2>Rezumatul</h2>
     <ol>
-      <li>Se decide <b>arhitectura HUD-ului</b> si <b>tratamentul benzii</b> de opriri. Restul (distanțe, senzori, capturi) rămâne.</li>
+      <li>Se decide <b>arhitectura HUD-ului</b> și <b>tratamentul benzii</b> de opriri. Restul (distanțe, senzori, capturi) rămâne.</li>
       <li>Banda de jos e singura piesă pe care nimeni nu o poate repara ieftin: e desenată, aruncată și reconstruită la fiecare schimbare de stare.</li>
       <li>Două lucruri trebuie reparate oricum: <b>contrastul peste cameră</b> și <b>țintele de 44 px</b>. Sunt 19 FAIL-uri în audit.</li>
     </ol>
   </div>
   <div class="next">
     <span class="lbl">Un singur pas, sub 2 minute</span>
-    <p>Apasă <b>„Alege"</b> la conceptia care ti se pare cea mai credibila, apoi apasa <b>„Copiază DECIZIE"</b>. Lipeste linia inapoi la mine.</p>
+    <p>Apasă <b>„Alege"</b> la concepția care ți se pare cea mai credibilă, apoi apasă <b>„Copiază DECIZIE"</b>. Lipește linia înapoi la mine.</p>
     <div class="dec">
       <span class="lbl">Linia DECIZIE de acum</span>
-      <code id="decNow">DECIZIE: (niciuna). Alege o conceptie mai jos</code>
+      <code id="decNow">DECIZIE: (niciuna). Alege o concepție mai jos</code>
       <button class="copy" type="button" id="copyDecNow" hidden>Copiază DECIZIE</button>
     </div>
-    <p class="hint">Daca nu te poti hotari, alege conceptia 1: riscul ei e cel mai mic.</p>
+    <p class="hint">Dacă nu te poți hotărâ, alege concepția 1: riscul ei e cel mai mic.</p>
   </div>
 </section>
 
@@ -818,7 +818,7 @@ h3.sec-sub{
   <symbol id="ic-album" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
 </svg>
 
-<!-- ============================ CONCEPTIA 1 ============================ -->
+<!-- ============================ CONCEPȚIA 1 ============================ -->
 <article class="concept" id="c1">
   <div class="c-mock">
     <div class="mk c1">
@@ -857,7 +857,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 1 din 10</p>
+    <p class="c-num">Concepția 1 din 10</p>
     <h2 class="c-name">Fișă de Arhivă</h2>
     <p class="c-pitch">HUD-ul devine o fișă pusă peste stradă: hârtie rece, rigluri fine, numele reperului mare, distanța cu cifre tabulare în dreapta. Banda devine o riglă plată cu anii, fără arc și fără adâncime falsă. Nimic nu e volum: informația stă pe tipografie, pe o singură linie de accent și pe spațiu gol.</p>
     <p class="c-accent"><i style="background:#9c3b2e"></i> Accent propus: <b style="font-weight:600">#9c3b2e</b> · cerneală de ștampilă · 6.08:1 pe hârtie</p>
@@ -865,7 +865,7 @@ h3.sec-sub{
 
   <div class="c-body">
     <table class="spec">
-      <tr><th>Fonturi</th><td><code>Display: "AradLens Display" (Fraunces, deja in repo) → Georgia, "Times New Roman", serif<br>Corp: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif<br>Cifre: font-variant-numeric: tabular-nums slashed-zero</code></td></tr>
+      <tr><th>Fonturi</th><td><code>Display: "AradLens Display" (Fraunces, deja în repo) → Georgia, "Times New Roman", serif<br>Corp: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif<br>Cifre: font-variant-numeric: tabular-nums slashed-zero</code></td></tr>
       <tr><th>Scală tipografică</th><td><code>12 / 16 / 20 / 28 / 36 px · LH 1.3 / 1.5 / 1.4 / 1.15 / 1.1 · 5 trepte, minimum 4 px între ele</code></td></tr>
       <tr><th>Paletă</th><td><code><span class="sw" style="background:#0f1316"></span>fundal #0f1316 · <span class="sw" style="background:#f2f2ef"></span>hârtie #f2f2ef · <span class="sw" style="background:#1b1e21"></span>cerneală #1b1e21 · <span class="sw" style="background:#4a4f55"></span>cerneală 2 #4a4f55 · <span class="sw" style="background:#c6c6bf"></span>linie #c6c6bf<br><span class="sw" style="background:#9c3b2e"></span>accent #9c3b2e (6.08:1 pe hârtie) · <span class="sw" style="background:#c9766a"></span>accent pe întuneric #c9766a (5.59:1 pe fundal)</code></td></tr>
       <tr><th>Raze</th><td><code>0 px pe suprafețe · 2 px pe butoane · 50% doar pe inelele circulare</code></td></tr>
@@ -902,17 +902,17 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C1" data-name="Fișă de Arhivă" aria-pressed="false"><span class="mark"></span>Alege conceptia 1</button>
+      <button class="btn-pick" type="button" data-c="C1" data-name="Fișă de Arhivă" aria-pressed="false"><span class="mark"></span>Alege concepția 1</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
-        <code>DECIZIE: C1 · Fișă de Arhivă · accent #9c3b2e · banda devine riglă plată cu anii · display Fraunces (deja in repo) · efort ~7 h</code>
+        <code>DECIZIE: C1 · Fișă de Arhivă · accent #9c3b2e · banda devine riglă plată cu anii · display Fraunces (deja în repo) · efort ~7 h</code>
         <button class="copy" type="button" data-copy>Copiază DECIZIE</button>
       </div>
     </div>
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 2 ============================ -->
+<!-- ============================ CONCEPȚIA 2 ============================ -->
 <article class="concept" id="c2">
   <div class="c-mock">
     <div class="mk c2">
@@ -972,8 +972,8 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 2 din 10</p>
-    <h2 class="c-name">Busola de Otel</h2>
+    <p class="c-num">Concepția 2 din 10</p>
+    <h2 class="c-name">Busola de Oțel</h2>
     <p class="c-pitch">Traseul devine un instrument. Banda se transformă într-o roată de busolă gravată: cinci opriri pe margine, un ac de alamă care arată direcția, cifre cardinale. HUD-ul rămâne întunecat și tiparul trece la un grotesc civic condensat, ca pe o cutie de instrument. Metalul apare într-un singur loc: acul și diviziunea activă.</p>
     <p class="c-accent"><i style="background:#d9a05b"></i> Accent propus: <b style="font-weight:600">#d9a05b</b> · alamă gravată · 8.12:1 pe fundal, 6.5:1 pe suprafață</p>
   </div>
@@ -1017,17 +1017,17 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C2" data-name="Busola de Otel" aria-pressed="false"><span class="mark"></span>Alege conceptia 2</button>
+      <button class="btn-pick" type="button" data-c="C2" data-name="Busola de Oțel" aria-pressed="false"><span class="mark"></span>Alege concepția 2</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
-        <code>DECIZIE: C2 · Busola de Otel · accent #d9a05b · banda devine roată de busolă · display Archivo Narrow (propunere) · efort ~14 h</code>
+        <code>DECIZIE: C2 · Busola de Oțel · accent #d9a05b · banda devine roată de busolă · display Archivo Narrow (propunere) · efort ~14 h</code>
         <button class="copy" type="button" data-copy>Copiază DECIZIE</button>
       </div>
     </div>
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 3 ============================ -->
+<!-- ============================ CONCEPȚIA 3 ============================ -->
 <article class="concept" id="c3">
   <div class="c-mock">
     <div class="mk c3">
@@ -1063,7 +1063,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 3 din 10</p>
+    <p class="c-num">Concepția 3 din 10</p>
     <h2 class="c-name">Cronica Tipărită</h2>
     <p class="c-pitch">HUD-ul devine o coloană de ziar tipărit. Pe marginea dreaptă rulează cronologia: 1865, 1874, 1876, 1896, 1913, cu anii aliniați la dreapta și numele sub ei. Banda dispare ca arc și devine o listă verticală de etape. Se citește de sus în jos, ca o pagină, nu ca un instrument.</p>
     <p class="c-accent"><i style="background:#7a5c16"></i> Accent propus: <b style="font-weight:600">#7a5c16</b> · cerneală de tipar · 5.52:1 pe hârtie, 9.51:1 pe fundal</p>
@@ -1108,7 +1108,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C3" data-name="Cronica Tipărită" aria-pressed="false"><span class="mark"></span>Alege conceptia 3</button>
+      <button class="btn-pick" type="button" data-c="C3" data-name="Cronica Tipărită" aria-pressed="false"><span class="mark"></span>Alege concepția 3</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C3 · Cronica Tipărită · accent #7a5c16 · banda devine coloană cronologică verticală · display Spectral (propunere) · efort ~11 h</code>
@@ -1118,7 +1118,7 @@ h3.sec-sub{
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 4 ============================ -->
+<!-- ============================ CONCEPȚIA 4 ============================ -->
 <article class="concept" id="c4">
   <div class="c-mock">
     <div class="mk c4">
@@ -1155,7 +1155,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 4 din 10</p>
+    <p class="c-num">Concepția 4 din 10</p>
     <h2 class="c-name">Vitrina de Muzeu</h2>
     <p class="c-pitch">Ca într-o sală de expoziție: peretele e întunecat, eticheta e hârtie, textul e scris cum scrie muzeul. Mult spațiu, o singură informație mare, restul la 13 px. Traseul devine un filmstrip de clișee pe care le glisezi; cadrul iluminat e cel curent. Cinci cadre, nu cinci cadrane.</p>
     <p class="c-accent"><i style="background:#1d4e6b"></i> Accent propus: <b style="font-weight:600">#1d4e6b</b> · albastru de Prusia, pigment de tipar · 8.19:1 pe hârtie</p>
@@ -1188,7 +1188,7 @@ h3.sec-sub{
       <h4>Ce riscă</h4>
       <ul>
         <li>Cormorant Garamond e fragil la 26–34 px pe telefon și are o personalitate mare: riscă să devină „editorial de revistă", exact registrul de care ne ferim <span class="cite">01 semnal #1</span>.</li>
-        <li>Eticheta albă acoperă aproape jumătate din cadru: pe strada, e mult mai puțin obiectiv decât pe ecran.</li>
+        <li>Eticheta albă acoperă aproape jumătate din cadru: pe stradă, e mult mai puțin obiectiv decât pe ecran.</li>
         <li>Filmstripul are 5 cadre de 52 px înălțime: pe ecrane înguste, anul fiecărui cadru devine ilizibil.</li>
       </ul>
     </div>
@@ -1200,7 +1200,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C4" data-name="Vitrina de Muzeu" aria-pressed="false"><span class="mark"></span>Alege conceptia 4</button>
+      <button class="btn-pick" type="button" data-c="C4" data-name="Vitrina de Muzeu" aria-pressed="false"><span class="mark"></span>Alege concepția 4</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C4 · Vitrina de Muzeu · accent #1d4e6b · banda devine filmstrip de clișee · display Cormorant Garamond (propunere) · efort ~9 h</code>
@@ -1210,7 +1210,7 @@ h3.sec-sub{
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 5 ============================ -->
+<!-- ============================ CONCEPȚIA 5 ============================ -->
 <article class="concept" id="c5">
   <div class="c-mock">
     <div class="mk c5">
@@ -1247,7 +1247,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 5 din 10</p>
+    <p class="c-num">Concepția 5 din 10</p>
     <h2 class="c-name">Harta de Oraș</h2>
     <p class="c-pitch">Ca pe o hartă de orientare urbană. Traseul este o linie continuă desenată pe marginea stângă, cu opririle ca noduri și anii lângă ele. Nu arc, nu cadrane: un desen topografic, cu serifă de manual și o singură verde de marcaj. Arată ca orașul, nu ca un joc.</p>
     <p class="c-accent"><i style="background:#b3c98a"></i> Accent propus: <b style="font-weight:600">#b3c98a</b> · verde de marcaj · 10.46:1 pe fundal; treapta închisă #4f6134 pentru marcaje</p>
@@ -1292,7 +1292,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C5" data-name="Harta de Oraș" aria-pressed="false"><span class="mark"></span>Alege conceptia 5</button>
+      <button class="btn-pick" type="button" data-c="C5" data-name="Harta de Oraș" aria-pressed="false"><span class="mark"></span>Alege concepția 5</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C5 · Harta de Oraș · accent #b3c98a · banda devine traseu desenat pe marginea stângă · display Source Serif 4 (propunere) · efort ~10 h</code>
@@ -1302,7 +1302,7 @@ h3.sec-sub{
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 6 ============================ -->
+<!-- ============================ CONCEPȚIA 6 ============================ -->
 <article class="concept" id="c6">
   <div class="c-mock">
     <div class="mk c6">
@@ -1339,7 +1339,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 6 din 10</p>
+    <p class="c-num">Concepția 6 din 10</p>
     <h2 class="c-name">Terminal de Arhivă</h2>
     <p class="c-pitch">Fără serifă deloc. Un terminal de arhivă: rânduri de date, aliniate la stânga, cu monospace pentru cifre și o singură linie de stare în ambră. Banda devine un rând de file de dosar, fiecare cu anul ei. Tot ce se vede se poate citi de la distanță și se poate rescrie într-un registru municipal.</p>
     <p class="c-accent"><i style="background:#f0a45c"></i> Accent propus: <b style="font-weight:600">#f0a45c</b> · ambră de terminal · 9.37:1 pe fundal; treapta închisă #a4511d pentru marcaje</p>
@@ -1384,7 +1384,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C6" data-name="Terminal de Arhivă" aria-pressed="false"><span class="mark"></span>Alege conceptia 6</button>
+      <button class="btn-pick" type="button" data-c="C6" data-name="Terminal de Arhivă" aria-pressed="false"><span class="mark"></span>Alege concepția 6</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C6 · Terminal de Arhivă · accent #f0a45c · banda devine rând de file de dosar · display IBM Plex Sans (propunere) · efort ~8 h</code>
@@ -1394,7 +1394,7 @@ h3.sec-sub{
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 7 ============================ -->
+<!-- ============================ CONCEPȚIA 7 ============================ -->
 <article class="concept" id="c7">
   <div class="c-mock">
     <div class="mk c7">
@@ -1424,7 +1424,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 7 din 10</p>
+    <p class="c-num">Concepția 7 din 10</p>
     <h2 class="c-name">Doar Direcția</h2>
     <p class="c-pitch">Banda dispare. În locul ei rămâne o foaie jos cu oprirea următoare, anul ei și o singură cifră mare. Cine merge vrea un singur lucru: unde sunt, cât de departe, ce fac. Traseul complet stă în album, la locul lui, și se deschide când te oprești.</p>
     <p class="c-accent"><i style="background:#7b3f5e"></i> Accent propus: <b style="font-weight:600">#7b3f5e</b> · prune · 6.84:1 pe foaie, 8.18:1 pe fundal</p>
@@ -1469,7 +1469,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C7" data-name="Doar Direcția" aria-pressed="false"><span class="mark"></span>Alege conceptia 7</button>
+      <button class="btn-pick" type="button" data-c="C7" data-name="Doar Direcția" aria-pressed="false"><span class="mark"></span>Alege concepția 7</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C7 · Doar Direcția · accent #7b3f5e · banda se scoate, rămâne o foaie jos cu o singură cifră · display Libre Caslon Text (propunere) · efort ~12 h</code>
@@ -1479,7 +1479,7 @@ h3.sec-sub{
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 8 ============================ -->
+<!-- ============================ CONCEPȚIA 8 ============================ -->
 <article class="concept" id="c8">
   <div class="c-mock">
     <div class="mk c8">
@@ -1516,7 +1516,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 8 din 10</p>
+    <p class="c-num">Concepția 8 din 10</p>
     <h2 class="c-name">Alb pe Vitrea</h2>
     <p class="c-pitch">HUD-ul devine hârtie albă peste cameră: etichete albe, cerneală neagră, o singură linie roșie de ștampilă. E varianta cea mai riscantă pentru contrast peste asfalt alb în soare, dar e singura care se citește ca un afiș municipal și nu ca un joc. Merită măsurată, nu credută.</p>
     <p class="c-accent"><i style="background:#8c2f39"></i> Accent propus: <b style="font-weight:600">#8c2f39</b> · roșu de ștampilă · 7.32:1 pe hârtie</p>
@@ -1524,7 +1524,7 @@ h3.sec-sub{
 
   <div class="c-body">
     <table class="spec">
-      <tr><th>Fonturi</th><td><code>Display: "AradLens Display" (Fraunces, deja in repo) → Georgia, "Times New Roman", serif<br>Corp: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif<br>Cifre: tabular-nums</code></td></tr>
+      <tr><th>Fonturi</th><td><code>Display: "AradLens Display" (Fraunces, deja în repo) → Georgia, "Times New Roman", serif<br>Corp: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif<br>Cifre: tabular-nums</code></td></tr>
       <tr><th>Scală tipografică</th><td><code>12 / 15 / 19 / 25 / 33 px · LH 1.3 / 1.5 / 1.4 / 1.25 / 1.12</code></td></tr>
       <tr><th>Paletă</th><td><code><span class="sw" style="background:#f4f3ee"></span>hârtie #f4f3ee (tot fundalul HUD-ului) · <span class="sw" style="background:#14171a"></span>cerneală #14171a (16.19:1) · <span class="sw" style="background:#4a4e52"></span>cerneală 2 #4a4e52 (7.55:1) · <span class="sw" style="background:#c9c7c0"></span>linie #c9c7c0<br><span class="sw" style="background:#8c2f39"></span>accent #8c2f39 (7.32:1) · <span class="sw" style="background:#ffffff"></span>albul plăcii #ffffff</code></td></tr>
       <tr><th>Raze</th><td><code>2 px pe plăci și butoane · inelele rămân circulare, 44 px, contur 1 px</code></td></tr>
@@ -1561,17 +1561,17 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C8" data-name="Alb pe Vitrea" aria-pressed="false"><span class="mark"></span>Alege conceptia 8</button>
+      <button class="btn-pick" type="button" data-c="C8" data-name="Alb pe Vitrea" aria-pressed="false"><span class="mark"></span>Alege concepția 8</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
-        <code>DECIZIE: C8 · Alb pe Vitrea · accent #8c2f39 · HUD alb peste cameră, banda devine rând de celule cu anul · display Fraunces (deja in repo) · efort ~7 h · risc: contrast pe cadru alb</code>
+        <code>DECIZIE: C8 · Alb pe Vitrea · accent #8c2f39 · HUD alb peste cameră, banda devine rând de celule cu anul · display Fraunces (deja în repo) · efort ~7 h · risc: contrast pe cadru alb</code>
         <button class="copy" type="button" data-copy>Copiază DECIZIE</button>
       </div>
     </div>
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 9 ============================ -->
+<!-- ============================ CONCEPȚIA 9 ============================ -->
 <article class="concept" id="c9">
   <div class="c-mock">
     <div class="mk c9">
@@ -1608,7 +1608,7 @@ h3.sec-sub{
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 9 din 10</p>
+    <p class="c-num">Concepția 9 din 10</p>
     <h2 class="c-name">Semnul de Stradă</h2>
     <p class="c-pitch">Semnul de stradă emailat: plăci cu contur alb, litere condensate, numere mari. Traseul devine o serie de plăci pe care le parcurgeai de sus în jos, fiecare cu anul ei. Cel mai lizibil în soare dintre toate variantele, cel mai greu de a îmbina cu orașul real, care are plăci de alt fel.</p>
     <p class="c-accent"><i style="background:#9fbde3"></i> Accent propus: <b style="font-weight:600">#9fbde3</b> · albastru de smalț · 9.49:1 pe fundal; treapta închisă #3d5a80 pentru plăci</p>
@@ -1653,7 +1653,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C9" data-name="Semnul de Stradă" aria-pressed="false"><span class="mark"></span>Alege conceptia 9</button>
+      <button class="btn-pick" type="button" data-c="C9" data-name="Semnul de Stradă" aria-pressed="false"><span class="mark"></span>Alege concepția 9</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C9 · Semnul de Stradă · accent #9fbde3 · banda devine șir de plăci emailate · display Big Shoulders Display (propunere) · efort ~9 h</code>
@@ -1663,7 +1663,7 @@ h3.sec-sub{
   </div>
 </article>
 
-<!-- ============================ CONCEPTIA 10 ============================ -->
+<!-- ============================ CONCEPȚIA 10 ============================ -->
 <article class="concept" id="c10">
   <div class="c-mock">
     <div class="mk c10">
@@ -1699,11 +1699,11 @@ h3.sec-sub{
         </div>
       </div>
     </div>
-    <p class="mock-cap"><b>390 × 844 px</b> · clișeul e fotografia reală din repo (`primaria-1901.jpg`), cu creditul de arhivă. Indexul din stânga înlocuiește banda.</p>
+    <p class="mock-cap"><b>390 × 844 px</b> · clișeul e fotografia reală dîn repo (`primaria-1901.jpg`), cu creditul de arhivă. Indexul din stânga înlocuiește banda.</p>
   </div>
 
   <div class="c-head">
-    <p class="c-num">Conceptia 10 din 10</p>
+    <p class="c-num">Concepția 10 din 10</p>
     <h2 class="c-name">Albumul Primul</h2>
     <p class="c-pitch">Albumul devine prima suprafață: o carte legată, cu index, clișeu, legendă și colofon, iar camera rămâne doar panoul de fundal când te uiți la album. Pe traseu supraviețuiește o singură cifră, distanța. Fotografiile tale au prioritate față de interfață.</p>
     <p class="c-accent"><i style="background:#dba86a"></i> Accent propus: <b style="font-weight:600">#dba86a</b> · pie de castan, culoarea copertei · 8.79:1 pe fundal; treapta închisă #8a5a2b pentru tipar</p>
@@ -1748,7 +1748,7 @@ h3.sec-sub{
     </div>
 
     <div class="choose">
-      <button class="btn-pick" type="button" data-c="C10" data-name="Albumul Primul" aria-pressed="false"><span class="mark"></span>Alege conceptia 10</button>
+      <button class="btn-pick" type="button" data-c="C10" data-name="Albumul Primul" aria-pressed="false"><span class="mark"></span>Alege concepția 10</button>
       <div class="dec-line">
         <span class="lbl">Linia DECIZIE</span>
         <code>DECIZIE: C10 · Albumul Primul · accent #dba86a · banda devine indexul cărții, albumul devine prima suprafață · display Newsreader (propunere) · efort ~13 h</code>
@@ -1766,7 +1766,7 @@ h3.sec-sub{
     <table class="cmp">
       <thead>
         <tr>
-          <th>ID</th><th>Conceptie</th><th>Arhitect</th><th>Display</th><th>Corp</th><th>Accent</th>
+          <th>ID</th><th>Concepție</th><th>Arhitect</th><th>Display</th><th>Corp</th><th>Accent</th>
           <th>Scală (px)</th><th>Banda</th><th>Mișcare</th><th>Efort</th><th>Risc</th><th>Trei mișcări anti-AI</th>
         </tr>
       </thead>
@@ -1774,7 +1774,7 @@ h3.sec-sub{
         <tr>
           <td class="col-id">C1</td><th>Fișă de Arhivă</th>
           <td>Fișă de hârtie peste stradă, aliniere stânga</td>
-          <td>Fraunces (in repo)</td><td>System sans</td>
+          <td>Fraunces (în repo)</td><td>System sans</td>
           <td><span class="sw" style="background:#9c3b2e"></span>#9c3b2e</td>
           <td>12 / 16 / 20 / 28 / 36</td>
           <td><b>Riglă plată</b> cu anii, fără arc</td>
@@ -1782,7 +1782,7 @@ h3.sec-sub{
           <td>5 trepte, 0 px rază, riglă fără perspectivă</td>
         </tr>
         <tr>
-          <td class="col-id">C2</td><th>Busola de Otel</th>
+          <td class="col-id">C2</td><th>Busola de Oțel</th>
           <td>Instrument întunecat, aliniere stânga</td>
           <td>Archivo Narrow (prop.)</td><td>Source Sans 3 (prop.)</td>
           <td><span class="sw" style="background:#d9a05b"></span>#d9a05b</td>
@@ -1844,7 +1844,7 @@ h3.sec-sub{
         <tr>
           <td class="col-id">C8</td><th>Alb pe Vitrea</th>
           <td>HUD alb peste cameră</td>
-          <td>Fraunces (in repo)</td><td>System sans</td>
+          <td>Fraunces (în repo)</td><td>System sans</td>
           <td><span class="sw" style="background:#8c2f39"></span>#8c2f39</td>
           <td>12 / 15 / 19 / 25 / 33</td>
           <td><b>Rând de celule</b> cu anul</td>
@@ -1886,14 +1886,14 @@ h3.sec-sub{
 <!-- ============================ CE PASTRAM ============================ -->
 <section id="pastram" style="padding:52px 0 8px">
   <h2 class="sec">Ce păstrăm din aplicația actuală</h2>
-  <p class="lead">Lista de păstrat vine din cercetarea 01 și din harta codului fragil din 03. Niciuna din cele zece conceptii nu are voie să sacrifice ceva de aici.</p>
+  <p class="lead">Lista de păstrat vine din cercetarea 01 și din harta codului fragil din 03. Niciuna din cele zece concepții nu are voie să sacrifice ceva de aici.</p>
   <div class="keep">
     <section>
       <h3>Identitate și voce</h3>
       <ul>
         <li>Banda de jos ca <b>instrument</b>, nu ca recipient de butoane: arcul, fășia de traseu și filmstripul sunt tot un instrument, doar desenate altfel.</li>
         <li>Regula „o singură culoare de semnal" și accentul unic, folosit doar pentru direcția live și sosire.</li>
-        <li>Vocea românească a porții de start: „O plimbă prin istoria Aradului.", „Fără cont, fără server: fotografiile rămân pe telefonul tău."</li>
+        <li>Vocea românească a porții de start: „O plimbare prin istoria Aradului.", „Fără cont, fără server: fotografiile rămân pe telefonul tău."</li>
         <li>Cuvântul „reper" în loc de „obiectiv"; fără „Lore", fără paranteze SaaS de tip „(Story &amp; Lore)" sau „(Demo)".</li>
         <li>Numele originale cu ortografie istorică, plus o glosă românească: „Ödön Lechner", „Anton Czigler", „Miklós Ybl", „Lajos Szántay".</li>
         <li>Creditul de arhivă: „Fortepan / Schoch Frigyes — Arad, 1901 (domeniu public)" tipărit lângă clișeu.</li>
@@ -1995,7 +1995,7 @@ h3.sec-sub{
 
   <h3>Keep (do not lose)</h3>
   <ul>
-    <li>The <b>compass band</b> (real arc maths, an instrument, not a container) · full-bleed unfiltered camera + two scrims · the "one signal colour" <i>rule</i> · tabular meters · the offset-blur rule · the start gate's no-scroll contract + landscape two-column mode · the Fortepan credit and public-domain provenance · the schematic-map disclaimer · the start gate's Romanian voice ("O plimbă prin istoria Aradului.", "Fără cont, fără server…") · the real content (5 landmarks, 3 chapters, lore prose) · the hand-drawn 24-grid SVG icon language · <code>prefers-reduced-motion</code> · the 44px / aria / focus accessibility floor · the idea of a chronological "cronica".</li>
+    <li>The <b>compass band</b> (real arc maths, an instrument, not a container) · full-bleed unfiltered camera + two scrims · the "one signal colour" <i>rule</i> · tabular meters · the offset-blur rule · the start gate's no-scroll contract + landscape two-column mode · the Fortepan credit and public-domain provenance · the schematic-map disclaimer · the start gate's Romanian voice ("O plimbare prin istoria Aradului.", "Fără cont, fără server…") · the real content (5 landmarks, 3 chapters, lore prose) · the hand-drawn 24-grid SVG icon language · <code>prefers-reduced-motion</code> · the 44px / aria / focus accessibility floor · the idea of a chronological "cronica".</li>
   </ul>
 
   <h3>Skills: the ranked eight</h3>
@@ -2479,7 +2479,7 @@ NOTĂ: display propus (Cormorant Garamond), de vendorizat în fonts/ înainte</c
   <div class="colophon">
     <section>
       <h3>Colofon</h3>
-      <p>Document scris de agentul de design, pe baza rapoartelor de cercetare din <code>docs/research/</code> și a codului din <code>index.html</code> (3722 de linii, arbore de lucru cu modificări necomise).<br>Data: 22 octombrie 2026. Versiune 1. Următorul pas: alegerea unei conceptii.</p>
+      <p>Document scris de agentul de design, pe baza rapoartelor de cercetare din <code>docs/research/</code> și a codului din <code>index.html</code> (3722 de linii, arbore de lucru cu modificări necomise).<br>Data: 22 octombrie 2026. Versiune 1. Următorul pas: alegerea unei concepții.</p>
     </section>
     <section>
       <h4>Fișiere atinse</h4>
@@ -2494,7 +2494,7 @@ NOTĂ: display propus (Cormorant Garamond), de vendorizat în fonts/ înainte</c
     </section>
     <section>
       <h4>Cum e făcut</h4>
-      <p>Un singur fișier HTML, cu <code>&lt;style&gt;</code> și <code>&lt;script&gt;</code> încorporate. Fără framework, fără build, fără bibliotecă externă. Doar fonturile propuse de conceptii vin de pe Google Fonts; fiecare are o stivă locală de rezervă, deci pagina rămâne lizibilă și fără rețea. Cele zece machete sunt HTML și CSS adevărate, la 390 × 844 px, cu text la dimensiune reală. Starea alegerilor se păstrează în <code>localStorage</code>, cheia <code>aradlens_concept_pick</code>.</p>
+      <p>Un singur fișier HTML, cu <code>&lt;style&gt;</code> și <code>&lt;script&gt;</code> încorporate. Fără framework, fără build, fără bibliotecă externă. Doar fonturile propuse de concepții vin de pe Google Fonts; fiecare are o stivă locală de rezervă, deci pagina rămâne lizibilă și fără rețea. Cele zece machete sunt HTML și CSS adevărate, la 390 × 844 px, cu text la dimensiune reală. Starea alegerilor se păstrează în <code>localStorage</code>, cheia <code>aradlens_concept_pick</code>.</p>
     </section>
     <section>
       <h4>Despre fonturile propuse</h4>
@@ -2536,7 +2536,7 @@ NOTĂ: display propus (Cormorant Garamond), de vendorizat în fonts/ înainte</c
     buttons.forEach(function (b) {
       var on = picks.some(function (p) { return p.c === b.dataset.c; });
       b.setAttribute("aria-pressed", on ? "true" : "false");
-      b.lastChild.textContent = on ? " Marcat" : (b.dataset.c === "C1" ? " Alege conceptia 1" : " Alege conceptia " + b.dataset.c.replace("C", ""));
+      b.lastChild.textContent = on ? " Marcat" : (b.dataset.c === "C1" ? " Alege concepția 1" : " Alege concepția " + b.dataset.c.replace("C", ""));
     });
 
     var names = picks.map(function (p) { return p.c; }).join(", ");
@@ -2544,7 +2544,7 @@ NOTĂ: display propus (Cormorant Garamond), de vendorizat în fonts/ înainte</c
     if (coverState) coverState.textContent = picks.length + " din 10 marcate" + (names ? " · " + names : "");
 
     if (picks.length === 0) {
-      decNow.textContent = "DECIZIE: (niciuna). Alege o conceptie mai jos";
+      decNow.textContent = "DECIZIE: (niciuna). Alege o concepție mai jos";
       if (copyNow) copyNow.hidden = true;
     } else {
       var last = picks[picks.length - 1];

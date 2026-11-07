@@ -4,15 +4,22 @@ Tourism AR web app for Arad (Romanian-language UI). Points the phone camera at
 the city, shows distance + direction to a selected landmark, lets the user view
 historic info, compare 1901 vs now, and "capture" a photo when close.
 
-No framework, no bundler, no backend. One HTML file served as static content.
+No framework, no bundler, no frontend backend. One HTML file served as static
+content; a same-origin nginx/std-lib reverse proxy (`/api`) relays calls to the
+central AradLens API (https://api.aradlens.binarysquad.club) because the API
+publishes no CORS headers and browsers would block direct calls.
 
 ## 1. Tracked files
 
 | File | Purpose |
 |---|---|
-| `index.html` (3634 lines, ~162 KB) | The entire app. `<style>` in `<head>` (lines 8–989), body markup lines ~990–1471, single `<script>` lines ~1472–3633 |
+| `index.html` (5300 lines, ~229 KB) | The entire app. `<style>` in `<head>` (lines 11–1810, the iOS 26 "liquid glass" layer is the block commented `STRATUL „LIQUID GLASS"` from ~line 1252), body markup lines ~1812–2320, single `<script>` from line 2322 (public API layer + gate, locations UI, tours, preload) |
 | `primaria-1901.jpg` | Only historic asset. Used by `REPERE[2].foto` (Primăria Arad, 1901) |
-| `docker-compose.yml` | `web: nginx:alpine`, maps repo root read-only to `/usr/share/nginx/html`, host port `8010:80` |
+| `docker-compose.yml` | `web: nginx:alpine`, maps repo root read-only to `/usr/share/nginx/html`, host port `8010:80`; also mounts `deploy/nginx/default.conf` over `/etc/nginx/conf.d/default.conf` |
+| `deploy/nginx/default.conf` | Prod nginx config: static site + reverse proxy `location /api/ { proxy_pass https://api.aradlens.binarysquad.club/; }` (SNI on, forwards `Authorization`/`Content-Type` untouched, no session/cache state) |
+| `dev_server.py` | Local dev substitute for the nginx proxy: stdlib `http.server` on 127.0.0.1:8010 serving static files and relaying `/api/*` to the central API (Python only, no deps) |
+| `Start-AradLens.bat` | Local launcher (Windows): starts `dev_server.py` minimized (falls back to `python -m http.server` if missing) and opens http://127.0.0.1:8010/index.html |
+| `fonts/` | Self-hosted OFL display face (AradLens Display) + license — must be committed or `@font-face` 404s in prod |
 | `deploy.sh` | Server-side: `git pull` + `docker compose down/build/up -d` |
 | `.github/workflows/deploy.yml` | On push to `main` (or manual dispatch): SSH to server and run `sudo -n $DEPLOY_PATH/deploy.sh`. Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `DEPLOY_PATH`, optional `SSH_PORT` |
 | `README.md` | One-line project description |
@@ -24,10 +31,10 @@ and two `Mobile*isDesktop*` files (accidental `man less` dumps, 1.6 KB / 16 KB).
 ## 2. `index.html` — UI layers (bottom to top)
 
 1. `<video id="cam">` — live camera background. Blurred/dim by default (`opacity .28, blur(6px)`), class `camera-clear` removes the filter in capture mode.
-2. `#overlay` — main AR HUD: `.top` (brand `AradLens`, `#routeStep` + `#compassWarningBadge`, `#storyObjectiveBanner`/`#storyObjectiveText`, `#diag` debug readout), `.center` (`#steerArrow` chevron + `#steerEdge` degree readout when the target is behind), `#rail` action rings (`#detailsBtn`, `#photoCaptureBtn`, `#albumBtn`, `#gamemodeRailBtn` + `#railModeDot` state dot, `#themeToggleBtn`), `#captureDistLabel`, `.bottom`: `#caption`/`#arLabel` (target name, "Mergi spre …" phrase, distance), `#distNum` + `#routeStepBottom`, `#coords`/`#flipBtn` (debug only), `.hint` and `#snapRail` — the bottom **compass band** (curved, draggable stop selector; see §4).
-3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#gamemodeModal` (`#selectStoryModeCard` / `#selectFreeModeCard`), `#chapterModal` (`#chaptersList`), `#storyLoreModal` (`#loreStepBadge`, `#loreStoryText`), `#rewardModal` (`#diplomaRewardName`, `#rewardNextChapterBtn`, `#rewardViewAlbumBtn`), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (vertical linear level map in modules: `#albumModuleBar` chips, stop nodes rendered into `#albumLevelTrack` by `renderLevelMap()`, first stop at the bottom, scroll upward) + `#albumCompareModal` (Then/Now cards `#albumThenBox`/`#albumNowBox` popup, opened by tapping a stop), `#arLabel` floating AR tag, `#albumBtn` / `#photoCaptureBtn` FABs, `#status` bar.
+2. `#overlay` — main AR HUD: `.top` (brand lockup `AradLens` with the `.brand-lens` disc, `#routeStep` + `#compassWarningBadge`, `#storyObjectiveBanner`/`#storyObjectiveText`, `#diag` debug readout), `.center` (`#steerArrow` chevron + `#steerEdge` degree readout when the target is behind), `#rail` vertical action stack of **glass rings** (46px, 9px gap; compacted to 44px/7px at 630–720px viewport heights): the horizontal `#themeToggleBtn.theme-switch` capsule first (56×30px track, sun left / moon right, `role="switch"` + `aria-checked` kept in sync by `applyTheme`), then `#gamemodeRailBtn` + `#railModeDot`, `#detailsBtn`, `#photoCaptureBtn`, `#albumBtn`. There are **no** locations/categories/tours rings any more — tours are album modules and the location page opens on long-press of a compass stop. `.bottom`: `#caption`/`#arLabel` (target name, "Mergi spre …" phrase, distance), `#distNum` + `#routeStepBottom`, `#coords`/`#flipBtn` (debug only, now prints the street), `.hint` and `#snapRail` — the bottom **compass band** (curved, draggable stop selector; see §4).
+3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#gamemodeModal` (`#selectStoryModeCard` / `#selectFreeModeCard`), `#chapterModal` (`#chaptersList`), `#storyLoreModal` (`#loreStepBadge`, `#loreStoryText`), `#rewardModal` (`#diplomaRewardName`, `#rewardNextChapterBtn`, `#rewardViewAlbumBtn`), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (**album + tours + level map**: sticky header, sticky `#albumModuleBar` chips `Liber / Cap. I–III / <tour names>`, stop nodes rendered into `#albumLevelTrack` by `renderLevelMap()`, first stop at the bottom, scroll upward) + `#albumCompareModal` (Then/Now cards `#albumThenBox`/`#albumNowBox`, opened by tapping a stop), `#arLabel` floating AR tag, `#locationsModal` (read-only, public: opens as an **objective page** from a long-press on a compass stop, or as the locations list; `#locDetail` is painted from cache instantly and refreshed silently via `GET /locations/{id}`), `#categoriesModal` (plain read-only list, no rail entry point), `#status` bar. `#toursModal` still exists in the DOM but is no longer reachable from the rail.
 
-Theming: CSS variables on `:root` + `body.light-theme` override. Persisted in `localStorage["aradlens_theme"]` via `applyTheme()` / `toggleTheme()`.
+Theming: CSS variables on `:root` + `body.light-theme` override. Persisted in `localStorage["aradlens_theme"]` via `applyTheme()` / `toggleTheme()`. On top of those base variables sits one **liquid-glass layer** (iOS 26): `--glass-blur/sat/tint/tint-thick/tint-thin/edge/hairline/inner-hi/inner-lo/shadow/sheen`, `--glass-solid`/`--glass-veil`/`--bar-solid` for the no-transparency fallback, the optic-lens colours (`--optic-warm/cool/violet`) and four spring curves (`--spring`, `-snappy`, `-bouncy`, `-soft`). Layout rules live at the end of `<style>` (~line 1252–1800) so they win the cascade over the original flat rules; `DESIGN.md` documents the material.
 
 ## 3. Data
 
@@ -45,14 +52,28 @@ const REPERE = [
 Only Primăria has `foto` — so only it enables the Then/Now compare
 (`renderAlbum()`). All five have `an/arhitect/stil/descriere/loreStory`, so
 `#detailsBtn` (`targetHasInfo()`), the info card and TTS work for every
-landmark. Coordinates are static OSM/Wikipedia approximations (comment in
-source says verify on-site). To add a landmark: append to `REPERE`, add a
-the linear album map (it renders all stops from `REPERE` directly; `renderAlbumCompare()` fills the Then/Now popup), and give it `foto`/`descriere` if it
-needs info/compare features.
+landmark. Coordinates are static OSM/Wikipedia approximations at rest; at
+runtime `applyApiLocations()` / `addApiOnlyObjective()` merge the API locations
+into the same array (`apiId`, live `lat`/`lon`, API-only objectives appended), so
+chapter indices stay valid. To add a landmark: append to `REPERE` (never reorder
+the first five — `CHAPTERS[].landmarkIndices` point at them), add the linear
+album map entry (`renderLevelMap()` renders all stops), and give it
+`foto`/`descriere` if it needs info/compare features.
+
+**Never show a coordinate to the visitor.** The API has no street field, so
+`streetFor(repere)` resolves `STRAZI_REPERE` (curated, hand-verified) →
+`STRAZI_API_ID` → a `STREET_RE` match inside the API description → `"Arad"`.
+Every surface that used to print `lat/lon` now prints that street: the info card
+meta, the `#coords` debug line, location cards and detail, tour stops and the
+album's compare header and level-map subtitles.
 
 Photos users take are stored in `localStorage["aradlens_user_photos"]` as
 `{ [nume]: { dataUrl, timestamp } }` (`USER_PHOTOS_STORAGE_KEY`). No backend —
 capture modal explicitly says permanent album save "will be available later".
+
+There is deliberately **no admin authentication on this site** — the AradLens
+API writes (categories/locations/tours/images) belong to the separate admin
+website. This repo only reads public GET endpoints through `/api`.
 
 Story mode adds `const CHAPTERS` (~line 1558): 3 chapters, each
 `{ id, index, numar, titlu, perioada, badge, icon, sinopsis, landmarkIndices: [4, 3, 2], reward: { id, badgeTitle, icon, seal, diplomaDesc } }`.
@@ -94,11 +115,18 @@ Key functions by area:
 - Info/audio: `openCard/closeCard`, `toggleSpeech/stopSpeech` (Web Speech API, `ro-RO`), `snapshotNow` (video → canvas), `setCmpPos/openPhoto/closePhoto`.
 - Capture: `enterCaptureMode/exitCaptureMode` (toggles `#captureScreen` + `camera-clear`), `executePhotoCapture` (flash + canvas → localStorage + modal), `showCaptureFeedback/hideCaptureModal`.
 - Album: `openAlbum/closeAlbum`, `selectAlbumLandmark` (exposed on `window` for SVG `onclick`), `renderAlbum` (pins + Then/Now boxes), `guideToSelectedLandmark` (selects target, closes album).
+- AradLens API (**public, read-only**, block at ~3880): `apiRequest(path, {timeoutMs})` — shared **GET-only** fetch through `API_PREFIX = "/api"`, JSON in/out (`"json"` content-type else "răspuns neașteptat"), AbortController timeout (default off, 8 s for health), error objects `{kind: network|timeout|offline|http|server, message}` with Romanian UI text that never leaks internals (401 keeps the API's own `detail` string; `console.warn` notes unexpected statuses for debugging); `esc()` escapes API strings before innerHTML. Only public GET endpoints: `ApiHealth.check` (`/health`), `CategoriesApi.list/get`, `LocationsApi.list/get` + `locationImageUrl` (`/locations/images/{id}` — displayed as plain `<img src>`; no lazy attribute: inside `display:flex` modals lazy-load stalls), `ToursApi.list/get` (Tours embed their `locations` array). **No auth, no tokens, no POST/PUT/PATCH/DELETE, no login forms — management lives in the separate admin site.**
+- API health gate: `#apiGate` (z 80 over the UI) + `runApiGate()`/`setApiGateState()` — runs at script load, loading spinner → on success hides gate → on failure shows the Romanian "Serverul AradLens nu este momentan disponibil…" message + `#apiGateRetry` ("Încearcă din nou") which re-runs the check manually; no automatic retry loop, no blank screen.
+- **Preload before the first tap:** the gate's success handler also runs `preloadAppData()` — `GET /locations`, `/tours`, `/categories` in parallel, `applyApiLocations()`, image warm-up, then it pre-renders the category list, the location list, the compass band, the album module bar and the level map. The gate text reads "Se pregătesc obiectivele, traseele și albumul…" while it runs, so opening a menu never waits on a spinner.
+- Public data UI: `#toursModal` (`tourCard`, `openTourDetail` via `GET /tours/{id}`, back button `#tourBackBtn`, now orphaned by the rail change), `#locationsModal` (`renderLocCards`, `openLocDetail` via `GET /locations/{id}`, category name re-fetched fresh via `GET /categories/{id}` with graceful fallback to the embedded name; `#locBackBtn` reads "← Închide" when opened standalone), `#categoriesModal` (plain read-only list). Shared helpers: `locationInfo`/`locationCard`/`tourCard`, `locationFromObjective`/`objectiveForLocation` (map an API location onto a `REPERE` entry and back), `paintLocDetail`, `openLocationPage`, `bindLongPress`, per-modal state/retry (`setXState`/`setXErrorState`), pluralized counts ("un tur", "o locație", "o categorie").
 
 ## 5. How to work on it
 
 - Edit `index.html` directly; verify by serving the directory and opening on a phone (or desktop preview bypass). There is no build step to keep in sync.
+- Liquid glass rules: exactly one `backdrop-filter` per stacking path (veils are scrims, sheets blur, sticky children get a solid fill); glass values come from the `--glass-*` tokens, never hardcoded in a new component; press/hover motion uses the `--spring*` curves. Both fallbacks (`prefers-reduced-transparency: reduce` — what Windows reports when transparency effects are off — and `@supports not (backdrop-filter)`) must keep the sheen/edge, otherwise the app looks like flat panels on those machines.
+- The album's header and module chips are sticky: `#albumModal` no longer scrolls, `#albumMapTab` does, and `scroll-padding-top` keeps a centred stop clear of the chip bar.
 - Keep the schematic-map disclaimer on the album ("Traseu schematic pe module, nu o proiecție GPS") — the level map reflects the module’s chronological order, not GPS positions.
 - `index.html` is UTF-8 (CRLF, no BOM); Romanian diacritics are intact. A tool that decodes it with a legacy codepage (PowerShell `Get-Content` without `-Encoding UTF8`, some editors) shows mojibake (`ș` → `ET`, `ț` → `E>`); that is a display artifact, not corruption — read/write UTF-8 and never "fix" strings from a garbled view.
 - Tuning the compass band: `BAND_SLOT` (108 px) sets stop spacing, `BAND_SAG` (26 px) the arc depth, `rotateX(13deg)` on `#snapRail` the tilt; `updateBandHalfWidth()` keeps fade/curve matched to the rail width, `renderCompassBand()` re-centres on `activeWheelIndex` after every story update.
-- Adding backend later: replace `USER_PHOTOS_STORAGE_KEY` persistence in `executePhotoCapture()` and the `foto`-only `renderAlbum()` Then-box with real API calls; landmarks 1, 2, 4, 5 still need historic assets.
+- Adding backend later: the `/api` proxy + `apiRequest()` are in place; this site stays read-only. Content management (POST/PUT/PATCH/DELETE, uploads, tokens) is for the admin website, not this repo. Replace `USER_PHOTOS_STORAGE_KEY` persistence in `executePhotoCapture()` and the `foto`-only `renderAlbum()` Then-box with real data (locations now exist server-side); landmarks 1, 2, 4, 5 still need historic assets.
+- Never call the API host directly from JS: it publishes no CORS headers (preflight 405), so cross-origin fetch fails in every browser — always go through `/api/...`. In prod that path is nginx (`deploy/nginx/default.conf` + docker-compose mount); locally run `python dev_server.py` (Start-AradLens.bat does this automatically).

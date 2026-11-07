@@ -19,11 +19,15 @@ if not defined PY (
 )
 
 rem Porneste serverul local minimalizat, apoi deschide browserul
-start "AradLens server" /min cmd /c "%PY% -m http.server 8010 --bind 127.0.0.1"
+if exist "%~dp0dev_server.py" ( start "AradLens server" /min cmd /c "%PY% "%~dp0dev_server.py"" 
+) else ( start "AradLens server" /min cmd /c "%PY% -m http.server 8010 --bind 127.0.0.1" 
+
+) 
 timeout /t 1 /nobreak >nul
 start "" "http://127.0.0.1:8010/index.html"
 
 echo   Deschis in browser: http://127.0.0.1:8010/index.html
 echo   Ca sa opresti serverul, inchide fereastra mica "AradLens server".
+echo   Serverul local prelucreaza si /api (proxy spre API-ul AradLens).
 echo.
 pause

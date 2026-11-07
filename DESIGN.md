@@ -22,6 +22,16 @@ colors:
   light-card: "#ffffff"
   light-muted: "#4a4234"
   light-hairline: "rgba(23,17,6,.2)"
+  glass-tint: "rgba(18,23,30,.46)"
+  glass-tint-thick: "rgba(16,20,27,.7)"
+  glass-solid: "rgba(17,22,29,.95)"
+  glass-edge: "rgba(255,255,255,.16)"
+  glass-sheen: "linear-gradient(158deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 24%, rgba(255,255,255,0) 50%, rgba(255,255,255,.05) 78%, rgba(255,255,255,.13) 100%)"
+  glass-blur: "26px"
+  glass-saturate: "185%"
+  optic-warm: "rgba(255,198,148,.55)"
+  optic-cool: "rgba(148,212,255,.5)"
+  optic-violet: "rgba(198,168,255,.42)"
 typography:
   display:
     fontFamily: "\"AradLens Display\", Georgia, \"Times New Roman\", serif"
@@ -106,8 +116,17 @@ rounded:
   panel: "14px"
   sheet: "16px"
   pill: "20px"
+  glass-panel: "22px"
+  glass-sheet: "28px"
+motion:
+  spring: "cubic-bezier(.32, 1.18, .34, 1)"
+  spring-snappy: "cubic-bezier(.30, 1.26, .38, 1)"
+  spring-bouncy: "cubic-bezier(.34, 1.42, .44, 1)"
+  spring-soft: "cubic-bezier(.25, .92, .28, 1)"
+  press: "110ms"
+  sheet: "460ms"
 spacing:
-  rail-gap: "12px"
+  rail-gap: "9px"
   rail-right: "14px"
   rail-top: "22%"
   caption-clearance: "68px"
@@ -118,13 +137,23 @@ components:
     textColor: "{colors.bone}"
     rounded: "{rounded.ring}"
     padding: "0"
-    size: "52px"
+    size: "46px"
   hud-ring-capture-ready:
     backgroundColor: "{colors.scrim-ink}"
     textColor: "{colors.bone}"
     rounded: "{rounded.ring}"
     padding: "0"
-    size: "52px"
+    size: "46px"
+  theme-switch:
+    track: "56×30px glass capsule (56×34px hit area), blur(18px) saturate(185%), 1px white .22 edge, sheen gradient"
+    knob: "24px bone disc sliding horizontally between sun (left) and moon (right) slots, spring on translateX"
+    hitArea: "56×34px, role=switch + aria-checked"
+  brand-lens:
+    size: "27px top bar / 38px start gate"
+    underlay: "primaria-1901.jpg at 230% zoom, saturate(.82) contrast(1.06)"
+    overlay: "specular radial highlight + warm/cool diffraction, screen blend"
+    rim: "conic warm→cool→violet at 2px, masked ring"
+    sweep: "lensSweep 7s — light travels across the lens and rests"
   hud-snap-dot:
     backgroundColor: "{colors.hairline}"
     rounded: "{rounded.snap}"
@@ -157,13 +186,35 @@ components:
     textColor: "{colors.bone}"
     rounded: "{rounded.ring}"
     padding: "0"
-    size: "16px radius"
+    size: "32px glass node on the level map"
   map-pin-active:
     backgroundColor: "{colors.amber}"
     textColor: "{colors.amber-ink}"
     rounded: "{rounded.ring}"
     padding: "0"
-    size: "16px radius"
+    size: "32px glass node, current stop"
+  glass-sheet:
+    backgroundColor: "{colors.glass-tint-thick}"
+    textColor: "{colors.bone}"
+    rounded: "{rounded.glass-sheet}"
+    padding: "18px 18px 16px"
+    border: "1px {colors.glass-edge}"
+    blur: "blur(26px) saturate(185%)"
+  glass-panel:
+    backgroundColor: "{colors.glass-tint}"
+    textColor: "{colors.bone}"
+    rounded: "{rounded.glass-panel}"
+    padding: "14px"
+    blur: "blur(20px) saturate(185%)"
+  glass-chip:
+    backgroundColor: "{colors.glass-tint-thin}"
+    textColor: "{colors.text-muted}"
+    rounded: "999px"
+    padding: "7px 13px"
+  glass-chip-active:
+    backgroundColor: "{colors.amber}"
+    textColor: "{colors.amber-ink}"
+    rounded: "999px"
   toast:
     backgroundColor: "{colors.world-surface}"
     textColor: "{colors.bone}"
@@ -225,10 +276,14 @@ an archival serif with an optical-size axis for stop names; every meter is
 tabular so distance never jitters while walking.
 
 **Key Characteristics:**
-- Camera full-bleed, no blur, no dimming — only thin top/bottom scrims.
+- Camera full-bleed, no dimming; interface floats as liquid glass above it.
 - Bone glyphs are the only interface color; beige means live/arrival, nothing else.
-- 52px ring rail on the right; snap dots ride the same edge; caption clears them by 68px.
+- 46px glass ring rail on the right with a horizontal sun/moon capsule at its top;
+  the compass band along the bottom edge carries every objective as a stop.
 - Arrival floods the caption rail beige like a postmark landing on the frame.
+- Every coordinate the visitor reads is a **street**, never a latitude: the API
+  ships no street field, so `streetFor()` resolves a curated table first and the
+  description text second.
 
 ## Colors
 
@@ -292,6 +347,68 @@ drop to ink: `2px 8px 22px rgba(23,17,6,.18)` (schematic/album) and
 flips to a bone wash (`rgba(246,242,233,.94 → .82 → .95)`); the desktop gate
 maps to bone ground + amber-ink type.
 
+## Liquid Glass layer (iOS 26)
+
+Every floating surface above the lens is one material, not a collection of
+styles. The recipe, in one place (`index.html`, the block commented
+`STRATUL „LIQUID GLASS"`):
+
+| Layer | Value |
+| --- | --- |
+| Fill | `--glass-tint` (.46) for panels, `--glass-tint-thick` (.70) for sheets |
+| Blur | `backdrop-filter: blur(26px) saturate(185%)` (sheets 26–30px, caption 22px) |
+| Sheen | `--glass-sheen` — a 158° white gradient that peaks top-left and returns at the bottom edge |
+| Edge | 1px `--glass-edge` (white .16 dark / white .80 light) |
+| Inner light | `inset 0 1px 0 var(--glass-inner-hi)` |
+| Inner shadow | `inset 0 -1px 0 var(--glass-inner-lo)` |
+| Lift | `--glass-shadow` — `0 18px 48px rgba(0,0,0,.46)` + a tight 2px contact shadow |
+
+### The One Blur Rule
+
+**Exactly one `backdrop-filter` per stacking path.** Veils (`.full-modal`,
+`#captureModal`) have none — they are plain scrims. The sheet inside them owns
+the blur. `#albumModal` owns its blur; the sticky module bar inside it is
+therefore *not* blurred — it is filled with `--bar-solid` plus the sheen, so it
+still reads as the same material while the map scrolls beneath it.
+Double-blurring is a Safari defect and burns GPU on a phone.
+
+### Motion: Apple springs, not easings
+
+Springs are declared once and reused:
+
+| Token | Curve | Feels like |
+| --- | --- | --- |
+| `--spring` | `cubic-bezier(.32, 1.18, .34, 1)` | default — sheets, chips, level nodes |
+| `--spring-snappy` | `cubic-bezier(.30, 1.26, .38, 1)` | small controls, the theme knob |
+| `--spring-bouncy` | `cubic-bezier(.34, 1.42, .44, 1)` | reward medallion only |
+| `--spring-soft` | `cubic-bezier(.25, .92, .28, 1)` | lens sweep, no visible overshoot |
+
+Press feedback is 110ms scale (.92–.97) — the surface reacts before the finger
+leaves. Sheets enter with `sheetIn` (opacity + 22px rise + .955 scale), level
+stops with `stopIn` staggered 40ms apart from the bottom up, veils with a 260ms
+opacity fade. Under `prefers-reduced-motion: reduce` every duration is zeroed by
+the pre-existing global block.
+
+### Transparency fallbacks
+
+Two reserves keep the material honest where the effect is unavailable:
+
+- `prefers-reduced-transparency: reduce` (what Windows reports with
+  "transparency effects" off) — blur is dropped, but the sheen, the 1px edge and
+  the inset highlights stay, and the fill becomes `--glass-solid`. The surface
+  stops being see-through; it never stops looking like glass.
+- `@supports not (backdrop-filter)` — same treatment without the media query.
+
+### Brand lens
+
+The wordmark carries the product metaphor: `.brand-lens` is a 27px disc (38px on
+the start gate) whose **background is the archival photograph** (`primaria-1901.jpg`,
+230% zoom, warmed down), with a specular white highlight and a cool/warm
+diffraction overlay in `screen` blend, a 2px **chromatic rim** from a conic
+gradient (warm → cool → violet), and a `lensSweep` highlight that crosses the
+glass every 7 seconds. The favicon is the same idea in inline SVG (amber `A`
+behind a lens ring), so the tab matches the lockup.
+
 ## Typography
 
 **Display Font:** AradLens Display (self-hosted Fraunces, `fonts/fraunces-latin.woff2`
@@ -346,11 +463,13 @@ while walking is a defect.
 
 Full-bleed camera (`#cam` fixed inset 0, `object-fit: cover`) with a flex column
 overlay: thin top row (brand left, step count right), pointer-events-none center,
-caption block bottom-left. The right rail (`#rail`, right 14px, top 22%, 12px gap)
-and snap rail (`#snapRail`, right 12px, bottom 18%) float over the lens; caption
-and scrim rows clear them with a 68px right margin. Center holds exactly one slim
-chevron (72px) and nothing else; the edge-case pill (`#steerEdge`) replaces it only
-when the bearing is behind the walker. Bottom scrim pads 14px 16px plus safe-area.
+caption block bottom-left. The right rail (`#rail`, right 14px, top 12%, 9px gap)
+floats over the lens as glass rings; the compass band (`#snapRail`) is the last
+child of `.bottom` and arcs along the bottom edge. On short viewports
+(630–720px tall) the rail compresses: 7px gap, 44px rings. Center holds exactly
+one slim chevron (72px) and nothing else; the edge-case pill (`#steerEdge`)
+replaces it only when the bearing is behind the walker. Bottom scrim pads
+14px 16px plus safe-area.
 
 ### Start gate layout (no-scroll contract)
 `#start` is a fixed, full-viewport column: `.start-inner` is a flex column with
@@ -365,43 +484,69 @@ needed in the shipped sizes.
 
 ## Elevation & Depth
 
-Hybrid: tonal scrims do the readability work, offset-blur shadows lift only the
-glyphs and rings off the live image. No cards, no panels, no resting shadows on
-surfaces — depth exists to keep bone legible over sunlit street footage.
+Hybrid: liquid glass floats above the lens, and scrims do the readability work
+where there is no surface. Depth is never a generic drop shadow: each raised
+element carries an inner top highlight, an inner bottom shadow, a 1px edge and
+one offset ambient shadow.
 
 ### Shadow Vocabulary (if applicable)
 - **Chevron lift** (`filter: drop-shadow(2px 6px 12px rgba(0,0,0,.55))`): keeps the
 beige chevron readable over bright pavement.
-- **Ring lift** (`box-shadow: 2px 6px 14px rgba(0,0,0,.5)`): every 52px rail ring
-at rest; capture-ready pulses to `2px 8px 22px rgba(0,0,0,.7)` at the 1.6s
-shutter keyframe midpoint.
+- **Ring lift**: every rail ring at rest; capture-ready pulses at the 1.6s
+  shutter keyframe midpoint.
+- **Glass lift** (`--glass-shadow`): `0 18px 48px rgba(0,0,0,.46)` plus a 2px
+  contact shadow; light theme swaps to `rgba(23,17,6,.18)`.
 - **Edge pill wash** (`background: rgba(5,7,10,.78)` + 1px hairline border): the
 only filled HUD chip besides rings.
 
 ### Named Rules (optional)
-**The Offset-Blur Rule.** Shadows are always offset down-right (2px 6–8px) with a
-12–22px blur at .5–.7 black — sun-side lift, never a centered glow, never colored.
+**The Offset-Blur Rule.** Shadows are always offset down — never a centered glow,
+never colored, except the beige press-dot on an active chip.
 
 ## Shapes
 
-Circular actions, rectangular captions, pill edge-cases. Rings are perfect circles
-(50%, 52px, 2px bone-at-.85 stroke over a .55 scrim wash, 22px stroke glyphs).
-Caption is a 12px rectangle with a transparent-at-rest border that takes the beige
-flood on arrival. Snap dots are 10px squares-at-6px-radius; the active stop
-elongates to 28px tall in solid beige. Focus ring is 6px radius. Hairlines are 1px
-bone-at-.22 — rules separate, they never box.
+Circular actions, rounded sheets, pill chips. Rings are perfect circles
+(50%, 46px, glass with a 1px white edge) with the 56×30 horizontal sun/moon
+capsule taking the first slot. Sheets are 26–28px rounded rectangles that stop
+short of the viewport edge; panels 18–22px; chips fully round. The active stop
+on the compass band is an amber reticle, not a fill. Hairlines are 1px at
+`--glass-hairline` — rules separate, they never box.
 
 ## Components
 
 ### Ring rail (signature)
-- **Shape:** perfect circle (50%, 52px, 2px `rgba(246,242,233,.85)` stroke).
-- **Rest:** `rgba(5,7,10,.55)` wash, bone 22px stroke glyph, ring-lift shadow.
-- **Press:** scale .92. Disabled: .55 opacity. Capture-ready (≤200 m): beige border
-+ 1.6s shutter pulse. Theme glyph is a 34px circle inside the rail rhythm.
+- **Shape:** perfect circle (50%, 46px) of liquid glass — 1px white edge, sheen,
+  `blur(20px) saturate(185%)`, ring-lift shadow.
+- **Rest:** translucent dark wash, bone 20px stroke glyph.
+- **Press:** scale .92 on `--spring-snappy`. Disabled: .5 opacity. Capture-ready
+  (≤200 m): beige border + 1.6s shutter pulse.
+- **Slots (top to bottom):** theme capsule, game mode, details, photo, album.
+  Route and location/category browsing moved out of the rail: tours live as album
+  modules, and a location page opens on **long-press** of an objective.
+- **Theme switch:** a horizontal 56×30px glass capsule (`#themeToggleBtn`,
+  `role="switch"`, `aria-checked` kept in sync by `applyTheme`): sun slot left,
+  moon slot right, a 24px bone knob that springs between them. State is
+  CSS-driven from `body.light-theme`; the meta theme-color and the
+  `aradlens_theme` key follow.
 
-### Snap rail
-- **Style:** 44px transparent hit targets; 10px bone-at-.35 dots at 6px radius.
-- **State:** active stop (`aria-current="true"`) elongates to 28px solid beige.
+### Compass band (objective selector)
+- **Style:** curved tape of stops (`#snapRail` + `renderCompassBand`), 108px slot
+  spacing, sag + `rotateX(13deg)` for the arc, drag / wheel / arrow keys.
+- **State:** amber reticle on the selected stop; story stops render `.locked`
+  (padlock, not selectable), `.completed` (teal) or current (amber).
+- **Content:** all objectives merged from the API in free mode; only the active
+  chapter's steps in story mode.
+- **Long-press (460ms):** opens the objective page (`#locationsModal`) with the
+  location detail, its street and its AR guide action. A normal tap still just
+  selects the stop.
+
+### Level map (album)
+- **Shape:** vertical level-select — first stop at the bottom, scroll upward;
+  amber = current, teal = photographed, padlock = locked (story order).
+- **Node:** 32px glass disc carrying the year (`an`) for heritage stops or the
+  tour position (`Oprirea n`) for tour modules; street as the subtitle.
+- **Modules:** `Liber`, `Cap. I–III`, plus every tour from the API, in one sticky
+  chip bar the header never hides.
 
 ### Caption rail (signature)
 - **Shape:** 12px rectangle, 10px 12px padding, transparent 1px border at rest.
@@ -439,9 +584,8 @@ the lens in both themes.
 lens in both themes.
 - **Compass warning** (~line 497) and **proximity toast** (~line 531): #141a21
 grounds with beige borders stay dark over the lens in both themes.
-- **Schematic map** (~line 581): the map stays a dark media surface in both
-themes, like the lens (svg-wrap ground #0b0e12; pins #14655a, active #c8b088
-via `selectAlbumLandmark`).
+- **Schematic map** (replaced): the old SVG pin map is gone; the album's level
+  map is the only map, and it stays a dark glass surface in both themes.
 - **Photo compare** (`#photoCmp`, ~line 474): media-dark ground with scrim
 tags; no light-theme override exists — intentional.
 
@@ -451,20 +595,27 @@ tags; no light-theme override exists — intentional.
 - **Do** keep the camera unfiltered and full-bleed — `opacity: 1; filter: none`
 on `#cam`; readability comes from the two scrims only.
 - **Do** reserve beige strictly for live direction and arrival flood.
+- **Do** keep exactly one `backdrop-filter` per stacking path: veils are scrims,
+  sheets own the blur, and a sticky child gets a solid fill instead of a second blur.
+- **Do** read every coordinate on screen as a street (`streetFor`), never as a
+  latitude — the API has no street field, so curated table first, description second.
+- **Do** keep press feedback at 110ms and sheet entry at 460ms on `--spring`;
+  new motion should reuse a token, not invent a curve.
 - **Do** set every meter, count, and meta numeral tabular — re-verify after any
-new readout is added.
-- **Do** clear the right rails with the 68px caption margin on any new bottom-row content.
+  new readout is added.
+- **Do** clear the compass band with the caption's bottom padding on any new
+  bottom-row content.
 - **Do** keep the OFL note with the self-hosted display face (`fonts/` + `fonts/OFL.txt`).
 - **Do** keep the start gate scroll-free in the shipped sizes; re-check
 320×568, 360×740, 390×844 and 1440×900 after any copy change.
 
 ### Don't:
-- **Don't** add panels, cards, or blur over the lens in the first viewport.
+- **Don't** nest `backdrop-filter` (blur inside blur) — Safari breaks and phones burn GPU.
 - **Don't** spend beige on decoration, branding, or disabled states.
 - **Don't** add a second black or a second hairline color — vary scrim-ink alpha instead.
-- **Don't** shrink rail rings below 52px or snap targets below 44px (field a11y floor).
+- **Don't** shrink rail rings below 46px or tap targets below 44px (field a11y floor).
 - **Don't** light-theme the stay-dark set (lens rails, capture screen,
-compare view, toasts, status, compass warning, schematic map ground) — the
+compare view, toasts, status, compass warning, album level map) — the
 master light-lens comment (~line 63) reserves the light lens for overlays,
 modals, and cards only.
 - **Don't** reintroduce a condensed grotesque with negative tracking — the
