@@ -24,8 +24,8 @@ and two `Mobile*isDesktop*` files (accidental `man less` dumps, 1.6 KB / 16 KB).
 ## 2. `index.html` — UI layers (bottom to top)
 
 1. `<video id="cam">` — live camera background. Blurred/dim by default (`opacity .28, blur(6px)`), class `camera-clear` removes the filter in capture mode.
-2. `#overlay` — main AR HUD: `.top` (brand `AradLens`, `#routeStep` / `#gameModeBadge` + `#gameModeBadgeText` "Pasul 2 / 3", `#storyObjectiveBanner`/`#storyObjectiveText`, `#compassWarningBadge`, `#diag` debug readout), `.center` (`#steerArrow` chevron + `#steerEdge` degree readout when the target is behind), `#rail` action rings (`#detailsBtn`, `#photoCaptureBtn`, `#albumBtn`, `#gamemodeRailBtn`, `#themeToggleBtn`), `#captureDistLabel`, `.bottom`: `#caption`/`#arLabel` (target name, "Mergi spre …" phrase, distance), `#distNum` + `#routeStepBottom`, `#coords`/`#flipBtn` (debug only), `.hint` and `#snapRail` — the bottom **compass band** (curved, draggable stop selector; see §4).
-3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#gamemodeModal` (`#selectStoryModeCard` / `#selectFreeModeCard`), `#chapterModal` (`#chaptersList`), `#storyLoreModal` (`#loreStepBadge`, `#loreStoryText`), `#rewardModal` (`#diplomaRewardName`, `#rewardNextChapterBtn`, `#rewardViewAlbumBtn`), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (schematic SVG map `mapPin0-4` + Then/Now cards `#albumThenBox/#albumNowBox` + rewards tab `#tabRewardsBtn`/`#albumRewardsTab`/`#albumRewardsList`), `#arLabel` floating AR tag, `#albumBtn` / `#photoCaptureBtn` FABs, `#status` bar.
+2. `#overlay` — main AR HUD: `.top` (brand `AradLens`, `#routeStep` + `#compassWarningBadge`, `#storyObjectiveBanner`/`#storyObjectiveText`, `#diag` debug readout), `.center` (`#steerArrow` chevron + `#steerEdge` degree readout when the target is behind), `#rail` action rings (`#detailsBtn`, `#photoCaptureBtn`, `#albumBtn`, `#gamemodeRailBtn` + `#railModeDot` state dot, `#themeToggleBtn`), `#captureDistLabel`, `.bottom`: `#caption`/`#arLabel` (target name, "Mergi spre …" phrase, distance), `#distNum` + `#routeStepBottom`, `#coords`/`#flipBtn` (debug only), `.hint` and `#snapRail` — the bottom **compass band** (curved, draggable stop selector; see §4).
+3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#gamemodeModal` (`#selectStoryModeCard` / `#selectFreeModeCard`), `#chapterModal` (`#chaptersList`), `#storyLoreModal` (`#loreStepBadge`, `#loreStoryText`), `#rewardModal` (`#diplomaRewardName`, `#rewardNextChapterBtn`, `#rewardViewAlbumBtn`), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (vertical linear level map in modules: `#albumModuleBar` chips, stop nodes rendered into `#albumLevelTrack` by `renderLevelMap()`, first stop at the bottom, scroll upward) + `#albumCompareModal` (Then/Now cards `#albumThenBox`/`#albumNowBox` popup, opened by tapping a stop), `#arLabel` floating AR tag, `#albumBtn` / `#photoCaptureBtn` FABs, `#status` bar.
 
 Theming: CSS variables on `:root` + `body.light-theme` override. Persisted in `localStorage["aradlens_theme"]` via `applyTheme()` / `toggleTheme()`.
 
@@ -42,12 +42,13 @@ const REPERE = [
 ];
 ```
 
-Only Primăria has `descriere/an/arhitect/stil/foto` — so only it enables
-`#detailsBtn` (`targetHasInfo()`), the info card, TTS, and the Then/Now compare.
-Coordinates are static OSM/Wikipedia approximations (comment in source says
-verify on-site). To add a landmark: append to `REPERE`, add a matching
-`mapPinN` group in the album SVG, and give it `foto`/`descriere` if it needs
-info/compare features.
+Only Primăria has `foto` — so only it enables the Then/Now compare
+(`renderAlbum()`). All five have `an/arhitect/stil/descriere/loreStory`, so
+`#detailsBtn` (`targetHasInfo()`), the info card and TTS work for every
+landmark. Coordinates are static OSM/Wikipedia approximations (comment in
+source says verify on-site). To add a landmark: append to `REPERE`, add a
+the linear album map (it renders all stops from `REPERE` directly; `renderAlbumCompare()` fills the Then/Now popup), and give it `foto`/`descriere` if it
+needs info/compare features.
 
 Photos users take are stored in `localStorage["aradlens_user_photos"]` as
 `{ [nume]: { dataUrl, timestamp } }` (`USER_PHOTOS_STORAGE_KEY`). No backend —
@@ -58,6 +59,12 @@ Story mode adds `const CHAPTERS` (~line 1558): 3 chapters, each
 Progress lives in `storyState` (~line 1616), persisted in
 `localStorage["aradlens_story_state"]`: `{ currentMode: "story"|"free", activeChapterId, chapters: { capN: { currentStep, completed, completedDate, photos } }, rewards: [] }`.
 In story mode a capture only counts if it matches `getCurrentStoryLandmark()`;
+
+**Entry mode is always free.** `storyState.currentMode` is forced to `"free"`
+right after the persisted state loads, so the app never starts in Story mode;
+chapter progress and rewards still persist and resume. The active mode/chapter
+is signalled by `#railModeDot` (amber dot on the `#gamemodeRailBtn` ring) plus
+that button's `title`/`aria-label` — there is no chapter chip in the top bar.
 other shots are answered with a `showCaptureFeedback` warning.
 
 ## 4. JS execution flow
@@ -73,7 +80,7 @@ Per-frame (`scheduleUpdate()` → `update()`, throttled):
 (`updateArLabel(az)` writes the direction phrase + edge indicator for `|az| > 85°`)
 plus `updateBandData()` (band distances and needle angles).
 `checkLandmarkProximity()` fires `#proximityToast` once per session per landmark
-(`notifiedLandmarksInSession` Set) when within 50 m.
+(`notifiedLandmarksInSession` Set) when within 200 m.
 
 Sensors: `handleOrientation()` consumes `deviceorientationabsolute` (if seen) else
 `deviceorientation` fallback + iOS `webkitCompassHeading`; `robustAngle()` /
@@ -91,7 +98,7 @@ Key functions by area:
 ## 5. How to work on it
 
 - Edit `index.html` directly; verify by serving the directory and opening on a phone (or desktop preview bypass). There is no build step to keep in sync.
-- Keep the schematic-map disclaimer ("pozițiile sunt demonstrative") — pins are hand-placed SVG coordinates, not GPS projections.
+- Keep the schematic-map disclaimer on the album ("Traseu schematic pe module, nu o proiecție GPS") — the level map reflects the module’s chronological order, not GPS positions.
 - `index.html` is UTF-8 (CRLF, no BOM); Romanian diacritics are intact. A tool that decodes it with a legacy codepage (PowerShell `Get-Content` without `-Encoding UTF8`, some editors) shows mojibake (`ș` → `ET`, `ț` → `E>`); that is a display artifact, not corruption — read/write UTF-8 and never "fix" strings from a garbled view.
 - Tuning the compass band: `BAND_SLOT` (108 px) sets stop spacing, `BAND_SAG` (26 px) the arc depth, `rotateX(13deg)` on `#snapRail` the tilt; `updateBandHalfWidth()` keeps fade/curve matched to the rail width, `renderCompassBand()` re-centres on `activeWheelIndex` after every story update.
 - Adding backend later: replace `USER_PHOTOS_STORAGE_KEY` persistence in `executePhotoCapture()` and the `foto`-only `renderAlbum()` Then-box with real API calls; landmarks 1, 2, 4, 5 still need historic assets.

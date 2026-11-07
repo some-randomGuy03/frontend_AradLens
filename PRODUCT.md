@@ -25,14 +25,14 @@ Field use: mobile web, camera + GPS + compass required, works best outdoors with
 ## Capabilities and Constraints
 
 - Static single `index.html` served as flat static root (nginx, port 8010); offline-capable; no framework, no build step.
-- 5 landmarks with static coordinates (`const REPERE`); proximity gate 50 m for capture; schematic album map is demonstrative, not GPS-projected (disclaimer stays).
+- 5 landmarks with static coordinates (`const REPERE`); proximity gate 200 m for capture; schematic album map is demonstrative, not GPS-projected (disclaimer stays).
 - Then/Now comparison and full info card exist per landmark only where archival material is on hand; landmarks without material yet show honest placeholders, never fabricated history.
 - Permanent album save awaits backend integration (undecided: timeline open).
 - Schematic-map disclaimer and sensor/shutter honesty are non-negotiable.
 
 ## Brand Commitments
 
-Name `AradLens` is binding. Voice: Romanian-language UI, plain walker wording over engineering jargon. Committed direction (from grilling): 1901-rooted archival identity generalized per landmark year; ordered walking route with progress over the circular selector; rebuilt permission priming with archival teaser.
+Name `AradLens` is binding. Voice: Romanian-language UI, plain walker wording over engineering jargon. Committed direction (from grilling): 1901-rooted archival identity generalized per landmark year; ordered walking route with progress over the circular selector; permission priming that names the sensors and spells out what the first tap asks for. Look: archival beige accent on a near-black ground, self-hosted Fraunces (SIL OFL) for display type and the system sans for body (see `DESIGN.md`).
 
 ## Evidence on Hand
 

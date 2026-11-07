@@ -5,36 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0e12">
 <title>AradLens</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0e12'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='system-ui,sans-serif' font-size='34' font-weight='800' fill='%23e8a33d'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0e12'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='system-ui,sans-serif' font-size='34' font-weight='800' fill='%23c8b088'%3EA%3C/text%3E%3C/svg%3E">
 <style>
-  /* Display voice: Oswald (SIL OFL 1.1, self-hosted latin + latin-ext woff2).
-     Display names only — body stays on the system stack (offline). */
+  /* Display voice: Fraunces (SIL OFL 1.1, self-hosted latin + latin-ext woff2,
+     variabil 100–900, cu axă optică opsz aplicată automat după mărime).
+     Aliasul rămâne "AradLens Display" - doar materia primește se schimbă.
+     Numai pentru titluri; corpul rămâne pe stiva de sistem (offline). */
   @font-face {
     font-family: "AradLens Display";
-    src: url("fonts/oswald-latin-ext.woff2") format("woff2");
-    font-weight: 200 700; font-style: normal; font-display: swap;
+    src: url("fonts/fraunces-latin-ext.woff2") format("woff2");
+    font-weight: 100 900; font-style: normal; font-display: swap; font-variation-settings: "SOFT" 0, "WONK" 0;
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
     font-family: "AradLens Display";
-    src: url("fonts/oswald-latin.woff2") format("woff2");
-    font-weight: 200 700; font-style: normal; font-display: swap;
+    src: url("fonts/fraunces-latin.woff2") format("woff2");
+    font-weight: 100 900; font-style: normal; font-display: swap; font-variation-settings: "SOFT" 0, "WONK" 0;
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
 
   :root {
     --ground: #0b0e12;
     --bone: #f6f2e9;
-    --amber: #e8a33d;
-    --amber-ink: #171106;
-    --amber-deep: #8a5f14;
+    /* Accent: bej cald de hârtie de arhivă (nu galben).
+       --amber       = bej pe soluri întunecate (9.2:1 pe #0b0e12)
+       --amber-ink   = cerneală pe umpleri bej (8.7:1 pe #c8b088)
+       --amber-deep  = bej închis, pentru text/linii pe suprafețe osoase (5.3:1 pe #f6f2e9)
+       --accent-green= accentul pe suprafețe deschise: bej în temă întunecată,
+                       bej închis (--amber-deep) în temă deschisă. */
+    --amber: #c8b088;
+    --amber-ink: #1c1409;
+    --amber-deep: #7a6038;
     --deep-teal: #14655a;
-    --display: "AradLens Display", "Arial Narrow", system-ui, sans-serif;
+    --display: "AradLens Display", Georgia, "Times New Roman", serif;
     --hud-scrim-top: linear-gradient(180deg, rgba(5,7,10,.68), rgba(5,7,10,0));
     --hud-scrim-bottom: linear-gradient(0deg, rgba(5,7,10,.88), rgba(5,7,10,0));
     --hud-hairline: rgba(246,242,233,.22);
     /* World surfaces: near-black ground, bone type, hairline rules.
-       Amber is reserved for live direction / arrival / capture states. */
+       Bejul este rezervat pentru direcția live / sosirea / captură. */
     --bg-main: #0b0e12;
     --bg-surface: #141a21;
     --bg-card: #141a21;
@@ -43,7 +51,7 @@
     --text-muted: rgba(246,242,233,.72);
     --border-color: rgba(246,242,233,.22);
     --accent-teal: #14655a;
-    --accent-green: #e8a33d;
+    --accent-green: #c8b088;
     --btn-bg: rgba(5,7,10,.55);
     --btn-border: rgba(246,242,233,.35);
     --btn-text: #f6f2e9;
@@ -63,7 +71,9 @@
     --text-muted: #4a4234;
     --border-color: rgba(23,17,6,.2);
     --accent-teal: #14655a;
-    --accent-green: #8a5f14;
+    /* Pe suprafețe osoase bejul deschis nu trece pragul de contrast:
+       accentul devine bejul închis (5.3:1 pe #f6f2e9). */
+    --accent-green: #7a6038;
     --btn-bg: rgba(23,17,6,.06);
     --btn-border: rgba(23,17,6,.28);
     --btn-text: #171106;
@@ -73,8 +83,10 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-main); color: var(--text-main); transition: background .3s ease, color .3s ease; }
   ::selection { background: var(--amber); color: var(--amber-ink); }
-  :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 6px; }
-  input, textarea { caret-color: var(--amber); }
+  /* Inelul de focus folosește accentul de suprafață: bej închis pe suprafețe
+     osoase (temă deschisă), bej deschis peste cameră (temă întunecată). */
+  :focus-visible { outline: 2px solid var(--accent-green); outline-offset: 3px; border-radius: 6px; }
+  input, textarea { caret-color: var(--accent-green); }
   /* Fără întârzierea de double-tap zoom pe butoane. Oprirea din banda busolei
      rămâne pe touch-action: none — glisarea nu trebuie citită ca pan/zoom. */
   button { touch-action: manipulation; }
@@ -113,23 +125,22 @@
     display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px;
   }
   .top .brand {
-    font-family: var(--display); font-size: 24px; font-weight: 600;
-    letter-spacing: -0.02em; color: var(--bone);
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: 0.01em; color: var(--bone);
   }
   .top-actions {
     display: flex; align-items: center; gap: 8px;
   }
   .route-step {
-    font-family: var(--display); font-size: 20px; font-weight: 600;
-    letter-spacing: -0.02em; color: var(--amber);
+    font-family: var(--display); font-size: 18px; font-weight: 600;
+    letter-spacing: 0.02em; color: var(--amber);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   .theme-toggle-btn {
     width: 34px; height: 34px; border-radius: 50%;
-    background: rgba(5,7,10,.55); border: 1.5px solid rgba(246,242,233,.35);
-    color: var(--bone); display: flex; align-items: center; justify-content: center;
+    background: rgba(246,242,233,.95); border: 1px solid rgba(23,17,6,.5);
+    color: var(--amber-ink); display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: transform .15s ease, background .2s ease;
-    box-shadow: 2px 6px 14px rgba(0,0,0,.5);
   }
   .theme-toggle-btn:active { transform: scale(.92); }
   .theme-toggle-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; }
@@ -141,12 +152,13 @@
     filter: drop-shadow(2px 6px 12px rgba(0,0,0,.55));
     transition: transform .12s linear;
   }
+  #steerArrow .chev-side { fill: none; stroke: var(--amber-deep); opacity: .8; }
   #steerArrow .chev-mark { fill: none; stroke: var(--amber); }
   #steerEdge {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
-    display: none; font-size: 22px; font-weight: 800; color: var(--bone);
-    background: rgba(5,7,10,.78); border: 1px solid var(--hud-hairline);
-    border-radius: 12px; padding: 10px 16px; white-space: nowrap;
+    display: none; font-size: 22px; font-weight: 800; color: var(--amber-ink);
+    background: rgba(246,242,233,.95); border: 1px solid rgba(23,17,6,.45);
+    border-radius: 2px; padding: 10px 16px; white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 
@@ -157,26 +169,34 @@
   }
   #rail .ring {
     width: 52px; height: 52px; border-radius: 50%;
-    border: 2px solid rgba(246,242,233,.85);
-    background: rgba(5,7,10,.55);
-    color: var(--bone);
+    border: 1px solid rgba(23,17,6,.5);
+    background: rgba(246,242,233,.95);
+    color: var(--amber-ink);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; padding: 0;
-    box-shadow: 2px 6px 14px rgba(0,0,0,.5);
     transition: transform .15s ease, border-color .2s ease;
+    position: relative;
   }
+  /* Starea de mod (Poveste activă) trăiește pe șina din dreapta, nu peste lentilă. */
+  .rail-state-dot {
+    position: absolute; top: 3px; right: 3px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--amber-deep); box-shadow: 0 0 0 2px rgba(246,242,233,.95);
+    opacity: 0; transition: opacity .2s ease;
+  }
+  .rail-state-dot.is-story { opacity: 1; }
   #rail .ring:active { transform: scale(.92); }
   #rail .ring svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
   #rail .ring:disabled { opacity: .55; cursor: default; }
   #rail .ring.capture-ready {
-    border-color: var(--amber);
+    border-color: var(--amber-deep);
     animation: shutterPulse 1.6s ease-in-out infinite;
   }
   #captureDistLabel {
     position: absolute; right: 76px; top: 22%; z-index: 2;
-    margin-top: 58px; font-size: 12px; font-weight: 700; color: var(--bone);
-    background: rgba(5,7,10,.78); border: 1px solid var(--hud-hairline);
-    border-radius: 12px; padding: 4px 10px; pointer-events: none; white-space: nowrap;
+    margin-top: 58px; font-size: 12px; font-weight: 700; color: var(--amber-ink);
+    background: rgba(246,242,233,.95); border: 1px solid rgba(23,17,6,.45);
+    border-radius: 2px; padding: 4px 10px; pointer-events: none; white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 
@@ -231,19 +251,20 @@
   .cb-lock { display: none; fill: none; stroke: rgba(246,242,233,.62); stroke-width: 1.1; stroke-linecap: round; }
   .compass-stop.no-dir .cb-rot { opacity: .28; }
   .cb-name {
-    font-size: 10px; font-weight: 600; line-height: 1.2; text-align: center;
+    font-family: var(--display); font-size: 10px; font-weight: 600; line-height: 1.2;
+    text-align: center; letter-spacing: 0;
     color: var(--bone); opacity: .82; width: 100%;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .cb-dist { font-size: 10px; font-weight: 700; line-height: 1; opacity: .55; font-variant-numeric: tabular-nums; }
   .compass-stop[aria-current="true"] .cb-halo { opacity: .55; }
   .compass-stop[aria-current="true"] .cb-ring { stroke: var(--amber); stroke-width: 1.6; }
-  .compass-stop[aria-current="true"] .cb-tick.major { stroke: rgba(232,163,61,.8); }
+  .compass-stop[aria-current="true"] .cb-tick.major { stroke: rgba(200,176,136,.8); }
   .compass-stop[aria-current="true"] .cb-ahead,
   .compass-stop[aria-current="true"] .cb-tip { fill: var(--amber); }
-  .compass-stop[aria-current="true"] .cb-tail { fill: rgba(232,163,61,.32); }
+  .compass-stop[aria-current="true"] .cb-tail { fill: rgba(200,176,136,.32); }
   .compass-stop[aria-current="true"] .cb-hub { fill: var(--amber); opacity: 1; }
-  .compass-stop[aria-current="true"] .cb-dial { filter: drop-shadow(0 0 6px rgba(232,163,61,.4)); }
+  .compass-stop[aria-current="true"] .cb-dial { filter: drop-shadow(0 0 6px rgba(200,176,136,.4)); }
   .compass-stop[aria-current="true"] .cb-name { color: var(--amber); opacity: 1; }
   .compass-stop[aria-current="true"] .cb-dist { color: var(--amber); opacity: .95; }
   /* Mod Poveste: pași încuiți (viitori) și pași finalizați */
@@ -269,16 +290,16 @@
     transition: background .3s ease;
   }
   #caption .cap-author {
-    font-family: var(--display); font-size: 17px; font-weight: 600;
-    letter-spacing: -0.02em; color: var(--bone);
+    font-family: var(--display); font-size: 16px; font-weight: 600;
+    letter-spacing: -0.005em; color: var(--bone);
   }
   #arLabel {
     position: static; opacity: 1; background: none; border: none;
     border-radius: 0; padding: 0; box-shadow: none; white-space: normal;
   }
   #arLabel .al-name {
-    font-family: var(--display); font-size: 30px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; color: var(--bone); margin: 4px 0 2px;
+    font-family: var(--display); font-size: 26px; font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.12; color: var(--bone); margin: 4px 0 2px;
   }
   #arLabel .al-meta {
     font-size: 15px; font-weight: 700; color: var(--bone);
@@ -307,11 +328,14 @@
   body.debug-mode #diag.debug-only, body.debug-mode #coords.debug-only, body.debug-mode #flipBtn.debug-only { display: block; }
   body.debug-mode #flipBtn.debug-only { display: inline-block; }
 
-  /* Ecran de start / permisiuni — gramatică de flux: fotografie de arhivă
-     full-bleed cu scrim, tipar os, o singură acțiune chihlimbarie */
+  /* Ecran de start — gramatică de flux: fotografie de arhivă full-bleed cu
+     scrim, tipar editorial, o singură acțiune bej. Fără scroll: coloana
+     intră într-un viewport 100dvh, cu CTA jos, la îndemâna degetului.
+     Scrollul vertical rămâne posibil doar ca plasă de siguranță (telefon
+     rotit sau text mărit); în format portret ecranul încape exact. */
   #start {
     position: fixed; inset: 0; z-index: 5; background: var(--ground);
-    color: var(--bone); display: flex; overflow-y: auto;
+    color: var(--bone); display: flex; overflow-x: hidden; overflow-y: auto;
     overscroll-behavior: contain;
   }
   .start-photo { position: fixed; inset: 0; z-index: 0; }
@@ -322,39 +346,48 @@
   }
   .start-inner {
     position: relative; z-index: 2; width: 100%; max-width: 430px;
-    margin: auto; padding: calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+    margin: auto; padding: calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column; gap: clamp(10px, 2.2vh, 20px);
   }
   .start-brand {
-    font-family: var(--display); font-size: 24px; font-weight: 600;
-    letter-spacing: -0.02em; color: var(--bone); margin-bottom: 10px;
+    font-family: var(--display); font-size: clamp(19px, 5vw, 22px); font-weight: 600;
+    letter-spacing: 0.01em; color: var(--bone);
   }
+  /* Blocul de cuprins: urcă în spațiul liber dintre brand și CTA. */
+  .start-head { margin-top: auto; }
   #start h1 {
-    font-family: var(--display); font-size: 30px; font-weight: 600;
-    line-height: 1.15; letter-spacing: -0.02em; color: var(--bone);
-    margin-bottom: 8px; text-wrap: balance;
+    font-family: var(--display); font-size: clamp(26px, 7vw, 32px); font-weight: 600;
+    line-height: 1.08; letter-spacing: -0.005em; color: var(--bone);
+    margin-bottom: 10px; text-wrap: balance;
   }
   .start-promise {
-    font-size: 15px; font-weight: 700; line-height: 1.35;
-    color: var(--bone); max-width: 34ch; margin-bottom: 14px;
+    font-size: clamp(13px, 3.7vw, 15px); font-weight: 700; line-height: 1.38;
+    color: var(--bone); margin-bottom: 8px; text-wrap: pretty;
   }
-  .start-teaser {
-    width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block;
-    border-radius: 12px; border: 1px solid var(--hud-hairline);
-    box-shadow: 2px 8px 22px rgba(0,0,0,.7);
+  .start-detail {
+    font-size: clamp(12px, 3.4vw, 14px); font-weight: 400; line-height: 1.45;
+    color: var(--bone); opacity: .82; margin-bottom: 10px; text-wrap: pretty;
   }
-  .start-credit { font-size: 12px; color: var(--bone); opacity: .75; margin: 6px 0 6px; font-variant-numeric: tabular-nums; }
-  .perm-rows { list-style: none; margin: 6px 0 18px; padding: 0; }
-  .perm-rows li {
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 10px 0; border-top: 1px solid var(--hud-hairline);
+  .start-credit {
+    font-size: 12px; line-height: 1.4; color: var(--bone); opacity: .68;
+    font-variant-numeric: tabular-nums;
   }
-  .perm-rows li:last-child { border-bottom: 1px solid var(--hud-hairline); }
-  .perm-rows svg { flex: 0 0 auto; width: 22px; height: 22px; stroke: var(--bone); fill: none; margin-top: 2px; }
-  .perm-rows strong {
-    display: block; font-family: var(--display); font-size: 17px;
-    font-weight: 600; letter-spacing: -0.02em; color: var(--bone);
+  /* Zona de jos: senzori, ce face primul tap, CTA. */
+  .start-foot { margin-top: auto; }
+  .start-sensors {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+    font-size: 12px; font-weight: 700; color: var(--bone); margin-bottom: 8px;
   }
-  .perm-rows span { font-size: 13px; line-height: 1.4; color: var(--bone); opacity: .8; }
+  .start-sensors .ss { display: inline-flex; align-items: center; gap: 5px; }
+  .start-sensors .ss svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex: 0 0 auto; }
+  .start-sensors .ss + .ss::before { content: "·"; opacity: .55; margin-right: 5px; font-weight: 400; }
+  .start-sensors .ss-note {
+    flex-basis: 100%; font-size: 12px; font-weight: 400; opacity: .75;
+  }
+  .start-hint {
+    font-size: 12px; line-height: 1.4; color: var(--bone); opacity: .78; margin-bottom: 10px;
+  }
   #startBtn {
     display: block; width: 100%; background: var(--amber); color: var(--amber-ink);
     border: none; padding: 15px 34px; font-size: 17px; min-height: 52px;
@@ -362,18 +395,36 @@
     box-shadow: 2px 8px 22px rgba(0,0,0,.7); font-variant-numeric: tabular-nums;
   }
   #startBtn:active { transform: scale(.98); }
-  #start .note { margin-top: 14px; font-size: 12px; line-height: 1.4; opacity: .75; color: var(--bone); text-align: center; }
+  #start .note { margin-top: 10px; font-size: 12px; line-height: 1.4; opacity: .72; color: var(--bone); text-align: center; }
   body.light-theme #start { background: var(--bone); color: var(--amber-ink); }
   body.light-theme .start-scrim {
     background: linear-gradient(180deg, rgba(246,242,233,.94) 0%, rgba(246,242,233,.82) 42%, rgba(246,242,233,.95) 100%);
   }
   body.light-theme #start h1, body.light-theme .start-brand,
-  body.light-theme .start-promise, body.light-theme .perm-rows strong { color: var(--amber-ink); }
-  body.light-theme .perm-rows svg { stroke: var(--amber-ink); }
-  body.light-theme .perm-rows span, body.light-theme #start .note,
-  body.light-theme .start-credit { color: var(--amber-ink); }
-  body.light-theme .perm-rows li, body.light-theme .perm-rows li:last-child { border-color: rgba(23,17,6,.2); }
-  body.light-theme .start-teaser { border-color: rgba(23,17,6,.25); }
+  body.light-theme .start-promise, body.light-theme .start-detail,
+  body.light-theme .start-sensors, body.light-theme .start-hint,
+  body.light-theme #start .note, body.light-theme .start-credit { color: var(--amber-ink); }
+
+  /* Telefon rotit (format landscape): coloana devine două câmpuri —
+     textul la stânga, acțiunea la dreapta — ca toată povestea și CTA-ul
+     să încapă fără scroll pe 375–430 px înălțime. */
+  @media (orientation: landscape) and (max-height: 560px) {
+    .start-inner {
+      max-width: 760px; display: grid; align-content: center;
+      grid-template-columns: 1.05fr .95fr; gap: 6px 28px;
+      padding: calc(12px + env(safe-area-inset-top)) 20px calc(12px + env(safe-area-inset-bottom));
+    }
+    .start-brand { grid-column: 1 / -1; grid-row: 1; }
+    .start-head { grid-column: 1; grid-row: 2; margin-top: 0; align-self: center; }
+    .start-foot { grid-column: 2; grid-row: 2; margin-top: 0; align-self: center; }
+    #start h1 { font-size: clamp(19px, 3vw, 26px); margin-bottom: 6px; }
+    .start-promise { font-size: 13px; margin-bottom: 6px; }
+    .start-detail { font-size: 12px; line-height: 1.38; margin-bottom: 6px; }
+    .start-credit { font-size: 12px; }
+    .start-sensors { margin-bottom: 6px; }
+    .start-hint { margin-bottom: 8px; }
+    #startBtn { padding: 12px 28px; min-height: 48px; }
+  }
 
   /* Bara de status/eroare — chihlimbar semnal, text cerneală (rămâne
      întunecată peste obiectiv în ambele teme, din proiectare) */
@@ -409,8 +460,8 @@
   }
   #card .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
   #card .card-title {
-    font-family: var(--display); font-size: 24px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; color: var(--text-main);
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.15; color: var(--text-main);
   }
   #card .card-x {
     flex:0 0 auto; background:transparent; color: var(--text-main); border:1.5px solid var(--border-color);
@@ -464,8 +515,8 @@
   /* Butoanele-inele trăiesc în #rail (vezi mai sus); regulile vechi devin neutre */
   #albumBtn, #photoCaptureBtn { position: static; }
   @keyframes shutterPulse {
-    0%, 100% { box-shadow: 2px 6px 14px rgba(0,0,0,.5); }
-    50% { box-shadow: 2px 8px 22px rgba(0,0,0,.7); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(122,96,56,.55); }
+    50% { box-shadow: 0 0 0 7px rgba(122,96,56,0); }
   }
 
   /* Notificare eroare busolă (dreptunghi cu colțuri rotunjite, contrast înalt;
@@ -539,8 +590,8 @@
     padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;
   }
   .album-header h2 {
-    font-family: var(--display); font-size: 24px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; color: var(--text-main); text-wrap: balance;
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.15; color: var(--text-main); text-wrap: balance;
   }
   .album-header p { font-size: 12px; margin-top: 4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
   .album-close-btn {
@@ -549,37 +600,76 @@
     min-height: 44px; font-variant-numeric: tabular-nums;
   }
 
-  /* Hartă schematică temporară: header aliniat vertical și pini măriți.
-     Harta rămâne o suprafață media întunecată în ambele teme, ca obiectivul. */
-  .schematic-box {
+  /* Hartă liniară pe module: o coloană de opriri jos→sus (prima oprire jos,
+     ca în selecția de niveluri din jocuri). Ordinea e cronologică, nu geografică. */
+  .level-chipbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .level-chip {
+    padding: 8px 14px; min-height: 44px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+    background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+    cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s ease, border-color .2s ease;
+  }
+  .level-chip.active {
+    background: rgba(200,176,136,.15); color: var(--accent-green); border-color: var(--accent-green);
+  }
+  .level-box {
     background: var(--bg-surface); border: 1px solid var(--border-color);
-    border-radius: 12px; padding: 12px; margin-bottom: 14px; color: var(--text-main);
-    box-shadow: 2px 8px 22px rgba(0,0,0,.5);
+    border-radius: 12px; padding: 14px 12px 12px; color: var(--text-main);
   }
-  .schematic-header-group {
-    display: flex; flex-direction: column; align-items: flex-start;
-    gap: 4px; margin-bottom: 10px;
+  .level-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 6px 12px; }
+  .level-module-label {
+    font-family: var(--display); font-size: 16px; font-weight: 600; letter-spacing: -0.005em;
+    color: var(--text-main); text-wrap: balance;
   }
-  .schematic-badge {
-    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1px;
-    background: var(--deep-teal); color: var(--bone); padding: 3px 8px; border-radius: 8px;
-    text-transform: uppercase; font-variant-numeric: tabular-nums;
+  .level-progress { font-size: 12px; font-weight: 700; color: var(--accent-green); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .level-track { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px 6px 16px; }
+  /* traseul: linie punctată verticală printre noduri */
+  .level-track::before {
+    content: ""; position: absolute; top: 40px; bottom: 52px; left: 50%;
+    width: 0; border-left: 2px dashed rgba(246,242,233,.28); transform: translateX(-1px);
   }
-  .schematic-instruction {
-    font-size: 13px; font-weight: 600; color: var(--text-main); margin-left: 2px;
+  body.light-theme .level-track::before { border-left-color: rgba(23,17,6,.28); }
+  .level-stop {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    width: 100%; max-width: 300px; margin: 0 auto 28px; padding: 0 6px;
+    background: transparent; border: 0; color: var(--text-main); cursor: pointer;
+    -webkit-tap-highlight-color: transparent; text-align: center;
+    font-family: inherit; font-size: inherit;
   }
-  .schematic-svg-wrap {
-    width: 100%; height: 230px; position: relative; border-radius: 10px;
-    overflow: hidden; background: #0b0e12; border: 1px solid var(--border-color);
-    padding: 8px;
+  .level-stop:last-child { margin-bottom: 6px; }
+  .level-stop:active .level-node { transform: scale(.94); }
+  .level-stop:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 3px; border-radius: 14px; }
+  .level-node {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-surface); border: 2px solid var(--border-color);
+    color: var(--text-main); font-variant-numeric: tabular-nums;
+    position: relative; transition: transform .15s ease, box-shadow .2s ease;
   }
-  .schematic-svg-wrap svg { width: 100%; height: 100%; display: block; }
-  .schematic-pin { transition: transform .2s ease; cursor: pointer; }
-  .schematic-pin.active-pin { filter: none; }
-  .schematic-pin-group { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .schematic-pin-group:active .schematic-pin { transform: scale(.93); }
-  .schematic-pin-group:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-  .schematic-note { font-size: 12px; margin-top: 8px; line-height: 1.35; color: var(--text-muted); }
+  .level-year { font-family: var(--display); font-size: 17px; font-weight: 600; }
+  .level-lock {
+    position: absolute; top: -4px; right: -8px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--bg-modal); border: 1px solid var(--border-color); color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .level-lock svg { width: 9px; height: 9px; stroke: currentColor; fill: none; }
+  .level-stop.done .level-node { background: var(--deep-teal); border-color: var(--deep-teal); color: var(--bone); }
+  .level-stop.current .level-node {
+    background: var(--amber); border-color: var(--amber); color: var(--amber-ink);
+    animation: levelPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes levelPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,176,136,.45); }
+    50% { box-shadow: 0 0 0 10px rgba(200,176,136,0); }
+  }
+  .level-stop.locked .level-node { border-color: var(--border-color); opacity: .55; }
+  .level-name {
+    font-family: var(--display); font-size: 19px; font-weight: 600; letter-spacing: -0.005em;
+    line-height: 1.2; margin-top: 6px; color: var(--text-main); text-wrap: balance;
+  }
+  .level-sub { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .level-stop.current .level-sub { color: var(--accent-green); font-weight: 700; }
+  .level-note { font-size: 12px; margin-top: 10px; line-height: 1.35; color: var(--text-muted); text-align: center; }
 
   /* Secțiunea de comparație Atunci / Acum — suprafețe de lume cu rigle de păr */
   .album-detail {
@@ -588,8 +678,8 @@
     box-shadow: 2px 8px 22px rgba(0,0,0,.5);
   }
   .album-landmark-name {
-    font-family: var(--display); font-size: 22px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; color: var(--text-main); margin-bottom: 4px; text-wrap: balance;
+    font-family: var(--display); font-size: 20px; font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.15; color: var(--text-main); margin-bottom: 4px; text-wrap: balance;
   }
   .album-landmark-meta { font-size: 12px; margin-bottom: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 
@@ -636,7 +726,7 @@
   .album-action-btn.secondary {
     background: transparent; color: var(--text-main); border: 1.5px solid var(--border-color);
   }
-  body.light-theme .schematic-box, body.light-theme .album-detail { box-shadow: 2px 8px 22px rgba(23,17,6,.18); }
+  body.light-theme .level-box, body.light-theme .album-detail { box-shadow: 2px 8px 22px rgba(23,17,6,.18); }
   body.light-theme .album-action-btn.primary { box-shadow: 2px 8px 22px rgba(23,17,6,.25); }
 
   /* Modul de fotografiere activă (când ești lângă reper) */
@@ -654,8 +744,8 @@
     font-variant-numeric: tabular-nums;
   }
   .cs-title {
-    font-family: var(--display); font-size: 22px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; text-shadow: 2px 6px 14px rgba(5,7,10,.8); text-wrap: balance;
+    font-family: var(--display); font-size: 20px; font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.15; text-shadow: 2px 6px 14px rgba(5,7,10,.8); text-wrap: balance;
   }
   .cs-sub { font-size: 13px; opacity: .85; margin-top: 3px; text-shadow: 2px 4px 10px rgba(5,7,10,.8); font-variant-numeric: tabular-nums; }
 
@@ -663,7 +753,7 @@
     flex: 1; display: flex; align-items: center; justify-content: center; pointer-events: none;
   }
   .cs-frame {
-    width: 240px; height: 240px; border: 2px dashed rgba(232,163,61,.65);
+    width: 240px; height: 240px; border: 2px dashed rgba(200,176,136,.65);
     border-radius: 16px; box-shadow: 0 0 0 9999px rgba(5,7,10,.15);
   }
 
@@ -705,7 +795,7 @@
   }
   body.light-theme .cm-card { background: #fffdf7; color: var(--amber-ink); border-color: rgba(23,17,6,.2); box-shadow: 2px 12px 32px rgba(23,17,6,.25); }
   body.light-theme .cm-card .cm-desc { color: var(--amber-ink); }
-  .cm-icon { margin-bottom: 8px; color: var(--amber); }
+  .cm-icon { margin-bottom: 8px; color: var(--accent-green); }
   .cm-icon svg { width: 40px; height: 40px; }
   .cm-title {
     font-family: var(--display); font-size: 22px; font-weight: 600;
@@ -722,8 +812,8 @@
     text-align: center; padding: 30px;
   }
   #desktopPlaceholder h1 {
-    font-family: var(--display); font-size: 30px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; text-wrap: balance;
+    font-family: var(--display); font-size: clamp(26px, 6vw, 32px); font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.12; margin-bottom: 12px; text-wrap: balance;
   }
   #desktopPlaceholder p { font-size: 15px; font-weight: 700; line-height: 1.35; max-width: 400px; }
   #desktopPlaceholder p + p { font-size: 13px; font-weight: 400; opacity: .8; margin-top: 8px; }
@@ -737,31 +827,15 @@
   /* =====================================================================
      STILURI PENTRU MODUL POVESTE / CRONOLOGIE & CAPITOLE
      ===================================================================== */
-  .mode-badge {
-    background: rgba(5,7,10,.78); border: 1.5px solid var(--amber);
-    color: var(--bone); border-radius: 12px; padding: 4px 10px;
-    font-size: 12px; font-weight: 700; display: inline-flex; align-items: center;
-    gap: 6px; cursor: pointer; transition: transform .15s ease, background .2s ease;
-    white-space: nowrap; font-family: inherit; box-shadow: 2px 4px 12px rgba(0,0,0,.4);
-    min-height: 34px; -webkit-tap-highlight-color: transparent;
-  }
-  .mode-badge:active { transform: scale(.95); }
-  .mode-badge-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
-    display: inline-block; box-shadow: 0 0 8px var(--amber);
-  }
   .story-objective-banner {
-    background: rgba(5,7,10,.85); border: 1.5px solid var(--amber);
-    border-radius: 10px; padding: 6px 12px; margin-top: 8px;
-    font-size: 12px; font-weight: 700; color: var(--bone);
+    background: rgba(246,242,233,.95); border: 1px solid var(--amber-deep);
+    border-radius: 2px; padding: 6px 12px; margin-top: 8px;
+    font-size: 12px; font-weight: 700; color: var(--amber-ink);
     display: flex; align-items: center; gap: 8px; max-width: 95%;
-    margin-left: auto; margin-right: auto; box-shadow: 2px 6px 18px rgba(0,0,0,.5);
+    margin-left: auto; margin-right: auto;
     font-variant-numeric: tabular-nums; cursor: pointer; font-family: inherit;
   }
   .story-objective-banner .sob-icon { font-size: 15px; }
-  body.light-theme .mode-badge {
-    background: rgba(255,253,247,.92); color: var(--amber-ink); border-color: var(--amber-deep);
-  }
   body.light-theme .story-objective-banner {
     background: rgba(255,253,247,.95); color: var(--amber-ink); border-color: var(--amber-deep);
   }
@@ -785,8 +859,8 @@
     gap: 12px;
   }
   .modal-header h2 {
-    font-family: var(--display); font-size: 22px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.2; color: var(--text-main);
+    font-family: var(--display); font-size: 20px; font-weight: 600;
+    letter-spacing: -0.005em; line-height: 1.2; color: var(--text-main);
   }
   .modal-header p { font-size: 12px; margin-top: 4px; color: var(--text-muted); }
   .modal-close-btn {
@@ -800,24 +874,23 @@
   /* Grile și carduri de mod de joc */
   .mode-cards-grid { display: flex; flex-direction: column; gap: 14px; }
   .mode-select-card {
-    background: rgba(246,242,233,.04); border: 1.5px solid var(--border-color);
-    border-radius: 14px; padding: 16px; position: relative; transition: border-color .2s ease;
+    background: rgba(246,242,233,.04); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 16px; position: relative; transition: border-color .2s ease;
   }
   .mode-select-card.featured {
-    border-color: var(--amber); background: rgba(232,163,61,.07);
+    border-color: var(--accent-green); background: rgba(200,176,136,.07);
   }
   .mode-badge-pill {
     display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
     background: var(--amber); color: var(--amber-ink); padding: 3px 8px; border-radius: 8px;
     letter-spacing: 0.5px; margin-bottom: 8px;
   }
-  .mode-icon { font-size: 32px; margin-bottom: 6px; }
   .mode-card-title {
-    font-family: var(--display); font-size: 20px; font-weight: 600;
-    color: var(--text-main); margin-bottom: 2px;
+    font-family: var(--display); font-size: 19px; font-weight: 600;
+    letter-spacing: -0.005em; color: var(--text-main); margin-bottom: 2px;
   }
   .mode-card-subtitle {
-    font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: 8px;
+    font-size: 12px; font-weight: 700; color: var(--accent-green); margin-bottom: 8px;
   }
   .mode-card-desc {
     font-size: 13px; line-height: 1.4; color: var(--text-muted); margin-bottom: 12px;
@@ -830,11 +903,11 @@
   /* Grile și carduri de capitole */
   .chapters-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
   .chapter-card {
-    background: rgba(246,242,233,.04); border: 1.5px solid var(--border-color);
-    border-radius: 14px; padding: 16px; position: relative;
+    background: rgba(246,242,233,.04); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 16px; position: relative;
   }
   .chapter-card.active-chapter {
-    border-color: var(--amber); background: rgba(232,163,61,.08);
+    border-color: var(--accent-green); background: rgba(200,176,136,.08);
   }
   .chapter-card.completed-chapter {
     border-color: var(--deep-teal); background: rgba(20,101,90,.12);
@@ -843,7 +916,7 @@
     display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 4px;
   }
   .chapter-number {
-    font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--amber);
+    font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--accent-green);
     letter-spacing: 1px;
   }
   .chapter-period-badge {
@@ -851,10 +924,10 @@
     padding: 2px 8px; border-radius: 6px; color: var(--text-main);
   }
   .chapter-title {
-    font-family: var(--display); font-size: 18px; font-weight: 600;
-    color: var(--text-main); margin-bottom: 4px;
+    font-family: var(--display); font-size: 17px; font-weight: 600;
+    letter-spacing: -0.005em; color: var(--text-main); margin-bottom: 4px;
   }
-  .chapter-desc { font-size: 12.5px; line-height: 1.35; color: var(--text-muted); margin-bottom: 10px; }
+  .chapter-desc { font-size: 13px; line-height: 1.35; color: var(--text-muted); margin-bottom: 10px; }
   .chapter-landmarks-list {
     display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
   }
@@ -867,7 +940,7 @@
     background: rgba(20,101,90,.3); border-color: var(--deep-teal); color: var(--bone);
   }
   .cl-item.current {
-    background: rgba(232,163,61,.2); border-color: var(--amber); color: var(--amber);
+    background: rgba(200,176,136,.2); border-color: var(--accent-green); color: var(--accent-green);
   }
   .chapter-reward-snippet {
     display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
@@ -885,11 +958,12 @@
     background: var(--deep-teal); color: var(--bone); padding: 4px 10px; border-radius: 8px;
   }
   .lore-year-stamp {
-    font-family: var(--display); font-size: 20px; font-weight: 800; color: var(--amber);
+    font-family: var(--display); font-size: 20px; font-weight: 800; letter-spacing: 0.02em;
+    color: var(--accent-green);
   }
   .lore-title {
-    font-family: var(--display); font-size: 24px; font-weight: 600;
-    letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 4px;
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: -0.005em; color: var(--text-main); margin-bottom: 4px;
   }
   .lore-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
   .lore-story-box {
@@ -898,10 +972,10 @@
   }
   .lore-ribbon {
     font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--amber); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    color: var(--accent-green); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
   }
   .lore-text {
-    font-size: 13.5px; line-height: 1.5; color: var(--text-main); font-weight: 500;
+    font-size: 13px; line-height: 1.5; color: var(--text-main); font-weight: 500;
   }
   .lore-photos-row {
     display: flex; gap: 8px; margin-bottom: 14px;
@@ -910,18 +984,18 @@
     flex: 1; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);
   }
   .lore-next-preview {
-    background: rgba(232,163,61,.1); border: 1px solid var(--amber); border-radius: 10px;
-    padding: 10px 12px; font-size: 12.5px; color: var(--text-main); margin-bottom: 14px;
+    background: rgba(200,176,136,.1); border: 1px solid var(--accent-green); border-radius: 10px;
+    padding: 10px 12px; font-size: 13px; color: var(--text-main); margin-bottom: 14px;
     display: flex; flex-direction: column; gap: 2px;
   }
-  .lore-next-preview strong { color: var(--amber); font-size: 11px; text-transform: uppercase; }
+  .lore-next-preview strong { color: var(--accent-green); font-size: 11px; text-transform: uppercase; }
 
   /* Modal de Recompensă & Diplomă */
   .celebratory { text-align: center; }
   .reward-ribbon {
     display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
-    letter-spacing: 2px; color: var(--amber); background: rgba(232,163,61,.15);
-    padding: 4px 12px; border-radius: 20px; border: 1px solid var(--amber); margin-bottom: 12px;
+    letter-spacing: 2px; color: var(--accent-green); background: rgba(200,176,136,.15);
+    padding: 4px 12px; border-radius: 20px; border: 1px solid var(--accent-green); margin-bottom: 12px;
   }
   .reward-icon-huge {
     font-size: 64px; line-height: 1; margin-bottom: 10px;
@@ -933,52 +1007,38 @@
     100% { transform: scale(1); }
   }
   .reward-title {
-    font-family: var(--display); font-size: 24px; font-weight: 600;
-    color: var(--text-main); margin-bottom: 4px;
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: -0.005em; color: var(--text-main); margin-bottom: 4px;
   }
   .reward-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
   .diploma-card {
-    background: #fffdf7; color: #171106; border: 4px double #8a5f14;
+    background: #fffdf7; color: #171106; border: 4px double #7a6038;
     border-radius: 12px; padding: 18px 16px; margin-bottom: 18px; text-align: center;
-    box-shadow: inset 0 0 20px rgba(138,95,20,.1), 2px 8px 24px rgba(0,0,0,.6);
+    box-shadow: inset 0 0 20px rgba(122,96,56,.1), 2px 8px 24px rgba(0,0,0,.6);
     position: relative;
   }
   .diploma-seal {
     font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-    color: #8a5f14; border-bottom: 1px solid #8a5f14; padding-bottom: 4px; margin-bottom: 10px;
+    color: #7a6038; border-bottom: 1px solid #7a6038; padding-bottom: 4px; margin-bottom: 10px;
   }
   .diploma-name {
-    font-family: var(--display); font-size: 21px; font-weight: 700;
-    color: #8a5f14; margin-bottom: 8px; line-height: 1.2;
+    font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: 0.01em;
+    color: #7a6038; margin-bottom: 8px; line-height: 1.2;
   }
   .diploma-text {
-    font-size: 12.5px; line-height: 1.45; color: #4a4234; margin-bottom: 12px;
+    font-size: 13px; line-height: 1.45; color: #4a4234; margin-bottom: 12px;
   }
   .diploma-meta {
-    font-size: 11px; font-weight: 700; color: #8a5f14; margin-bottom: 12px; font-variant-numeric: tabular-nums;
+    font-size: 11px; font-weight: 700; color: #7a6038; margin-bottom: 12px; font-variant-numeric: tabular-nums;
   }
   .diploma-steps {
     display: flex; flex-direction: column; gap: 4px; text-align: left;
-    background: rgba(138,95,20,.06); border-radius: 8px; padding: 8px 10px;
-    font-size: 11.5px; font-weight: 600; color: #171106;
+    background: rgba(122,96,56,.06); border-radius: 8px; padding: 8px 10px;
+    font-size: 12px; font-weight: 600; color: #171106;
   }
   .diploma-steps span { display: flex; align-items: center; gap: 6px; }
   .reward-actions { display: flex; flex-direction: column; gap: 8px; }
 
-  /* Tab bar în album */
-  .album-tab-bar {
-    display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border-color);
-    padding-bottom: 8px;
-  }
-  .album-tab-btn {
-    flex: 1; padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 10px;
-    border: 1.5px solid transparent; background: transparent; color: var(--text-muted);
-    cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: center;
-    gap: 6px; transition: background-color .2s ease, color .2s ease, border-color .2s ease;
-  }
-  .album-tab-btn.active {
-    background: rgba(232,163,61,.15); color: var(--amber); border-color: var(--amber);
-  }
   .rewards-list-container {
     display: flex; flex-direction: column; gap: 14px;
   }
@@ -987,14 +1047,14 @@
     border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: center;
   }
   .reward-badge-card.unlocked {
-    border-color: var(--amber); background: rgba(232,163,61,.06);
+    border-color: var(--accent-green); background: rgba(200,176,136,.06);
   }
   .reward-badge-card.locked { opacity: 0.55; }
   .rbc-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
   .rbc-info { flex: 1; }
-  .rbc-title { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
+  .rbc-title { font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-main); margin-bottom: 2px; }
   .rbc-desc { font-size: 12px; color: var(--text-muted); line-height: 1.35; margin-bottom: 4px; }
-  .rbc-meta { font-size: 11px; font-weight: 700; color: var(--amber); }
+  .rbc-meta { font-size: 11px; font-weight: 700; color: var(--accent-green); }
 
   /* Titluri: rânduri echilibrate (progressive enhancement, ignorat de browserele vechi) */
   .card-title, .modal-header h2, .chapter-title, .mode-card-title,
@@ -1004,18 +1064,16 @@
   @media (hover: hover) {
     .btn:hover, .card-x:hover, .album-close-btn:hover, .modal-close-btn:hover,
     .cs-cancel-btn:hover, .album-action-btn.secondary:hover { border-color: currentColor; }
-    .album-tab-btn:not(.active):hover { color: var(--text-main); border-color: currentColor; }
-    #rail .ring:hover { border-color: var(--bone); }
+    #rail .ring:hover { border-color: rgba(23,17,6,.85); }
     #card .card-actions .btn:hover,
     #startBtn:hover, #desktopPreviewBtn:hover, .album-action-btn.primary:hover {
-      box-shadow: 0 0 0 3px rgba(232,163,61,.35), 2px 8px 22px rgba(0,0,0,.7);
+      box-shadow: 0 0 0 3px rgba(200,176,136,.35), 2px 8px 22px rgba(0,0,0,.7);
     }
-    .mode-badge:hover, .story-objective-banner:hover { filter: brightness(1.15); }
+    .story-objective-banner:hover { filter: brightness(1.15); }
     /* Cursor real: indiciu de hover fără a atinge transformările de :active. */
     .compass-stop:hover { filter: brightness(1.18); }
     #compassWarningBadge:hover { filter: brightness(1.12); }
     .cs-shutter:hover { border-color: var(--bone); }
-    .schematic-pin-group:hover .schematic-pin { filter: brightness(1.18); }
   }
 
   /* Mișcare redusă: animațiile decorative sunt oprite; stările funcționale
@@ -1111,98 +1169,50 @@
 
 
 
-<!-- Ecran / Panou de Album și Hartă Schematică -->
+<!-- Ecran / Panou de Album — Hartă liniară pe module -->
 <div id="albumModal" role="dialog" aria-modal="true" aria-labelledby="albumTitle">
   <div class="album-header">
     <div>
       <h2 id="albumTitle">Album &amp; Hartă Arad</h2>
-      <p>Hartă schematică demonstrativă, comparații istorice și cronologie</p>
+      <p>Traseu pe module · atingi o oprire și deschizi comparația Atunci / Acum</p>
     </div>
     <button class="album-close-btn" id="albumCloseBtn">Închide</button>
   </div>
 
-  <!-- Comutator Tab-uri Album -->
-  <div class="album-tab-bar">
-    <button class="album-tab-btn active" id="tabMapBtn" aria-pressed="true">📷 Repere &amp; Hartă</button>
-    <button class="album-tab-btn" id="tabRewardsBtn" aria-pressed="false">🏆 Recompense &amp; Cronologie (<span id="rewardsCountBadge">0</span>)</button>
-  </div>
-
-  <!-- Tab 1: Hartă și comparație -->
+  <!-- Hartă liniară: o singură coloană de opriri, prima oprire jos, ultima sus -->
   <div id="albumMapTab">
-    <!-- Hartă schematică temporară: titlu și instrucțiune aliniate vertical, pini măriți -->
-    <div class="schematic-box">
-      <div class="schematic-header-group">
-        <span class="schematic-badge">Hartă schematică temporară (Demo)</span>
-        <div class="schematic-instruction">Selectează un reper</div>
+    <div class="level-chipbar" id="albumModuleBar" role="group" aria-label="Alege modulul traseului"></div>
+    <div class="level-box">
+      <div class="level-head">
+        <span class="level-module-label" id="albumModuleLabel">—</span>
+        <span class="level-progress" id="albumModuleProgress">—</span>
       </div>
-      <div class="schematic-svg-wrap">
-        <svg viewBox="0 0 380 230" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Hartă schematică a reperelor Aradului">
-          <defs>
-            <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(246,242,233,0.06)" stroke-width="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#gridPattern)" />
-
-          <!-- Râul Mureș (formă schematică de râu) -->
-          <path d="M 0 185 C 90 215, 180 200, 260 175 S 380 145, 380 145" stroke="#1f6f65" stroke-width="26" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <text x="250" y="200" fill="#f6f2e9" opacity="0.6" font-size="9" font-weight="700" letter-spacing="1">RÂUL MUREȘ</text>
-
-          <!-- Bulevardul Revoluției (axă schematică) -->
-          <path d="M 40 108 L 340 96" stroke="rgba(246,242,233,0.28)" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 4"/>
-          <text x="50" y="94" fill="rgba(246,242,233,0.55)" font-size="8">Bd. Revoluției (schematic)</text>
-
-          <!-- Pini demonstrativi măriți pentru cele 5 repere -->
-          <g class="schematic-pin-group" data-idx="0" tabindex="0" role="button" aria-label="Selectează Turnul de Apă" onclick="selectAlbumLandmark(0)" style="cursor:pointer">
-            <circle class="schematic-pin" id="mapPin0" cx="75" cy="48" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-            <text x="75" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">1</text>
-            <text x="75" y="74" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Turnul de Apă</text>
-          </g>
-          <g class="schematic-pin-group" data-idx="1" tabindex="0" role="button" aria-label="Selectează Palatul Cultural" onclick="selectAlbumLandmark(1)" style="cursor:pointer">
-            <circle class="schematic-pin" id="mapPin1" cx="290" cy="130" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-            <text x="290" y="134" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">2</text>
-            <text x="290" y="156" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Palatul Cultural</text>
-          </g>
-          <g class="schematic-pin-group" data-idx="2" tabindex="0" role="button" aria-label="Selectează Primăria" onclick="selectAlbumLandmark(2)" style="cursor:pointer">
-            <circle class="schematic-pin" id="mapPin2" cx="215" cy="80" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-            <text x="215" y="84" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">3</text>
-            <text x="215" y="106" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Primăria</text>
-          </g>
-          <g class="schematic-pin-group" data-idx="3" tabindex="0" role="button" aria-label="Selectează Teatrul Slavici" onclick="selectAlbumLandmark(3)" style="cursor:pointer">
-            <circle class="schematic-pin" id="mapPin3" cx="145" cy="96" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-            <text x="145" y="100" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">4</text>
-            <text x="145" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Teatrul Slavici</text>
-          </g>
-          <g class="schematic-pin-group" data-idx="4" tabindex="0" role="button" aria-label="Selectează Catedrala Veche" onclick="selectAlbumLandmark(4)" style="cursor:pointer">
-            <circle class="schematic-pin" id="mapPin4" cx="90" cy="150" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-            <text x="90" y="154" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">5</text>
-            <text x="90" y="176" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Catedrala Veche</text>
-          </g>
-        </svg>
-      </div>
-      <div class="schematic-note">Pozițiile de pe această hartă sunt demonstrative și orientative (fără proiecție GPS reală).</div>
+      <div class="level-track" id="albumLevelTrack"></div>
+      <div class="level-note">Traseu schematic pe module, nu o proiecție GPS: ordinea opririlor e cea cronologică a modului ales, nu așezarea geografică reală.</div>
     </div>
+  </div>
+</div>
 
-    <!-- Zonă detaliu și comparație Atunci / Acum -->
-    <div class="album-detail">
-      <div class="album-landmark-name" id="albumLandmarkTitle">—</div>
-      <div class="album-landmark-meta" id="albumLandmarkMeta">—</div>
+<!-- Fereastra Atunci / Acum — deschisă din atingerea unei opriri de pe hartă -->
+<div id="albumCompareModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="albumLandmarkTitle">
+  <div class="album-detail" id="albumCompareCard" style="width:100%;max-width:440px;">
+    <div class="album-landmark-name" id="albumLandmarkTitle">—</div>
+    <div class="album-landmark-meta" id="albumLandmarkMeta">—</div>
 
-      <div class="cmp-grid">
-        <!-- Card Atunci -->
-        <div class="cmp-card">
-          <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg> Atunci (Istoric)</div>
-          <div class="cmp-card-content" id="albumThenBox">
-            <!-- Generat dinamic -->
-          </div>
+    <div class="cmp-grid">
+      <!-- Card Atunci -->
+      <div class="cmp-card">
+        <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg> Atunci (Istoric)</div>
+        <div class="cmp-card-content" id="albumThenBox">
+          <!-- Generat dinamic -->
         </div>
+      </div>
 
-        <!-- Card Acum -->
-        <div class="cmp-card">
-          <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Acum (Album personal)</div>
-          <div class="cmp-card-content" id="albumNowBox">
-            <!-- Generat dinamic -->
-          </div>
+      <!-- Card Acum -->
+      <div class="cmp-card">
+        <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Acum (Album personal)</div>
+        <div class="cmp-card-content" id="albumNowBox">
+          <!-- Generat dinamic -->
         </div>
       </div>
     </div>
@@ -1211,17 +1221,6 @@
     <div class="album-actions">
       <button class="album-action-btn primary" id="albumGuideBtn">Ghidează spre acest reper în AR</button>
       <button class="album-action-btn secondary" id="albumBackBtn">Închide</button>
-    </div>
-  </div>
-
-  <!-- Tab 2: Recompense, Diplome & Cronologia Istorică -->
-  <div id="albumRewardsTab" style="display:none;">
-    <div class="rewards-list-container" id="albumRewardsList">
-      <!-- Generat dinamic din capitole și progres -->
-    </div>
-    <div class="album-actions" style="margin-top:14px;">
-      <button class="album-action-btn primary" id="albumRewardsLaunchBtn">Deschide Capitolele Povestii</button>
-      <button class="album-action-btn secondary" id="albumRewardsCloseBtn">Închide</button>
     </div>
   </div>
 </div>
@@ -1239,9 +1238,8 @@
 
     <div class="mode-cards-grid">
       <!-- Modul Poveste / Lore -->
-      <div class="mode-select-card featured" id="selectStoryModeCard">
-        <div class="mode-badge-pill">⭐ Recomandat · Modul Poveste</div>
-        <div class="mode-icon" aria-hidden="true">📜</div>
+      <div class="mode-select-card" id="selectStoryModeCard">
+        <div class="mode-badge-pill">Opțional · Modul Poveste</div>
         <div class="mode-card-title">Cronica Aradului (Story &amp; Lore)</div>
         <div class="mode-card-subtitle">Călătorie Cronologică pe Capitole</div>
         <p class="mode-card-desc">
@@ -1252,12 +1250,12 @@
           <span>✓ Istorisiri secrete („Lore”) deblocate la fața locului</span>
           <span>✓ Recompense, medalii și diplome de colecție</span>
         </div>
-        <button class="album-action-btn primary" id="btnChooseStoryMode">Alege Capitolul &amp; Începe Povestea ➔</button>
+        <button class="album-action-btn secondary" id="btnChooseStoryMode">Alege Capitolul &amp; Începe Povestea ➔</button>
       </div>
 
       <!-- Modul Liber -->
-      <div class="mode-select-card" id="selectFreeModeCard">
-        <div class="mode-icon" aria-hidden="true">🧭</div>
+      <div class="mode-select-card featured" id="selectFreeModeCard">
+        <div class="mode-badge-pill">Recomandat · Modul Liber</div>
         <div class="mode-card-title">Modul Liber (Explorer)</div>
         <div class="mode-card-subtitle">Explorare la alegerea ta</div>
         <p class="mode-card-desc">
@@ -1268,7 +1266,7 @@
           <span>✓ Comparații foto Atunci / Acum</span>
           <span>✓ Potrivit pentru explorare rapidă</span>
         </div>
-        <button class="album-action-btn secondary" id="btnChooseFreeMode">Explorează în Mod Liber</button>
+        <button class="album-action-btn primary" id="btnChooseFreeMode">Explorează în Mod Liber</button>
       </div>
     </div>
   </div>
@@ -1362,10 +1360,6 @@
     <div class="top-row">
       <div class="brand">AradLens</div>
       <div class="top-actions">
-        <button id="gameModeBadge" class="mode-badge" title="Schimbă modul de joc sau capitolul">
-          <span class="mode-badge-dot"></span>
-          <span id="gameModeBadgeText">Mod Poveste: Cap. I</span>
-        </button>
         <div class="route-step tnum" id="routeStep" aria-live="polite">1 / 5</div>
         <button id="compassWarningBadge" aria-label="Avertisment busolă" title="Avertisment busolă: apasă pentru detalii">
           <span>!</span>
@@ -1385,6 +1379,7 @@
   <div class="center">
     <svg id="steerArrow" viewBox="0 0 72 72" aria-hidden="true">
       
+      <path class="chev-side" d="M18 47.5 L36 23.5 L54 47.5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
       <path class="chev-mark" d="M18 44 L36 20 L54 44" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div id="steerEdge" aria-hidden="true"></div>
@@ -1396,6 +1391,7 @@
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         <path d="M8 7h8M8 11h6"/>
       </svg>
+      <span class="rail-state-dot" id="railModeDot" aria-hidden="true"></span>
     </button>
     <button id="detailsBtn" class="ring" style="display:none;" aria-label="Deschide fișa reperului" title="Fișă & audio"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="12" y1="7" x2="12.01" y2="7"/></svg></button>
     <button id="photoCaptureBtn" class="ring" aria-label="Fotografiază reperul selectat" title="Fotografiază reperul selectat" disabled>
@@ -1470,7 +1466,7 @@
 <div id="photoCmp">
   <div class="cmp-wrap">
     <canvas id="cmpNow"></canvas>
-    <img class="cmp-old" id="cmpOld" alt="Fotografie istorică — Primăria Arad, 1901">
+    <img class="cmp-old" id="cmpOld" src="primaria-1901.jpg" alt="Fotografie istorică — Primăria Arad, 1901">
     <div class="cmp-divider" id="cmpDivider"></div>
   </div>
   <div class="cmp-top">
@@ -1490,26 +1486,25 @@
   <div class="start-scrim" aria-hidden="true"></div>
   <div class="start-inner">
     <div class="start-brand">AradLens</div>
-    <h1>Stai unde a stat 1901.</h1>
-    <p class="start-promise">La reperele cu fotografie de arhivă, AradLens ține imaginea de atunci lângă priveliștea de azi. Prima pereche: Primăria, 1901.</p>
-    <img class="start-teaser" src="primaria-1901.jpg" alt="Fotografie de arhivă — Primăria Arad, 1901" width="1100" height="834" fetchpriority="high">
-    <div class="start-credit">Fortepan / Schoch Frigyes — Arad, 1901 (domeniu public)</div>
-    <ul class="perm-rows">
-      <li>
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <div><strong>Cameră</strong><span>Pornește obiectivul live; la fiecare reper poți compara Atunci / Acum.</span></div>
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <div><strong>Locație</strong><span>Măsoară distanța până la reper și deblochează declanșatorul la 50 m.</span></div>
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-        <div><strong>Busolă</strong><span>Săgeata arată încotro să mergi, pas cu pas, pe traseu.</span></div>
-      </li>
-    </ul>
-    <button id="startBtn">Pornește</button>
-    <div class="note">Fără cont, fără server: fotografiile rămân pe telefonul tău.</div>
+
+    <div class="start-head">
+      <h1>O plimbă prin istoria Aradului.</h1>
+      <p class="start-promise">AradLens îți arată ce era aici înainte: cinci obiective istorice din centrul Aradului, de la 1865 la 1913.</p>
+      <p class="start-detail">Fiecare obiectiv are fișă și poveste, iar traseul îl parcurgi liber sau în Poveste, pe capitole, cu diplome de Cronicar la final. Pentru Primăria, de exemplu, clădirea din 1901 se așază lângă cea de azi.</p>
+      <p class="start-credit">Fotografie de fundal: Primăria Arad, 1901 — Fortepan / Schoch Frigyes (domeniu public)</p>
+    </div>
+
+    <div class="start-foot">
+      <p class="start-sensors">
+        <span class="ss"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Cameră</span>
+        <span class="ss"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Locație</span>
+        <span class="ss"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>Busolă</span>
+        <span class="ss-note">folosite doar pe telefonul tău, ca să te ghideze pe traseu</span>
+      </p>
+      <p class="start-hint">Prima apăsare cere permisiunea de mișcare (busola), apoi camera și locația.</p>
+      <button id="startBtn">Pornește traseul</button>
+      <div class="note">Fără cont, fără server: fotografiile rămân pe telefonul tău.</div>
+    </div>
   </div>
 </div>
 
@@ -1659,7 +1654,7 @@ const CHAPTERS = [
 /* Stare persistență Mod Poveste & Recompense */
 const STORY_STORAGE_KEY = "aradlens_story_state";
 let storyState = {
-  currentMode: "story", // "story" | "free"
+  currentMode: "free", // "story" | "free" — intrarea implicită este Modul Liber
   activeChapterId: "cap1",
   chapters: {
     cap1: { currentStep: 0, completed: false, completedDate: null, photos: {} },
@@ -1689,6 +1684,10 @@ try {
     if (!Array.isArray(storyState.rewards)) storyState.rewards = [];
   }
 } catch (e) {}
+
+/* Intrare implicită: Modul Liber. Cronologia (capitole, pași, recompense) rămâne
+   salvată și se reia din Capitolul activ, dar modul de joc nu se impune la pornire. */
+storyState.currentMode = "free";
 
 function saveStoryState() {
   try {
@@ -1845,7 +1844,8 @@ function updateStoryUI() {
   const isStory = isStoryMode();
   const ch = getActiveChapter();
   const prog = getActiveChapterProgress();
-  const badgeText = $("#gameModeBadgeText");
+  const railBtn = $("#gamemodeRailBtn");
+  const railDot = $("#railModeDot");
   const banner = $("#storyObjectiveBanner");
   const objText = $("#storyObjectiveText");
   const rewardsCountBadge = $("#rewardsCountBadge");
@@ -1855,9 +1855,11 @@ function updateStoryUI() {
   }
 
   if (isStory) {
-    if (badgeText) {
-      const stepNum = prog.completed ? "Finalizat ★" : `${prog.currentStep + 1}/${ch.landmarkIndices.length}`;
-      badgeText.textContent = `📖 ${ch.numar}: ${stepNum}`;
+    const stepNum = prog.completed ? "Finalizat ★" : `${prog.currentStep + 1}/${ch.landmarkIndices.length}`;
+    if (railDot) railDot.classList.add("is-story");
+    if (railBtn) {
+      railBtn.title = `Poveste · ${ch.numar} · ${stepNum}`;
+      railBtn.setAttribute("aria-label", `Mod de joc și capitole — Poveste, ${ch.numar}, pasul ${stepNum}`);
     }
     if (banner && objText) {
       banner.style.display = "flex";
@@ -1869,7 +1871,11 @@ function updateStoryUI() {
       }
     }
   } else {
-    if (badgeText) badgeText.textContent = "🧭 Mod Liber";
+    if (railDot) railDot.classList.remove("is-story");
+    if (railBtn) {
+      railBtn.title = "Mod Liber";
+      railBtn.setAttribute("aria-label", "Mod de joc și capitole — Mod Liber");
+    }
     if (banner) banner.style.display = "none";
   }
 
@@ -1980,7 +1986,7 @@ function renderChaptersList() {
       </div>
       <div class="chapter-title">${ch.icon} ${ch.titlu}</div>
       <div class="chapter-desc">${ch.sinopsis}</div>
-      <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px;">Repere în ordine cronologică:</div>
+      <div style="font-size:12px;font-weight:700;color:var(--accent-green);margin-bottom:8px;">Repere în ordine cronologică:</div>
       <div class="chapter-landmarks-list">
         ${landmarksMarkup}
       </div>
@@ -2898,7 +2904,7 @@ let arrivedNow = false, readyNow = false;
 function refreshArrived(){
   document.body.classList.toggle("has-arrived", arrivedNow || readyNow);
 }
-const PROXIMITY_RADIUS_METERS = 50;
+const PROXIMITY_RADIUS_METERS = 200;
 
 // Reține numele reperelor pentru care s-a afișat notificarea în această sesiune (evită notificări repetate)
 const notifiedLandmarksInSession = new Set();
@@ -3043,12 +3049,12 @@ function executePhotoCapture() {
     return;
   }
 
-  // 2. Verificare proximitate (raza de 50 m)
+  // 2. Verificare proximitate (raza de 200 m)
   if (userLat == null || userLon == null) {
     showCaptureFeedback(
       "pin",
       "Locație indisponibilă",
-      `Pentru a asocia fotografia reperului ${currentLandmark.nume}, aplicația trebuie să verifice dacă te afli la mai puțin de 50 m de acesta. Activează GPS-ul și permisiunea de locație.`
+      `Pentru a asocia fotografia reperului ${currentLandmark.nume}, aplicația trebuie să verifice dacă te afli la mai puțin de 200 m de acesta. Activează GPS-ul și permisiunea de locație.`
     );
     return;
   }
@@ -3058,7 +3064,7 @@ function executePhotoCapture() {
     showCaptureFeedback(
       "pin",
       "Ești prea departe de obiectiv",
-      `Pentru a fotografia ${currentLandmark.nume}, trebuie să te afli la o distanță de maximum 50 m de obiectiv. Distanța ta actuală este de ${formatDistance(d)}.`
+      `Pentru a fotografia ${currentLandmark.nume}, trebuie să te afli la o distanță de maximum 200 m de obiectiv. Distanța ta actuală este de ${formatDistance(d)}.`
     );
     return;
   }
@@ -3270,27 +3276,8 @@ function closeRewardModal() {
   if (modal) modal.style.display = "none";
 }
 
-function switchAlbumTab(tab) {
-  const mapTab = $("#albumMapTab");
-  const rewTab = $("#albumRewardsTab");
-  const tabMapBtn = $("#tabMapBtn");
-  const tabRewardsBtn = $("#tabRewardsBtn");
-
-  if (tab === "rewards") {
-    if (mapTab) mapTab.style.display = "none";
-    if (rewTab) rewTab.style.display = "block";
-    if (tabRewardsBtn) { tabRewardsBtn.classList.add("active"); tabRewardsBtn.setAttribute("aria-pressed", "true"); }
-    if (tabMapBtn) { tabMapBtn.classList.remove("active"); tabMapBtn.setAttribute("aria-pressed", "false"); }
-    renderAlbumRewards();
-  } else {
-    if (mapTab) mapTab.style.display = "block";
-    if (rewTab) rewTab.style.display = "none";
-    if (tabMapBtn) { tabMapBtn.classList.add("active"); tabMapBtn.setAttribute("aria-pressed", "true"); }
-    if (tabRewardsBtn) { tabRewardsBtn.classList.remove("active"); tabRewardsBtn.setAttribute("aria-pressed", "false"); }
-    renderAlbum();
-  }
-}
-
+/* Tab-urile albumului au dispărut: harta liniară e singura suprafață.
+   Comparatia Atunci / Acum e acum o fereastră propri-zisă (#albumCompareModal). */
 function renderAlbumRewards() {
   const listEl = $("#albumRewardsList");
   if (!listEl) return;
@@ -3320,7 +3307,7 @@ function renderAlbumRewards() {
 
   // Secțiune de cronici istorice deblocate
   const loreTitle = document.createElement("div");
-  loreTitle.style.cssText = "font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--text-main); margin-top: 14px; margin-bottom: 8px;";
+  loreTitle.style.cssText = "font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-main); margin-top: 14px; margin-bottom: 8px;";
   loreTitle.textContent = "📜 Cronica Aradului — File Deblocate";
   listEl.appendChild(loreTitle);
 
@@ -3469,62 +3456,139 @@ window.simulateCompassWarning = function() {
 };
 
 /* =====================================================================
-   FUNCȚIONALITATEA 1: BUTON ȘI ECRAN DE ALBUM (SELECȚIE DOAR PE HARTĂ)
+   FUNCȚIONALITATEA 1: ALBUMUL = HARTĂ LINIARĂ PE MODULE
+   Traseu vertical jos→sus (prima oprire jos, ca în selecția de niveluri
+   din jocuri). Fiecare modul — Modul Liber sau un capitol al Poveștii —
+   își generează propria hartă; ordinea e cea cronologică a modului,
+   lungimea traseului = numărul de opriri ale modului. Nu e proiecție GPS.
    ===================================================================== */
+let albumModuleId = null;      // null = modulul potrivit stării curente de Poveste
 let selectedAlbumIndex = 0;
 
+function staticChapterProgress(id) {
+  const p = storyState.chapters[id];
+  if (!p || typeof p !== "object") return { currentStep: 0, completed: false };
+  const step = Number(p.currentStep);
+  return {
+    currentStep: (isNaN(step) || step < 0) ? 0 : Math.floor(step),
+    completed: Boolean(p.completed)
+  };
+}
+
+function getAlbumModule() {
+  const autoId = (storyState.currentMode === "story") ? storyState.activeChapterId : "free";
+  const id = albumModuleId || autoId;
+  const ch = CHAPTERS.find(c => c.id === id);
+  if (ch) return { kind: "chapter", id: ch.id, chapter: ch, label: `${ch.numar} · ${ch.titlu}` };
+  return { kind: "free", id: "free", label: "Modul Liber · Traseul complet" };
+}
+
+function albumStops(mod) {
+  if (mod.kind === "chapter") {
+    const prog = staticChapterProgress(mod.chapter.id);
+    return mod.chapter.landmarkIndices.map((idx, i) => ({
+      idx, step: i,
+      state: (prog.completed || i < prog.currentStep) ? "done" :
+             (i === prog.currentStep ? "current" : "locked")
+    }));
+  }
+  return REPERE.map((_, i) => i)
+    .sort((a, b) => REPERE[a].anNumeric - REPERE[b].anNumeric)
+    .map(idx => ({ idx, step: null, state: userCapturedPhotos[REPERE[idx].nume] ? "done" : "open" }));
+}
+
+function renderAlbumModuleBar() {
+  const bar = $("#albumModuleBar");
+  if (!bar) return;
+  const mod = getAlbumModule();
+  const chips = [{ id: "free", label: "Liber" }].concat(
+    CHAPTERS.map(c => ({ id: c.id, label: c.numar.replace("Capitolul", "Cap.") }))
+  );
+  bar.innerHTML = "";
+  chips.forEach(c => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "level-chip" + (c.id === mod.id ? " active" : "");
+    b.textContent = c.label;
+    b.setAttribute("aria-pressed", c.id === mod.id ? "true" : "false");
+    b.onclick = () => { albumModuleId = c.id; renderAlbumModuleBar(); renderLevelMap(); };
+    bar.appendChild(b);
+  });
+}
+
+const LEVEL_LOCK_SVG = '<span class="level-lock"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>';
+
+function renderLevelMap() {
+  const track = $("#albumLevelTrack");
+  if (!track) return;
+  const mod = getAlbumModule();
+  const stops = albumStops(mod);
+  $("#albumModuleLabel").textContent = mod.label;
+  const doneCount = stops.filter(s2 => s2.state === "done").length;
+  $("#albumModuleProgress").textContent = mod.kind === "chapter"
+    ? (staticChapterProgress(mod.chapter.id).completed
+        ? "Capitol complet"
+        : `Pasul ${Math.min(staticChapterProgress(mod.chapter.id).currentStep + 1, stops.length)} din ${stops.length}`)
+    : `${doneCount} / ${stops.length} fotografiate`;
+
+  track.innerHTML = "";
+  // Prima oprire stă jos: DOM-ul e invers (sus = ultima oprire), dezvoltare
+  // în sus ca la selecția de niveluri din jocuri.
+  [...stops].reverse().forEach((s2) => {
+    const lm = REPERE[s2.idx];
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "level-stop " + s2.state;
+    b.dataset.idx = s2.idx;
+    b.setAttribute("aria-label", `${lm.nume} (${lm.an}) — deschide comparația Atunci / Acum`);
+    let sub;
+    if (s2.state === "done") sub = "Fotografie în album";
+    else if (s2.state === "current") sub = `Următoarea oprire · pasul ${s2.step + 1}`;
+    else if (s2.state === "locked") sub = "Încuiată · se parcurge în ordine";
+    else sub = "Fără fotografie încă";
+    b.innerHTML = `
+      <span class="level-node">${s2.state === "locked" ? LEVEL_LOCK_SVG : ""}<span class="level-year">${lm.an}</span></span>
+      <span class="level-name">${lm.nume}</span>
+      <span class="level-sub">${sub}</span>`;
+    b.onclick = () => selectAlbumLandmark(s2.idx);
+    track.appendChild(b);
+  });
+}
+
 function openAlbum() {
-  const activeIdx = REPERE.findIndex(r => r.nume === target.nume);
-  selectedAlbumIndex = activeIdx >= 0 ? activeIdx : 0;
-  switchAlbumTab("map");
+  albumModuleId = null;              // redeschidere → modulul potrivit stării
+  $("#albumCompareModal").style.display = "none";
+  renderAlbumModuleBar();
+  renderLevelMap();
   $("#albumModal").style.display = "flex";
+  // Pornim centrat pe oprirea activă (aflată mai jos pe hartă)
+  requestAnimationFrame(() => {
+    const cur = document.querySelector("#albumLevelTrack .level-stop.current");
+    const first = document.querySelector("#albumLevelTrack .level-stop:last-child");
+    (cur || first || { scrollIntoView() {} }).scrollIntoView({ block: "center" });
+  });
 }
 
 function closeAlbum() {
+  $("#albumCompareModal").style.display = "none";
   $("#albumModal").style.display = "none";
 }
 
 function selectAlbumLandmark(idx) {
   selectedAlbumIndex = idx;
-  renderAlbum();
+  renderAlbumCompare();
+  $("#albumCompareModal").style.display = "flex";
 }
 window.selectAlbumLandmark = selectAlbumLandmark;
 
-// Tastatură pentru pinii SVG (grupurile <g> cu tabindex/role din hartă)
-document.querySelectorAll(".schematic-pin-group").forEach(g => {
-  g.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      const idx = Number(g.getAttribute("data-idx"));
-      if (!isNaN(idx)) selectAlbumLandmark(idx);
-    }
-  });
-});
-
 function renderAlbum() {
-  const landmark = REPERE[selectedAlbumIndex] || REPERE[0];
+  // La scrierea sincronă din fluxul de captură: doar hartă (fereastră separată)
+  renderAlbumModuleBar();
+  renderLevelMap();
+}
 
-  // Actualizare pini vizuali pe harta schematică (os inactiv / chihlimbariu activ)
-  REPERE.forEach((_, i) => {
-    const pin = document.getElementById("mapPin" + i);
-    const grp = document.querySelector('.schematic-pin-group[data-idx="' + i + '"]');
-    const num = grp ? grp.querySelectorAll("text")[0] : null;
-    if (pin) {
-      if (i === selectedAlbumIndex) {
-        pin.classList.add("active-pin");
-        pin.setAttribute("fill", "#e8a33d");
-        pin.setAttribute("stroke", "#e8a33d");
-        pin.setAttribute("stroke-width", "3.5");
-        if (num) num.setAttribute("fill", "#171106");
-      } else {
-        pin.classList.remove("active-pin");
-        pin.setAttribute("fill", "#14655a");
-        pin.setAttribute("stroke", "#f6f2e9");
-        pin.setAttribute("stroke-width", "2");
-        if (num) num.setAttribute("fill", "#f6f2e9");
-      }
-    }
-  });
+function renderAlbumCompare() {
+  const landmark = REPERE[selectedAlbumIndex] || REPERE[0];
 
   // Titlu și metadate reper selectat
   $("#albumLandmarkTitle").textContent = landmark.nume;
@@ -3563,7 +3627,7 @@ function renderAlbum() {
     nowBox.innerHTML = `
       <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="cmp-placeholder-text">Nicio fotografie realizată încă</div>
-      <div class="cmp-placeholder-sub">Apropie-te la mai puțin de 50 m de ${landmark.nume} și folosește butonul foto din dreapta jos pentru a adăuga o imagine aici.</div>
+      <div class="cmp-placeholder-sub">Apropie-te la mai puțin de 200 m de ${landmark.nume} și folosește butonul foto din dreapta jos pentru a adăuga o imagine aici.</div>
     `;
   }
 }
@@ -3578,28 +3642,7 @@ $("#albumCloseBtn").onclick = closeAlbum;
 $("#albumBackBtn").onclick = closeAlbum;
 $("#albumGuideBtn").onclick = guideToSelectedLandmark;
 
-/* Tab-uri Album */
-const tabMapBtn = $("#tabMapBtn");
-if (tabMapBtn) tabMapBtn.onclick = () => switchAlbumTab("map");
-
-const tabRewardsBtn = $("#tabRewardsBtn");
-if (tabRewardsBtn) tabRewardsBtn.onclick = () => switchAlbumTab("rewards");
-
-const albumRewardsCloseBtn = $("#albumRewardsCloseBtn");
-if (albumRewardsCloseBtn) albumRewardsCloseBtn.onclick = closeAlbum;
-
-const albumRewardsLaunchBtn = $("#albumRewardsLaunchBtn");
-if (albumRewardsLaunchBtn) {
-  albumRewardsLaunchBtn.onclick = () => {
-    closeAlbum();
-    openChapterModal();
-  };
-}
-
-/* Butoane Mod de Joc & Capitole */
-const gameModeBadge = $("#gameModeBadge");
-if (gameModeBadge) gameModeBadge.onclick = openGamemodeModal;
-
+/* Butoane Mod de Joc & Capitole — releu pe șina din dreapta; eticheta de sus a fost eliminată */
 const gamemodeRailBtn = $("#gamemodeRailBtn");
 if (gamemodeRailBtn) gamemodeRailBtn.onclick = openGamemodeModal;
 
@@ -3649,7 +3692,6 @@ if (rewardViewAlbumBtn) {
   rewardViewAlbumBtn.onclick = () => {
     closeRewardModal();
     openAlbum();
-    switchAlbumTab("rewards");
   };
 }
 
