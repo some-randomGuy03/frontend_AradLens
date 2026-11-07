@@ -1523,6 +1523,28 @@
     background: var(--bg-modal);
   }
   .loc-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  img.img-missing { opacity: 0; }
+  .loc-img-wrap:has(img.img-missing) { background: var(--panel-surface); border-style: dashed; }
+  html[lang="en"] .loc-img-wrap:has(img.img-missing)::after { content: "Unavailable"; }
+  .loc-img-wrap:has(img.img-missing)::after {
+    content: "Indisponibil";
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--text-muted); text-align: center; padding: 4px;
+  }
+  .album-archive-strip-row img.img-missing { display: none; }
+  .album-cmp-stage.is-unavailable { cursor: default; }
+  .album-cmp-stage.is-unavailable .album-cmp-layer,
+  .album-cmp-stage.is-unavailable .album-cmp-badges,
+  .album-cmp-stage.is-unavailable .album-cmp-handle { display: none; }
+  .album-cmp-stage-fallback {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    font-size: 13px; font-weight: 600; line-height: 1.45;
+    color: var(--text-muted);
+    background: rgba(246,242,233,.28);
+  }
+  html.dark-theme .album-cmp-stage-fallback { background: rgba(15,18,23,.72); }
   .loc-img-del {
     position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; padding: 0;
     border: 0; border-radius: 50%; background: rgba(246,242,233,.95); color: var(--amber-deep);
@@ -2021,10 +2043,15 @@
   }
   .loc-card { padding: 14px 2px; border-bottom: 1px solid var(--lg-border); }
   .loc-card.is-selected {
-    background: rgba(200,176,136,.12);
-    box-shadow: inset 3px 0 0 var(--amber-deep);
-    padding-left: 12px;
+    border: 2px solid var(--amber);
+    border-radius: 22px;
+    padding: 14px 16px;
+    margin: 8px 0;
+    background: rgba(200,176,136,.10);
+    box-shadow: 0 10px 24px rgba(12,22,32,.08);
   }
+  #locList .loc-imgs { gap: 10px; }
+  #locList .loc-img-wrap { flex: 0 0 84px; width: 84px; height: 64px; }
   .cat-item { padding: 12px 2px; border-bottom: 1px solid var(--lg-border); }
   .cat-item:last-child, .loc-card:last-child { border-bottom: 0; }
   .loc-chip { background: rgba(255,255,255,.14); border-color: var(--lg-border); color: var(--ink-muted); border-radius: 999px; }
@@ -2481,6 +2508,46 @@
     box-shadow: 0 10px 24px rgba(12,22,32,.08);
   }
 
+  /* Selectorul de mod încape pe un ecran fără scroll. */
+  #gamemodeModal .modal-card {
+    padding: 16px;
+    max-height: calc(100dvh - 32px);
+  }
+  #gamemodeModal .modal-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+  #gamemodeModal .modal-header h2 {
+    font-size: 18px;
+    white-space: nowrap;
+  }
+  #gamemodeModal .mode-cards-grid { gap: 10px; }
+  #gamemodeModal .mode-select-card { padding: 12px 0; }
+  #gamemodeModal .mode-select-card.is-selected { padding: 14px 16px; }
+  #gamemodeModal .mode-badge-pill {
+    font-size: 10px;
+    padding: 2px 7px;
+    margin-bottom: 5px;
+  }
+  #gamemodeModal .mode-card-title { font-size: 17px; }
+  #gamemodeModal .mode-card-subtitle { font-size: 11px; margin-bottom: 5px; }
+  #gamemodeModal .mode-card-desc {
+    font-size: 12px;
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+  #gamemodeModal .mode-card-perks {
+    gap: 2px;
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  #gamemodeModal .album-action-btn {
+    min-height: 42px;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
   /* ---------- 16. Fallbacks ---------- */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     #rail .ring, .modal-card, #card,
@@ -2771,7 +2838,6 @@
     <div class="modal-header">
       <div>
         <h2 id="gmTitle">Cum vrei să explorezi?</h2>
-        <p>Alege un mod.</p>
       </div>
       <button class="modal-close-btn" id="gmCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
@@ -3036,7 +3102,7 @@
         <span class="ts-knob"></span>
       </span>
     </button>
-    <!-- Acțiunile reperului: mod de joc, fișă, fotografiere, album. -->
+    <!-- Acțiunile reperului: mod de joc, fișă, album, fotografiere. -->
     <button id="gamemodeRailBtn" class="ring" aria-label="Mod de joc &amp; Capitole" title="Mod de joc &amp; Capitole">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -3046,19 +3112,19 @@
       <span class="rail-state-dot" id="railModeDot" aria-hidden="true"></span>
     </button>
     <button id="detailsBtn" class="ring" style="display:none;" aria-label="Deschide fișa reperului" title="Fișă & audio"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="12" y1="7" x2="12.01" y2="7"/></svg></button>
-    <button id="photoCaptureBtn" class="ring" aria-label="Fotografiază reperul selectat" title="Fotografiază reperul selectat" disabled>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-    <circle cx="12" cy="13" r="4"/>
-  </svg>
-</button>
     <button id="albumBtn" class="ring" aria-label="Deschide albumul, harta și traseele" title="Album">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-    <circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
-  </svg>
-</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </button>
+    <button id="photoCaptureBtn" class="ring" aria-label="Fotografiază reperul selectat" title="Fotografiază reperul selectat" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    </button>
   </nav>
 
   <div class="bottom">
@@ -3187,7 +3253,7 @@
  "Tururi": "Tours",
  "Trasee gata făcute.": "Ready-made routes.",
  "Toate tururile": "All tours",
- "Cum vrei să explorezi?": "How do you want to explore?",
+ "Cum vrei să explorezi?": "How will you explore?",
  "Alege un mod.": "Choose a mode.",
  "Modul poveste": "Story mode",
  "Povestea Aradului": "The story of Arad",
@@ -3521,6 +3587,11 @@
  "Alege un tur sau mergi liber. La fiecare oprire găsești povestea locului.": "Choose a tour or walk freely. At every stop you'll find the story of the place.",
  "Îți cerem camera, locația și busola.": "We ask for your camera, location and compass.",
  "Fără cont. Pozele rămân pe telefon.": "No account. Photos stay on your phone.",
+ "Indisponibil": "Unavailable",
+ "Imagine indisponibilă": "Image unavailable",
+ "Arhivă indisponibilă": "Archive unavailable",
+ "Poza nu poate fi afișată": "The photo cannot be displayed",
+ "Arhiva foto nu este disponibilă momentan. Încearcă din nou.": "The photo archive is not available right now. Try again.",
  "Arad": "Arad",
  "Fortepan / Schoch Frigyes, Arad, 1901": "Fortepan / Schoch Frigyes, Arad, 1901",
  "AradLens": "AradLens"
@@ -6172,6 +6243,16 @@ function renderAlbum() {
 }
 
 function renderAlbumCompare() {
+  const stageEl = $("#albumCompareStage");
+  if (stageEl) {
+    stageEl.classList.remove("is-unavailable");
+    const oldFallback = stageEl.querySelector(".album-cmp-stage-fallback");
+    if (oldFallback) oldFallback.remove();
+    const meta = document.getElementById("albumCompareMetaRow");
+    if (meta) meta.hidden = false;
+    const hint = document.querySelector("#albumCompareModal .album-cmp-hint");
+    if (hint) hint.hidden = false;
+  }
   const landmark = REPERE[selectedAlbumIndex] || REPERE[0];
   const name = landmark.apiName || landmark.nume;
   $("#albumLandmarkTitle").textContent = name;
@@ -6432,6 +6513,34 @@ const VoiceApi = {
   speech: (body) => apiPostVoiceSpeech(body)
 };
 
+/* Dacă un fișier de imagine lipsește în arhivă, nu lăsăm iconița de
+   imagine spartă în pagină; afișăm un fallback discret. */
+document.addEventListener("error", (e) => {
+  const img = e.target;
+  if (!img || img.tagName !== "IMG") return;
+  if (img.dataset.missingHandled === "1") return;
+  img.dataset.missingHandled = "1";
+  img.classList.add("img-missing");
+  console.debug("[AradLens] imagine indisponibilă:", img.currentSrc || img.src);
+
+  const stage = img.closest("#albumCompareStage");
+  if (stage && !stage.querySelector(".album-cmp-stage-fallback")) {
+    stage.classList.add("is-unavailable");
+    const fallback = document.createElement("div");
+    fallback.className = "album-cmp-stage-fallback";
+    fallback.textContent = "Arhiva foto nu este disponibilă momentan. Încearcă din nou.";
+    stage.appendChild(fallback);
+    const seeMore = document.getElementById("albumSeeMoreBtn");
+    if (seeMore) seeMore.hidden = true;
+    const archiveStrip = document.getElementById("albumArchiveStrip");
+    if (archiveStrip) archiveStrip.hidden = true;
+    const meta = document.getElementById("albumCompareMetaRow");
+    if (meta) meta.hidden = true;
+    const hint = document.querySelector("#albumCompareModal .album-cmp-hint");
+    if (hint) hint.hidden = true;
+  }
+}, true);
+
 /* =====================================================================
    PREÎNCĂRCARE , toate paginile se pregătesc înainte de primul tap
    ---------------------------------------------------------------------
@@ -6638,8 +6747,9 @@ function locationFromObjective(o) {
 function locationCard(loc) {
   const info = locationInfo(loc, 3);
   const street = `<span class="loc-coords">${esc(streetForLocation(loc))}</span>`;
+  const images = info.imgs ? `<div class="loc-imgs">${info.imgs}</div>` : "";
   return `<div class="loc-card-top"><span class="loc-name">${esc(loc.name)}</span>${info.cat}</div>
-    ${street}${info.desc}${info.imgs}
+    ${street}${info.desc}${images}
     <div class="loc-actions">
       <button class="cat-link" data-act="detail" type="button">Vezi locația</button>
     </div>`;
