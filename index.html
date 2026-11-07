@@ -667,6 +667,277 @@
     box-shadow: 2px 8px 22px rgba(0,0,0,.7);
   }
   body.light-theme #desktopPlaceholder { background: var(--bone); color: var(--amber-ink); }
+
+  /* =====================================================================
+     STILURI PENTRU MODUL POVESTE / CRONOLOGIE & CAPITOLE
+     ===================================================================== */
+  .mode-badge {
+    background: rgba(5,7,10,.78); border: 1.5px solid var(--amber);
+    color: var(--bone); border-radius: 12px; padding: 4px 10px;
+    font-size: 12px; font-weight: 700; display: inline-flex; align-items: center;
+    gap: 6px; cursor: pointer; transition: transform .15s ease, background .2s ease;
+    white-space: nowrap; font-family: inherit; box-shadow: 2px 4px 12px rgba(0,0,0,.4);
+    min-height: 34px; -webkit-tap-highlight-color: transparent;
+  }
+  .mode-badge:active { transform: scale(.95); }
+  .mode-badge-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
+    display: inline-block; box-shadow: 0 0 8px var(--amber);
+  }
+  .story-objective-banner {
+    background: rgba(5,7,10,.85); border: 1.5px solid var(--amber);
+    border-radius: 10px; padding: 6px 12px; margin-top: 8px;
+    font-size: 12px; font-weight: 700; color: var(--bone);
+    display: flex; align-items: center; gap: 8px; max-width: 95%;
+    margin-left: auto; margin-right: auto; box-shadow: 2px 6px 18px rgba(0,0,0,.5);
+    font-variant-numeric: tabular-nums; cursor: pointer;
+  }
+  .story-objective-banner .sob-icon { font-size: 15px; }
+  body.light-theme .mode-badge {
+    background: rgba(255,253,247,.92); color: var(--amber-ink); border-color: var(--amber-deep);
+  }
+  body.light-theme .story-objective-banner {
+    background: rgba(255,253,247,.95); color: var(--amber-ink); border-color: var(--amber-deep);
+  }
+
+  /* Modale pe tot ecranul */
+  .full-modal {
+    position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.75); padding: 16px; backdrop-filter: blur(5px);
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .modal-card {
+    background: var(--bg-surface); border: 1px solid var(--border-color);
+    border-radius: 16px; padding: 20px; color: var(--text-main);
+    max-width: 440px; width: 100%; box-shadow: 2px 14px 40px rgba(0,0,0,.8);
+    position: relative; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-card.wide { max-width: 520px; }
+  .modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;
+    gap: 12px;
+  }
+  .modal-header h2 {
+    font-family: var(--display); font-size: 22px; font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1.2; color: var(--text-main);
+  }
+  .modal-header p { font-size: 12px; margin-top: 4px; color: var(--text-muted); }
+  .modal-close-btn {
+    background: transparent; border: 1.5px solid var(--border-color);
+    color: var(--text-main); border-radius: 10px; width: 36px; height: 36px;
+    font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .modal-close-btn:active { transform: scale(.92); }
+
+  /* Grile și carduri de mod de joc */
+  .mode-cards-grid { display: flex; flex-direction: column; gap: 14px; }
+  .mode-select-card {
+    background: rgba(246,242,233,.04); border: 1.5px solid var(--border-color);
+    border-radius: 14px; padding: 16px; position: relative; transition: border-color .2s ease;
+  }
+  .mode-select-card.featured {
+    border-color: var(--amber); background: rgba(232,163,61,.07);
+  }
+  .mode-badge-pill {
+    display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
+    background: var(--amber); color: var(--amber-ink); padding: 3px 8px; border-radius: 8px;
+    letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .mode-icon { font-size: 32px; margin-bottom: 6px; }
+  .mode-card-title {
+    font-family: var(--display); font-size: 20px; font-weight: 600;
+    color: var(--text-main); margin-bottom: 2px;
+  }
+  .mode-card-subtitle {
+    font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: 8px;
+  }
+  .mode-card-desc {
+    font-size: 13px; line-height: 1.4; color: var(--text-muted); margin-bottom: 12px;
+  }
+  .mode-card-perks {
+    display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600;
+    color: var(--text-main); margin-bottom: 14px;
+  }
+
+  /* Grile și carduri de capitole */
+  .chapters-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+  .chapter-card {
+    background: rgba(246,242,233,.04); border: 1.5px solid var(--border-color);
+    border-radius: 14px; padding: 16px; position: relative;
+  }
+  .chapter-card.active-chapter {
+    border-color: var(--amber); background: rgba(232,163,61,.08);
+  }
+  .chapter-card.completed-chapter {
+    border-color: var(--deep-teal); background: rgba(20,101,90,.12);
+  }
+  .chapter-top-row {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 4px;
+  }
+  .chapter-number {
+    font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--amber);
+    letter-spacing: 1px;
+  }
+  .chapter-period-badge {
+    font-size: 11px; font-weight: 700; background: rgba(246,242,233,.12);
+    padding: 2px 8px; border-radius: 6px; color: var(--text-main);
+  }
+  .chapter-title {
+    font-family: var(--display); font-size: 18px; font-weight: 600;
+    color: var(--text-main); margin-bottom: 4px;
+  }
+  .chapter-desc { font-size: 12.5px; line-height: 1.35; color: var(--text-muted); margin-bottom: 10px; }
+  .chapter-landmarks-list {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  }
+  .cl-item {
+    font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+    background: rgba(246,242,233,.08); border: 1px solid var(--border-color);
+    color: var(--text-main); display: inline-flex; align-items: center; gap: 4px;
+  }
+  .cl-item.done {
+    background: rgba(20,101,90,.3); border-color: var(--deep-teal); color: var(--bone);
+  }
+  .cl-item.current {
+    background: rgba(232,163,61,.2); border-color: var(--amber); color: var(--amber);
+  }
+  .chapter-reward-snippet {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
+    color: var(--text-main); background: rgba(0,0,0,.25); padding: 6px 10px; border-radius: 8px;
+    margin-bottom: 12px; border: 1px dashed var(--border-color);
+  }
+  .chapter-reward-snippet span.r-icon { font-size: 18px; }
+
+  /* Filă de Istorie (Lore modal) */
+  .lore-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+  }
+  .lore-badge {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    background: var(--deep-teal); color: var(--bone); padding: 4px 10px; border-radius: 8px;
+  }
+  .lore-year-stamp {
+    font-family: var(--display); font-size: 20px; font-weight: 800; color: var(--amber);
+  }
+  .lore-title {
+    font-family: var(--display); font-size: 24px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 4px;
+  }
+  .lore-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+  .lore-story-box {
+    background: rgba(246,242,233,.05); border: 1.5px solid var(--border-color);
+    border-radius: 12px; padding: 14px; margin-bottom: 14px; position: relative;
+  }
+  .lore-ribbon {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--amber); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .lore-text {
+    font-size: 13.5px; line-height: 1.5; color: var(--text-main); font-weight: 500;
+  }
+  .lore-photos-row {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  .lore-photo-thumb {
+    flex: 1; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);
+  }
+  .lore-next-preview {
+    background: rgba(232,163,61,.1); border: 1px solid var(--amber); border-radius: 10px;
+    padding: 10px 12px; font-size: 12.5px; color: var(--text-main); margin-bottom: 14px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .lore-next-preview strong { color: var(--amber); font-size: 11px; text-transform: uppercase; }
+
+  /* Modal de Recompensă & Diplomă */
+  .celebratory { text-align: center; }
+  .reward-ribbon {
+    display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--amber); background: rgba(232,163,61,.15);
+    padding: 4px 12px; border-radius: 20px; border: 1px solid var(--amber); margin-bottom: 12px;
+  }
+  .reward-icon-huge {
+    font-size: 64px; line-height: 1; margin-bottom: 10px;
+    animation: popBounce .6s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popBounce {
+    0% { transform: scale(0.3); opacity: 0; }
+    80% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .reward-title {
+    font-family: var(--display); font-size: 24px; font-weight: 600;
+    color: var(--text-main); margin-bottom: 4px;
+  }
+  .reward-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .diploma-card {
+    background: #fffdf7; color: #171106; border: 4px double #8a5f14;
+    border-radius: 12px; padding: 18px 16px; margin-bottom: 18px; text-align: center;
+    box-shadow: inset 0 0 20px rgba(138,95,20,.1), 2px 8px 24px rgba(0,0,0,.6);
+    position: relative;
+  }
+  .diploma-seal {
+    font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: #8a5f14; border-bottom: 1px solid #8a5f14; padding-bottom: 4px; margin-bottom: 10px;
+  }
+  .diploma-name {
+    font-family: var(--display); font-size: 21px; font-weight: 700;
+    color: #8a5f14; margin-bottom: 8px; line-height: 1.2;
+  }
+  .diploma-text {
+    font-size: 12.5px; line-height: 1.45; color: #4a4234; margin-bottom: 12px;
+  }
+  .diploma-meta {
+    font-size: 11px; font-weight: 700; color: #8a5f14; margin-bottom: 12px; font-variant-numeric: tabular-nums;
+  }
+  .diploma-steps {
+    display: flex; flex-direction: column; gap: 4px; text-align: left;
+    background: rgba(138,95,20,.06); border-radius: 8px; padding: 8px 10px;
+    font-size: 11.5px; font-weight: 600; color: #171106;
+  }
+  .diploma-steps span { display: flex; align-items: center; gap: 6px; }
+  .reward-actions { display: flex; flex-direction: column; gap: 8px; }
+
+  /* Tab bar în album */
+  .album-tab-bar {
+    display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+  }
+  .album-tab-btn {
+    flex: 1; padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 10px;
+    border: 1.5px solid transparent; background: transparent; color: var(--text-muted);
+    cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: center;
+    gap: 6px; transition: all .2s ease;
+  }
+  .album-tab-btn.active {
+    background: rgba(232,163,61,.15); color: var(--amber); border-color: var(--amber);
+  }
+  .rewards-list-container {
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .reward-badge-card {
+    background: var(--bg-surface); border: 1.5px solid var(--border-color);
+    border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: center;
+  }
+  .reward-badge-card.unlocked {
+    border-color: var(--amber); background: rgba(232,163,61,.06);
+  }
+  .reward-badge-card.locked { opacity: 0.55; }
+  .rbc-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
+  .rbc-info { flex: 1; }
+  .rbc-title { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
+  .rbc-desc { font-size: 12px; color: var(--text-muted); line-height: 1.35; margin-bottom: 4px; }
+  .rbc-meta { font-size: 11px; font-weight: 700; color: var(--amber); }
+
+  /* Snap dot locked & completed states */
+  .snap-dot.locked { opacity: .45; }
+  .snap-dot.locked::before {
+    background: rgba(246,242,233,.15) !important; border-color: rgba(246,242,233,.3) !important;
+  }
+  .snap-dot.completed::before {
+    background: #14655a !important; border-color: var(--amber) !important;
+  }
 </style>
 </head>
 <body>
@@ -753,93 +1024,239 @@
   <div class="album-header">
     <div>
       <h2>Album &amp; Hartă Arad</h2>
-      <p>Hartă schematică demonstrativă și comparații istorice</p>
+      <p>Hartă schematică demonstrativă, comparații istorice și cronologie</p>
     </div>
     <button class="album-close-btn" id="albumCloseBtn">Închide</button>
   </div>
 
-  <!-- Hartă schematică temporară: titlu și instrucțiune aliniate vertical, pini măriți -->
-  <div class="schematic-box">
-    <div class="schematic-header-group">
-      <span class="schematic-badge">Hartă schematică temporară (Demo)</span>
-      <div class="schematic-instruction">Selectează un reper</div>
-    </div>
-    <div class="schematic-svg-wrap">
-      <svg viewBox="0 0 380 230" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(246,242,233,0.06)" stroke-width="1"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#gridPattern)" />
-
-        <!-- Râul Mureș (formă schematică de râu) -->
-        <path d="M 0 185 C 90 215, 180 200, 260 175 S 380 145, 380 145" stroke="#1f6f65" stroke-width="26" fill="none" opacity="0.85" stroke-linecap="round"/>
-        <text x="250" y="200" fill="#f6f2e9" opacity="0.6" font-size="9" font-weight="700" letter-spacing="1">RÂUL MUREȘ</text>
-
-        <!-- Bulevardul Revoluției (axă schematică) -->
-        <path d="M 40 108 L 340 96" stroke="rgba(246,242,233,0.28)" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 4"/>
-        <text x="50" y="94" fill="rgba(246,242,233,0.55)" font-size="8">Bd. Revoluției (schematic)</text>
-
-        <!-- Pini demonstrativi măriți pentru cele 5 repere -->
-        <g class="schematic-pin-group" data-idx="0" tabindex="0" role="button" aria-label="Selectează Turnul de Apă" onclick="selectAlbumLandmark(0)" style="cursor:pointer">
-          <circle class="schematic-pin" id="mapPin0" cx="75" cy="48" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-          <text x="75" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">1</text>
-          <text x="75" y="74" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Turnul de Apă</text>
-        </g>
-        <g class="schematic-pin-group" data-idx="1" tabindex="0" role="button" aria-label="Selectează Palatul Cultural" onclick="selectAlbumLandmark(1)" style="cursor:pointer">
-          <circle class="schematic-pin" id="mapPin1" cx="290" cy="130" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-          <text x="290" y="134" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">2</text>
-          <text x="290" y="156" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Palatul Cultural</text>
-        </g>
-        <g class="schematic-pin-group" data-idx="2" tabindex="0" role="button" aria-label="Selectează Primăria" onclick="selectAlbumLandmark(2)" style="cursor:pointer">
-          <circle class="schematic-pin" id="mapPin2" cx="215" cy="80" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-          <text x="215" y="84" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">3</text>
-          <text x="215" y="106" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Primăria</text>
-        </g>
-        <g class="schematic-pin-group" data-idx="3" tabindex="0" role="button" aria-label="Selectează Teatrul Slavici" onclick="selectAlbumLandmark(3)" style="cursor:pointer">
-          <circle class="schematic-pin" id="mapPin3" cx="145" cy="96" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-          <text x="145" y="100" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">4</text>
-          <text x="145" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Teatrul Slavici</text>
-        </g>
-        <g class="schematic-pin-group" data-idx="4" tabindex="0" role="button" aria-label="Selectează Catedrala Veche" onclick="selectAlbumLandmark(4)" style="cursor:pointer">
-          <circle class="schematic-pin" id="mapPin4" cx="90" cy="150" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
-          <text x="90" y="154" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">5</text>
-          <text x="90" y="176" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Catedrala Veche</text>
-        </g>
-      </svg>
-    </div>
-    <div class="schematic-note">Pozițiile de pe această hartă sunt demonstrative și orientative (fără proiecție GPS reală).</div>
+  <!-- Comutator Tab-uri Album -->
+  <div class="album-tab-bar">
+    <button class="album-tab-btn active" id="tabMapBtn">📷 Repere &amp; Hartă</button>
+    <button class="album-tab-btn" id="tabRewardsBtn">🏆 Recompense &amp; Cronologie (<span id="rewardsCountBadge">0</span>)</button>
   </div>
 
-  <!-- Zonă detaliu și comparație Atunci / Acum (fără butoane suplimentare de selecție) -->
-  <div class="album-detail">
-    <div class="album-landmark-name" id="albumLandmarkTitle">—</div>
-    <div class="album-landmark-meta" id="albumLandmarkMeta">—</div>
-
-    <div class="cmp-grid">
-      <!-- Card Atunci -->
-      <div class="cmp-card">
-        <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg> Atunci (Istoric)</div>
-        <div class="cmp-card-content" id="albumThenBox">
-          <!-- Generat dinamic -->
-        </div>
+  <!-- Tab 1: Hartă și comparație -->
+  <div id="albumMapTab">
+    <!-- Hartă schematică temporară: titlu și instrucțiune aliniate vertical, pini măriți -->
+    <div class="schematic-box">
+      <div class="schematic-header-group">
+        <span class="schematic-badge">Hartă schematică temporară (Demo)</span>
+        <div class="schematic-instruction">Selectează un reper</div>
       </div>
+      <div class="schematic-svg-wrap">
+        <svg viewBox="0 0 380 230" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(246,242,233,0.06)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#gridPattern)" />
 
-      <!-- Card Acum -->
-      <div class="cmp-card">
-        <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Acum (Album personal)</div>
-        <div class="cmp-card-content" id="albumNowBox">
-          <!-- Generat dinamic -->
+          <!-- Râul Mureș (formă schematică de râu) -->
+          <path d="M 0 185 C 90 215, 180 200, 260 175 S 380 145, 380 145" stroke="#1f6f65" stroke-width="26" fill="none" opacity="0.85" stroke-linecap="round"/>
+          <text x="250" y="200" fill="#f6f2e9" opacity="0.6" font-size="9" font-weight="700" letter-spacing="1">RÂUL MUREȘ</text>
+
+          <!-- Bulevardul Revoluției (axă schematică) -->
+          <path d="M 40 108 L 340 96" stroke="rgba(246,242,233,0.28)" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 4"/>
+          <text x="50" y="94" fill="rgba(246,242,233,0.55)" font-size="8">Bd. Revoluției (schematic)</text>
+
+          <!-- Pini demonstrativi măriți pentru cele 5 repere -->
+          <g class="schematic-pin-group" data-idx="0" tabindex="0" role="button" aria-label="Selectează Turnul de Apă" onclick="selectAlbumLandmark(0)" style="cursor:pointer">
+            <circle class="schematic-pin" id="mapPin0" cx="75" cy="48" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
+            <text x="75" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">1</text>
+            <text x="75" y="74" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Turnul de Apă</text>
+          </g>
+          <g class="schematic-pin-group" data-idx="1" tabindex="0" role="button" aria-label="Selectează Palatul Cultural" onclick="selectAlbumLandmark(1)" style="cursor:pointer">
+            <circle class="schematic-pin" id="mapPin1" cx="290" cy="130" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
+            <text x="290" y="134" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">2</text>
+            <text x="290" y="156" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Palatul Cultural</text>
+          </g>
+          <g class="schematic-pin-group" data-idx="2" tabindex="0" role="button" aria-label="Selectează Primăria" onclick="selectAlbumLandmark(2)" style="cursor:pointer">
+            <circle class="schematic-pin" id="mapPin2" cx="215" cy="80" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
+            <text x="215" y="84" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">3</text>
+            <text x="215" y="106" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Primăria</text>
+          </g>
+          <g class="schematic-pin-group" data-idx="3" tabindex="0" role="button" aria-label="Selectează Teatrul Slavici" onclick="selectAlbumLandmark(3)" style="cursor:pointer">
+            <circle class="schematic-pin" id="mapPin3" cx="145" cy="96" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
+            <text x="145" y="100" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">4</text>
+            <text x="145" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Teatrul Slavici</text>
+          </g>
+          <g class="schematic-pin-group" data-idx="4" tabindex="0" role="button" aria-label="Selectează Catedrala Veche" onclick="selectAlbumLandmark(4)" style="cursor:pointer">
+            <circle class="schematic-pin" id="mapPin4" cx="90" cy="150" r="16" fill="#14655a" stroke="#f6f2e9" stroke-width="2"/>
+            <text x="90" y="154" text-anchor="middle" font-size="11" font-weight="800" fill="#f6f2e9">5</text>
+            <text x="90" y="176" text-anchor="middle" font-size="12" font-weight="600" fill="#f6f2e9" opacity="0.9">Catedrala Veche</text>
+          </g>
+        </svg>
+      </div>
+      <div class="schematic-note">Pozițiile de pe această hartă sunt demonstrative și orientative (fără proiecție GPS reală).</div>
+    </div>
+
+    <!-- Zonă detaliu și comparație Atunci / Acum -->
+    <div class="album-detail">
+      <div class="album-landmark-name" id="albumLandmarkTitle">—</div>
+      <div class="album-landmark-meta" id="albumLandmarkMeta">—</div>
+
+      <div class="cmp-grid">
+        <!-- Card Atunci -->
+        <div class="cmp-card">
+          <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg> Atunci (Istoric)</div>
+          <div class="cmp-card-content" id="albumThenBox">
+            <!-- Generat dinamic -->
+          </div>
+        </div>
+
+        <!-- Card Acum -->
+        <div class="cmp-card">
+          <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Acum (Album personal)</div>
+          <div class="cmp-card-content" id="albumNowBox">
+            <!-- Generat dinamic -->
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Butoane acțiune album -->
+    <div class="album-actions">
+      <button class="album-action-btn primary" id="albumGuideBtn">Ghidează spre acest reper în AR</button>
+      <button class="album-action-btn secondary" id="albumBackBtn">Închide</button>
+    </div>
   </div>
 
-  <!-- Butoane acțiune album -->
-  <div class="album-actions">
-    <button class="album-action-btn primary" id="albumGuideBtn">Ghidează spre acest reper în AR</button>
-    <button class="album-action-btn secondary" id="albumBackBtn">Închide</button>
+  <!-- Tab 2: Recompense, Diplome & Cronologia Istorică -->
+  <div id="albumRewardsTab" style="display:none;">
+    <div class="rewards-list-container" id="albumRewardsList">
+      <!-- Generat dinamic din capitole și progres -->
+    </div>
+    <div class="album-actions" style="margin-top:14px;">
+      <button class="album-action-btn primary" id="albumRewardsLaunchBtn">Deschide Capitolele Povestii</button>
+      <button class="album-action-btn secondary" id="albumRewardsCloseBtn">Închide</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 1: Selectare Mod de Joc (Poveste vs Liber) -->
+<div id="gamemodeModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
+  <div class="modal-card wide">
+    <div class="modal-header">
+      <div>
+        <h2 id="gmTitle">Mod de Explorare AradLens</h2>
+        <p>Alege cum dorești să descoperi comorile istorice ale Aradului</p>
+      </div>
+      <button class="modal-close-btn" id="gmCloseBtn" aria-label="Închide">✕</button>
+    </div>
+
+    <div class="mode-cards-grid">
+      <!-- Modul Poveste / Lore -->
+      <div class="mode-select-card featured" id="selectStoryModeCard">
+        <div class="mode-badge-pill">⭐ Recomandat · Modul Poveste</div>
+        <div class="mode-icon">📜</div>
+        <div class="mode-card-title">Cronica Aradului (Story &amp; Lore)</div>
+        <div class="mode-card-subtitle">Călătorie Cronologică pe Capitole</div>
+        <p class="mode-card-desc">
+          Pășește într-o veritabilă călătorie în timp! Alege un capitol, mergi la repere și fotografiază-le în ordinea construcției lor (1865 → 1913). La fiecare oprire deblochezi file de istorie, iar la finalul fiecărui capitol primești diplome și recompense de cronicar!
+        </p>
+        <div class="mode-card-perks">
+          <span>✓ Ghidare cronologică pas cu pas (de la cel mai vechi reper)</span>
+          <span>✓ Istorisiri secrete („Lore”) deblocate la fața locului</span>
+          <span>✓ Recompense, medalii și diplome de colecție</span>
+        </div>
+        <button class="album-action-btn primary" id="btnChooseStoryMode">Alege Capitolul &amp; Începe Povestea ➔</button>
+      </div>
+
+      <!-- Modul Liber -->
+      <div class="mode-select-card" id="selectFreeModeCard">
+        <div class="mode-icon">🧭</div>
+        <div class="mode-card-title">Modul Liber (Explorer)</div>
+        <div class="mode-card-subtitle">Explorare la alegerea ta</div>
+        <p class="mode-card-desc">
+          Plimbă-te în ritmul tău între oricare dintre cele 5 repere, fără restricții de ordine. Compară fotografiile istorice cu cele actuale și salvează-ți fotografiile în album.
+        </p>
+        <div class="mode-card-perks">
+          <span>✓ Libertate totală de alegere a reperelor</span>
+          <span>✓ Comparații foto Atunci / Acum</span>
+          <span>✓ Potrivit pentru explorare rapidă</span>
+        </div>
+        <button class="album-action-btn secondary" id="btnChooseFreeMode">Explorează în Mod Liber</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Selectare Capitol (Capitolele Cronicii) -->
+<div id="chapterModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="cmHeadTitle">
+  <div class="modal-card wide">
+    <div class="modal-header">
+      <div>
+        <h2 id="cmHeadTitle">Alege Capitolul Istoric</h2>
+        <p>Fiecare capitol te provoacă să fotografiezi reperele în ordine cronologică</p>
+      </div>
+      <button class="modal-close-btn" id="chapterCloseBtn" aria-label="Închide">✕</button>
+    </div>
+
+    <!-- Lista capitolelor generate dinamic -->
+    <div id="chaptersList" class="chapters-grid"></div>
+
+    <div class="album-actions" style="margin-top:10px;">
+      <button class="album-action-btn secondary" id="chapterBackToModeBtn">Schimbă în Mod Liber</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 3: Filă de Istorie Deblocată (Lore Unfold Popup la fotografiere) -->
+<div id="storyLoreModal" class="full-modal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="lore-header">
+      <div class="lore-badge" id="loreStepBadge">Capitolul I · Pasul 1 din 3</div>
+      <div class="lore-year-stamp" id="loreYearStamp">1865</div>
+    </div>
+    
+    <div class="lore-title" id="loreTitle">Catedrala Veche</div>
+    <div class="lore-meta" id="loreMeta">Anul 1865 · Anton Czigler</div>
+
+    <div class="lore-photos-row" id="lorePhotosRow">
+      <!-- Imagini generate dinamic -->
+    </div>
+
+    <div class="lore-story-box">
+      <div class="lore-ribbon">📜 Filă din Cronica Aradului</div>
+      <p id="loreStoryText" class="lore-text">—</p>
+    </div>
+
+    <div class="lore-next-preview" id="loreNextPreview">
+      <strong>Următorul reper din cronologie:</strong>
+      <span id="loreNextName">—</span>
+    </div>
+
+    <div class="lore-actions">
+      <button class="album-action-btn primary" id="loreContinueBtn">Continuă Călătoria în Timp ➔</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 4: Recompensă & Diplomă Capitol Finalizat -->
+<div id="rewardModal" class="full-modal" role="dialog" aria-modal="true">
+  <div class="modal-card celebratory">
+    <div class="reward-ribbon">★ CAPITOL FINALIZAT ★</div>
+    <div class="reward-icon-huge" id="rewardIconHuge">🏆</div>
+    <h2 class="reward-title" id="rewardTitle">Diplomă de Cronicar</h2>
+    <div class="reward-subtitle" id="rewardSubtitle">Ai reconstituit cu succes cronologia istorică a Aradului!</div>
+
+    <!-- Card Diplomă Istorică -->
+    <div class="diploma-card">
+      <div class="diploma-seal" id="diplomaSeal">OMOLOGAT ARADLENS ARCHIVE</div>
+      <div class="diploma-name" id="diplomaRewardName">Cronicar de Onoare al Aradului</div>
+      <div class="diploma-text" id="diplomaText">—</div>
+      <div class="diploma-meta" id="diplomaMeta">Data finalizării: —</div>
+      <div class="diploma-steps" id="diplomaSteps">
+        <!-- Pași parcurși -->
+      </div>
+    </div>
+
+    <div class="reward-actions">
+      <button class="album-action-btn primary" id="rewardNextChapterBtn">Alege Următorul Capitol ➔</button>
+      <button class="album-action-btn secondary" id="rewardViewAlbumBtn">Vezi Recompensele &amp; Albumul</button>
+      <button class="album-action-btn secondary" id="rewardCloseBtn">Închide</button>
+    </div>
   </div>
 </div>
 
@@ -853,12 +1270,20 @@
     <div class="top-row">
       <div class="brand">AradLens</div>
       <div class="top-actions">
+        <button id="gameModeBadge" class="mode-badge" aria-label="Mod de joc curent" title="Schimbă modul de joc sau capitolul">
+          <span class="mode-badge-dot"></span>
+          <span id="gameModeBadgeText">Mod Poveste: Cap. I</span>
+        </button>
         <div class="route-step tnum" id="routeStep" aria-live="polite">1 / 5</div>
-        
         <button id="compassWarningBadge" aria-label="Avertisment busolă" title="Avertisment busolă: apasă pentru detalii">
           <span>!</span>
         </button>
       </div>
+    </div>
+
+    <div id="storyObjectiveBanner" class="story-objective-banner" style="display:none;" title="Apasă pentru detalii capitol">
+      <span class="sob-icon">⏳</span>
+      <span id="storyObjectiveText">Obiectiv cronologic: Fotografiază Catedrala Veche (1865)</span>
     </div>
     
     <div id="humanStatus" class="sr-only" aria-live="polite">Alege un reper și pornește ghidarea.</div>
@@ -873,6 +1298,13 @@
     <div id="steerEdge" aria-hidden="true"></div>
   </div>
   <nav id="rail" aria-label="Acțiuni reper">
+    <button id="gamemodeRailBtn" class="ring" aria-label="Mod de joc &amp; Capitole" title="Mod de joc &amp; Capitole">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        <path d="M8 7h8M8 11h6"/>
+      </svg>
+    </button>
     <button id="detailsBtn" class="ring" style="display:none;" aria-label="Deschide fișa reperului" title="Fișă & audio"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="12" y1="7" x2="12.01" y2="7"/></svg></button>
     <button id="photoCaptureBtn" class="ring" aria-label="Fotografiază reperul selectat" title="Fotografiază reperul selectat" disabled>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -999,29 +1431,206 @@
    Precizia lor determină direct exactitatea direcției spre reper.
    ===================================================================== */
 const REPERE = [
-  { nume: "Turnul de Apă",        lat: 46.16966, lon: 21.30803,
-    stil: "Obiectiv istoric",
-    descriere: "Turn de apă istoric al Aradului, recunoscut după silueta sa înaltă, vizibilă de la distanță." },
-  { nume: "Palatul Cultural",     lat: 46.17411, lon: 21.32017,
-    stil: "Obiectiv istoric",
-    descriere: "Palatul Cultural este un reper central al Aradului, care găzduiește instituții de cultură și evenimente publice." },
   {
+    id: "turnul",
+    nume: "Turnul de Apă",
+    lat: 46.16966, lon: 21.30803,
+    an: "1896",
+    anNumeric: 1896,
+    epoca: "Sfârșitul sec. XIX",
+    arhitect: "Miklós Ybl",
+    stil: "Neogotic industrial",
+    descriere: "Turn de apă istoric al Aradului, ridicat în 1896, înalt de 35 m, a servit la alimentarea modernă a orașului și ca foișor de veghe pentru pompieri.",
+    loreStory: "În anul 1896, la cumpăna timpurilor, Aradul a făcut un pas uriaș spre modernitatea tehnologică prin ridicarea Turnului de Apă de 35 metri. Această capodoperă inginerească a alimentat prima rețea subterană de apă potabilă a orașului, iar din foișorul său superior veghea zi și noapte garda de pompieri, apărând cetatea de flăcări.",
+    loreSnippet: "1896: Victoria ingineriei edilitare și a siguranței urbane."
+  },
+  {
+    id: "palatul",
+    nume: "Palatul Cultural",
+    lat: 46.17411, lon: 21.32017,
+    an: "1913",
+    anNumeric: 1913,
+    epoca: "Începutul sec. XX",
+    arhitect: "Lajos Szántay",
+    stil: "Eclectic monumental",
+    descriere: "Palatul Cultural, inaugurat în toamna anului 1913, reunește Muzeul Județean, Filarmonica de Stat și Biblioteca sub o cupolă arhitecturală somptuoasă.",
+    loreStory: "În toamna anului 1913, chiar înainte de izbucnirea Primului Război Mondial, Aradul și-a inaugurat cea mai strălucită perlă: Palatul Cultural, proiectat de arhitectul local Lajos Szántay. Unind sub o singură cupolă grandioasă muzeul, filarmonica și biblioteca, palatul a consacrat Aradul ca o adevărată capitală a culturii vestice.",
+    loreSnippet: "1913: Apogeul artelor și al efervescenței culturale pe malul Mureșului."
+  },
+  {
+    id: "primaria",
     nume: "Primăria Arad",
     lat: 46.17537, lon: 21.31930,
-    an: "1872–1876",
+    an: "1876",
+    anNumeric: 1876,
+    epoca: "1872–1876",
     arhitect: "Ödön Lechner (proiect), Francisc Pekar",
-    stil: "Neorenascentist eclectic",
-    descriere: "Palatul Administrativ al Aradului, sediul Primăriei Municipiului, a fost construit între 1872 și 1876. Fațada îmbină neorenascentismul flamand cu elemente ale primăriilor medievale târzii, iar turnul central înalt de 54 m adăpostește un orologiu adus din Elveția în 1878, care cântă „Oda Bucuriei” la orele fixe. Vitraliile holului, realizate de artistul arădean Sever Frențiu, ilustrează anotimpurile și lunile anului.",
+    stil: "Neorenascentist eclectic flamand",
+    descriere: "Palatul Administrativ al Aradului, sediul Primăriei Municipiului, a fost construit între 1872 și 1876. Fațada îmbină neorenascentismul flamand cu elemente ale primăriilor medievale târzii, iar turnul de 54 m adăpostește un orologiu adus din Elveția în 1878 ce cântă „Oda Bucuriei” la orele fixe.",
     foto: "primaria-1901.jpg",
-    fotoCredit: "Foto istorică: Fortepan / Schoch Frigyes — Arad, 1901 (domeniu public)"
+    fotoCredit: "Foto istorică: Fortepan / Schoch Frigyes — Arad, 1901 (domeniu public)",
+    loreStory: "Construit între 1872 și 1876 după planurile maestrului Ödön Lechner, Palatul Administrativ a devenit inima civică a Aradului. Turnul înalt de 54 de metri domină bulevardul central, iar orologiul elvețian montat în 1878 măsoară de un secol și jumătate bătăile inimii unui oraș curajos și vizionar.",
+    loreSnippet: "1876: Ridicarea grandorii administrative și a turnului cu orologiu."
   },
-  { nume: "Teatrul I. Slavici",   lat: 46.17109, lon: 21.31577,
-    stil: "Obiectiv istoric",
-    descriere: "Teatrul Ioan Slavici este scena principală de teatru a Aradului, situată în centrul orașului." },
-  { nume: "Catedrala Veche",      lat: 46.17050, lon: 21.31170,
-    stil: "Obiectiv istoric",
-    descriere: "Catedrala Veche este un lăcaș de cult ortodox din Arad, situat în zona centrală a orașului." }
+  {
+    id: "teatru",
+    nume: "Teatrul I. Slavici",
+    lat: 46.17109, lon: 21.31577,
+    an: "1874",
+    anNumeric: 1874,
+    epoca: "1872–1874",
+    arhitect: "Anton Czigler",
+    stil: "Neoclasic",
+    descriere: "Teatrul Clasic Ioan Slavici este scena principală a artelor dramatice din Arad, inaugurată în toamna anului 1874 cu participarea marilor personalități ale vremii.",
+    loreStory: "Inaugurat în toamna anului 1874 în prezența împăratului Franz Joseph, Teatrul din Arad a fost sanctuarul dramaturgiei și al marilor adunări culturale. Chiar și după incendiul mistuitor din 1883, teatrul a renăscut din propria cenușă prin dăruirea cetățenilor, devenind altarul teatrului transilvănean.",
+    loreSnippet: "1874: Sanctuarul dramaturgiei clasice și al marilor spectacole."
+  },
+  {
+    id: "catedrala",
+    nume: "Catedrala Veche",
+    lat: 46.17050, lon: 21.31170,
+    an: "1865",
+    anNumeric: 1865,
+    epoca: "1862–1865",
+    arhitect: "Anton Czigler",
+    stil: "Baroc târziu / Neoclasic",
+    descriere: "Catedrala Veche din Arad, sfințită în 1865, a constituit centrul spiritual și comunitar ortodox al orașului pe durata marilor prefaceri istorice.",
+    loreStory: "Sfințită în 1865 de episcopul Procopie Ivașcovici, Catedrala Veche a fost primul mare monument de zid al renașterii civice a Aradului modern. Aici s-a adunat comunitatea în cele mai grele momente de cumpănă și speranță, marcând piatra de temelie a călătoriei noastre istorice.",
+    loreSnippet: "1865: Punctul de pornire al spiritualității și identității arădene."
+  }
 ];
+
+/* =====================================================================
+   CAPITOLELE CRONICII ISTORICE (MODUL POVESTE / LORE)
+   Repere ordonate strict cronologic după anul construcției/inaugurării:
+   1. Catedrala Veche (1865) -> 2. Teatrul Slavici (1874) ->
+   3. Primăria Arad (1876) -> 4. Turnul de Apă (1896) ->
+   5. Palatul Cultural (1913)
+   ===================================================================== */
+const CHAPTERS = [
+  {
+    id: "cap1",
+    index: 0,
+    numar: "Capitolul I",
+    titlu: "Zorii Renașterii Civice",
+    perioada: "1865 – 1876",
+    badge: "1865 – 1876",
+    icon: "🏛️",
+    sinopsis: "Urmărește pas cu pas transformarea Aradului de la prima catedrală de zid, trecând prin sanctuarul dramaturgiei, până la impunătorul Palat Administrativ.",
+    landmarkIndices: [4, 3, 2], // Catedrala Veche (1865), Teatrul Slavici (1874), Primăria Arad (1876)
+    reward: {
+      id: "rew_cap1",
+      badgeTitle: "Pionier al Aradului Modern",
+      icon: "🥈",
+      seal: "OMOLOGAT 1876 · ARADLENS ARCHIVE",
+      diplomaDesc: "Diplomă de Cronicar acordată pentru reconstituirea cronologică a celor trei ctitorii fondatoare ale Aradului modern (1865 – 1876)."
+    }
+  },
+  {
+    id: "cap2",
+    index: 1,
+    numar: "Capitolul II",
+    titlu: "Epoca Inovației și Artelor",
+    perioada: "1896 – 1913",
+    badge: "1896 – 1913",
+    icon: "⚙️",
+    sinopsis: "Pășește în epoca marilor inovații inginerești și a rafinamentului cultural: de la Turnul de Apă până la cupola somptuoasă a Palatului Cultural.",
+    landmarkIndices: [0, 1], // Turnul de Apă (1896), Palatul Cultural (1913)
+    reward: {
+      id: "rew_cap2",
+      badgeTitle: "Maestru al Inovației Arădene",
+      icon: "🥇",
+      seal: "OMOLOGAT 1913 · ARADLENS ARCHIVE",
+      diplomaDesc: "Diplomă de Cronicar acordată pentru descoperirea cronologică a triumfului tehnologic și artistic de la începutul secolului XX (1896 – 1913)."
+    }
+  },
+  {
+    id: "cap3",
+    index: 2,
+    numar: "Capitolul III",
+    titlu: "Marea Odisee a Aradului",
+    perioada: "1865 – 1913",
+    badge: "Traseul Suprem · 5 Repere",
+    icon: "👑",
+    sinopsis: "Călătoria completă prin jumătatea de secol care a modelat Aradul. Fotografiază toate cele 5 monumente în ordinea exactă a ridicării lor pentru a deveni Cronicar de Onoare.",
+    landmarkIndices: [4, 3, 2, 0, 1], // Catedrala (1865) -> Teatrul (1874) -> Primăria (1876) -> Turnul (1896) -> Palatul (1913)
+    reward: {
+      id: "rew_cap3",
+      badgeTitle: "Cronicar de Onoare al Aradului",
+      icon: "🏆",
+      seal: "MARELE SIGILIU DE AUR · ARADLENS ARCHIVE",
+      diplomaDesc: "Cea mai înaltă distincție acordată unui explorator AradLens: ai parcurs și imortalizat întreaga cronologie istorică a Aradului!"
+    }
+  }
+];
+
+/* Stare persistență Mod Poveste & Recompense */
+const STORY_STORAGE_KEY = "aradlens_story_state";
+let storyState = {
+  currentMode: "story", // "story" | "free"
+  activeChapterId: "cap1",
+  chapters: {
+    cap1: { currentStep: 0, completed: false, completedDate: null, photos: {} },
+    cap2: { currentStep: 0, completed: false, completedDate: null, photos: {} },
+    cap3: { currentStep: 0, completed: false, completedDate: null, photos: {} }
+  },
+  rewards: []
+};
+
+try {
+  const savedStory = localStorage.getItem(STORY_STORAGE_KEY);
+  if (savedStory) {
+    const parsed = JSON.parse(savedStory);
+    storyState = Object.assign(storyState, parsed);
+    if (!storyState.chapters || typeof storyState.chapters !== "object") storyState.chapters = {};
+    ["cap1", "cap2", "cap3"].forEach(cid => {
+      const c = storyState.chapters[cid];
+      if (!c || typeof c !== "object") {
+        storyState.chapters[cid] = { currentStep: 0, completed: false, completedDate: null, photos: {} };
+      } else {
+        const stepNum = Number(c.currentStep);
+        c.currentStep = (isNaN(stepNum) || stepNum < 0) ? 0 : Math.floor(stepNum);
+        c.completed = Boolean(c.completed);
+        if (!c.photos || typeof c.photos !== "object") c.photos = {};
+      }
+    });
+    if (!Array.isArray(storyState.rewards)) storyState.rewards = [];
+  }
+} catch (e) {}
+
+function saveStoryState() {
+  try {
+    localStorage.setItem(STORY_STORAGE_KEY, JSON.stringify(storyState));
+  } catch (e) {}
+}
+
+function getActiveChapter() {
+  return CHAPTERS.find(c => c.id === storyState.activeChapterId) || CHAPTERS[0];
+}
+
+function getActiveChapterProgress() {
+  const ch = getActiveChapter();
+  if (!storyState.chapters || typeof storyState.chapters !== "object") {
+    storyState.chapters = {};
+  }
+  let prog = storyState.chapters[ch.id];
+  if (!prog || typeof prog !== "object") {
+    prog = { currentStep: 0, completed: false, completedDate: null, photos: {} };
+    storyState.chapters[ch.id] = prog;
+  }
+  const stepNum = Number(prog.currentStep);
+  prog.currentStep = (isNaN(stepNum) || stepNum < 0) ? 0 : Math.floor(stepNum);
+  prog.completed = Boolean(prog.completed);
+  if (!prog.photos || typeof prog.photos !== "object") prog.photos = {};
+  return prog;
+}
+
+function getCurrentStoryLandmark() {
+  const ch = getActiveChapter();
+  const prog = getActiveChapterProgress();
+  const step = Math.min(prog.currentStep, ch.landmarkIndices.length - 1);
+  return REPERE[ch.landmarkIndices[step]] || REPERE[4];
+}
 
 let target = REPERE[0];
 let userLat = null, userLon = null;
@@ -1131,10 +1740,182 @@ checkDeviceType();
 window.addEventListener('resize', checkDeviceType);
 window.addEventListener('orientationchange', checkDeviceType);
 
-/* ---------- Selector de Repere: traseu ordonat (puncte de salt 1->5, fara infasurare) ---------- */
+/* =====================================================================
+   MANAGEMENTUL MODURILOR DE JOC & CRONICA PE CAPITOLE
+   ===================================================================== */
+function isStoryMode() {
+  return storyState.currentMode === "story";
+}
+
+function updateStoryUI() {
+  const isStory = isStoryMode();
+  const ch = getActiveChapter();
+  const prog = getActiveChapterProgress();
+  const badgeText = $("#gameModeBadgeText");
+  const banner = $("#storyObjectiveBanner");
+  const objText = $("#storyObjectiveText");
+  const rewardsCountBadge = $("#rewardsCountBadge");
+
+  if (rewardsCountBadge) {
+    rewardsCountBadge.textContent = storyState.rewards.length;
+  }
+
+  if (isStory) {
+    if (badgeText) {
+      const stepNum = prog.completed ? "Finalizat ★" : `${prog.currentStep + 1}/${ch.landmarkIndices.length}`;
+      badgeText.textContent = `📖 ${ch.numar}: ${stepNum}`;
+    }
+    if (banner && objText) {
+      banner.style.display = "flex";
+      if (prog.completed) {
+        objText.textContent = `Capitol finalizat! Ai obținut: ${ch.reward.badgeTitle} ★`;
+      } else {
+        const curTarget = getCurrentStoryLandmark();
+        objText.textContent = `Pas cronologic: Fotografiază ${curTarget.nume} (${curTarget.an})`;
+      }
+    }
+  } else {
+    if (badgeText) badgeText.textContent = "🧭 Mod Liber";
+    if (banner) banner.style.display = "none";
+  }
+
+  updateRouteSteps();
+  renderRouteDots();
+}
+
+function showStoryLockedToast(landmark) {
+  const toast = $("#proximityToast");
+  if (!toast) return;
+  const cw = $("#compassWarning");
+  if (cw) cw.style.display = "none";
+  $("#ptTitle").textContent = "Reper blocat în timp!";
+  $("#ptMsg").textContent = `Pentru a păstra ordinea cronologică a istoriei, fotografiază mai întâi ${landmark.nume} (${landmark.an}).`;
+  toast.style.display = "flex";
+  if (proximityToastTimer) clearTimeout(proximityToastTimer);
+  proximityToastTimer = setTimeout(() => { toast.style.display = "none"; }, 5000);
+}
+
+function selectGamemode(mode) {
+  storyState.currentMode = mode;
+  saveStoryState();
+  if (mode === "story") {
+    target = getCurrentStoryLandmark();
+    activeWheelIndex = 0;
+  } else {
+    activeWheelIndex = 0;
+    target = REPERE[0];
+  }
+  $("#targetName").textContent = `AradLens \u00b7 ${target.nume}`;
+  updateDetailsBtn();
+  updateStoryUI();
+  scheduleUpdate();
+}
+
+function selectChapter(chapterId) {
+  storyState.activeChapterId = chapterId;
+  storyState.currentMode = "story";
+  saveStoryState();
+  target = getCurrentStoryLandmark();
+  activeWheelIndex = 0;
+  $("#targetName").textContent = `AradLens \u00b7 ${target.nume}`;
+  updateDetailsBtn();
+  updateStoryUI();
+  scheduleUpdate();
+  closeChapterModal();
+}
+
+function openGamemodeModal() {
+  const m = $("#gamemodeModal");
+  if (m) m.style.display = "flex";
+}
+function closeGamemodeModal() {
+  const m = $("#gamemodeModal");
+  if (m) m.style.display = "none";
+}
+
+function openChapterModal() {
+  renderChaptersList();
+  const m = $("#chapterModal");
+  if (m) m.style.display = "flex";
+}
+function closeChapterModal() {
+  const m = $("#chapterModal");
+  if (m) m.style.display = "none";
+}
+
+function renderChaptersList() {
+  const listEl = $("#chaptersList");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+
+  CHAPTERS.forEach((ch) => {
+    const rawProg = (storyState.chapters && storyState.chapters[ch.id]) || {};
+    const currentStep = (typeof rawProg.currentStep === "number" && !isNaN(rawProg.currentStep)) ? rawProg.currentStep : 0;
+    const isCompleted = Boolean(rawProg.completed);
+    const prog = { currentStep, completed: isCompleted };
+    const isCurrentActive = (storyState.activeChapterId === ch.id && storyState.currentMode === "story");
+
+    const card = document.createElement("div");
+    card.className = `chapter-card ${isCurrentActive ? "active-chapter" : ""} ${isCompleted ? "completed-chapter" : ""}`;
+
+    let statusText = "Neînceput";
+    if (isCompleted) {
+      statusText = "★ Finalizat (Recompensă deblocată)";
+    } else if (prog.currentStep > 0) {
+      statusText = `În desfășurare (Pasul ${prog.currentStep + 1} din ${ch.landmarkIndices.length})`;
+    }
+
+    const landmarksMarkup = ch.landmarkIndices.map((idx, stepIdx) => {
+      const lm = REPERE[idx];
+      let cls = "cl-item";
+      let icon = "⏳";
+      if (isCompleted || stepIdx < prog.currentStep) {
+        cls += " done";
+        icon = "✓";
+      } else if (stepIdx === prog.currentStep) {
+        cls += " current";
+        icon = "📍";
+      }
+      return `<span class="${cls}">${icon} ${stepIdx + 1}. ${lm.nume} (${lm.an})</span>`;
+    }).join("");
+
+    card.innerHTML = `
+      <div class="chapter-top-row">
+        <span class="chapter-number">${ch.numar}</span>
+        <span class="chapter-period-badge">${ch.badge}</span>
+      </div>
+      <div class="chapter-title">${ch.icon} ${ch.titlu}</div>
+      <div class="chapter-desc">${ch.sinopsis}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px;">Repere în ordine cronologică:</div>
+      <div class="chapter-landmarks-list">
+        ${landmarksMarkup}
+      </div>
+      <div class="chapter-reward-snippet">
+        <span class="r-icon">${ch.reward.icon}</span>
+        <div>
+          <div>Recompensă: <strong>${ch.reward.badgeTitle}</strong></div>
+          <div style="font-size:11px;opacity:0.8;">${statusText}</div>
+        </div>
+      </div>
+      <button class="album-action-btn ${isCurrentActive ? 'secondary' : 'primary'}" onclick="selectChapter('${ch.id}')">
+        ${isCurrentActive ? (isCompleted ? "Reia acest capitol" : "Continuă capitolul activ") : (isCompleted ? "Reia capitolul" : "Începe acest capitol")}
+      </button>
+    `;
+    listEl.appendChild(card);
+  });
+}
+window.selectChapter = selectChapter;
+
+/* ---------- Selector de Repere: Traseu cronologic sau Mod Liber ---------- */
 let activeWheelIndex = 0;
 
 function routeStepText(i){
+  if (isStoryMode()) {
+    const ch = getActiveChapter();
+    const prog = getActiveChapterProgress();
+    if (prog.completed) return `★ ${ch.numar}`;
+    return `Pasul ${prog.currentStep + 1} / ${ch.landmarkIndices.length}`;
+  }
   return `${i + 1} / ${REPERE.length}`;
 }
 
@@ -1149,19 +1930,67 @@ function renderRouteDots(){
   const rail = $("#snapRail");
   if (!rail) return;
   rail.innerHTML = "";
-  REPERE.forEach((r, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "snap-dot";
-    b.dataset.index = i;
-    b.setAttribute("aria-current", i === activeWheelIndex ? "true" : "false");
-    b.setAttribute("aria-label", `Oprirea ${i + 1} din ${REPERE.length}: ${r.nume}`);
-    b.title = r.nume;
-    b.addEventListener("click", () => {
-      selectTargetByIndex(i, true);
+
+  if (isStoryMode()) {
+    const ch = getActiveChapter();
+    const prog = getActiveChapterProgress();
+
+    ch.landmarkIndices.forEach((rIdx, stepIdx) => {
+      const r = REPERE[rIdx];
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "snap-dot";
+      b.dataset.step = stepIdx;
+      b.dataset.repereIndex = rIdx;
+
+      const isCurrent = (stepIdx === prog.currentStep && !prog.completed);
+      const isPast = (stepIdx < prog.currentStep || prog.completed);
+      const isFuture = (stepIdx > prog.currentStep && !prog.completed);
+
+      if (isCurrent) {
+        b.setAttribute("aria-current", "true");
+        b.title = `Pasul ${stepIdx + 1}: ${r.nume} (${r.an}) - Obiectiv activ`;
+        b.setAttribute("aria-label", `Obiectiv curent: ${r.nume} (${r.an})`);
+      } else if (isPast) {
+        b.classList.add("completed");
+        b.setAttribute("aria-current", "false");
+        b.title = `${r.nume} (${r.an}) - Finalizat`;
+        b.setAttribute("aria-label", `Pas finalizat: ${r.nume} (${r.an})`);
+      } else {
+        b.classList.add("locked");
+        b.setAttribute("aria-current", "false");
+        b.title = `🔒 ${r.nume} (${r.an}) - Încuiat`;
+        b.setAttribute("aria-label", `Reper încuiat în timp`);
+      }
+
+      b.addEventListener("click", () => {
+        if (isFuture) {
+          showStoryLockedToast(getCurrentStoryLandmark());
+        } else {
+          selectTargetByIndex(rIdx, false);
+          document.querySelectorAll(".snap-dot").forEach(d => d.setAttribute("aria-current", "false"));
+          b.setAttribute("aria-current", "true");
+        }
+      });
+      rail.appendChild(b);
     });
-    rail.appendChild(b);
-  });
+  } else {
+    // Mod Liber
+    REPERE.forEach((r, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "snap-dot";
+      b.dataset.index = i;
+      b.setAttribute("aria-current", i === activeWheelIndex ? "true" : "false");
+      b.setAttribute("aria-label", `Oprirea ${i + 1} din ${REPERE.length}: ${r.nume}`);
+      b.title = `${r.nume} (${r.an || ''})`;
+      b.addEventListener("click", () => {
+        selectTargetByIndex(i, true);
+      });
+      rail.appendChild(b);
+    });
+  }
+
   updateRouteSteps();
   updateWheelDistances();
 }
@@ -1170,22 +1999,38 @@ function renderRouteDots(){
 function setWheelActiveIndex(idx, animate = true) {
   const N = REPERE.length;
   activeWheelIndex = Math.min(N - 1, Math.max(0, idx | 0));
-  document.querySelectorAll(".snap-dot").forEach(d => {
-    d.setAttribute("aria-current", String(Number(d.dataset.index) === activeWheelIndex));
-  });
+  if (!isStoryMode()) {
+    document.querySelectorAll(".snap-dot").forEach(d => {
+      d.setAttribute("aria-current", String(Number(d.dataset.index) === activeWheelIndex));
+    });
+  }
   updateRouteSteps();
 }
 
 function updateWheelDistances() {
-  REPERE.forEach((r, i) => {
-    const dot = document.querySelector(`.snap-dot[data-index="${i}"]`);
-    if (!dot) return;
-    let label = `Oprirea ${i + 1} din ${REPERE.length}: ${r.nume}`;
-    if (userLat != null && userLon != null && hasValidCoords(r)) {
-      label += `, ${formatDistance(distance(userLat, userLon, r.lat, r.lon))}`;
-    }
-    dot.setAttribute("aria-label", label);
-  });
+  if (isStoryMode()) {
+    const ch = getActiveChapter();
+    ch.landmarkIndices.forEach((rIdx, stepIdx) => {
+      const r = REPERE[rIdx];
+      const dot = document.querySelector(`.snap-dot[data-step="${stepIdx}"]`);
+      if (!dot) return;
+      let label = `Pasul ${stepIdx + 1}: ${r.nume} (${r.an})`;
+      if (userLat != null && userLon != null && hasValidCoords(r)) {
+        label += `, ${formatDistance(distance(userLat, userLon, r.lat, r.lon))}`;
+      }
+      dot.setAttribute("aria-label", label);
+    });
+  } else {
+    REPERE.forEach((r, i) => {
+      const dot = document.querySelector(`.snap-dot[data-index="${i}"]`);
+      if (!dot) return;
+      let label = `Oprirea ${i + 1} din ${REPERE.length}: ${r.nume}`;
+      if (userLat != null && userLon != null && hasValidCoords(r)) {
+        label += `, ${formatDistance(distance(userLat, userLon, r.lat, r.lon))}`;
+      }
+      dot.setAttribute("aria-label", label);
+    });
+  }
 }
 
 function selectTargetByIndex(i, shouldUpdateWheel = true) {
@@ -1197,7 +2042,7 @@ function selectTargetByIndex(i, shouldUpdateWheel = true) {
   stopSpeech();
   if (wasOpen) openCard(); else closeCard();
   updateDetailsBtn();
-  if (shouldUpdateWheel) {
+  if (shouldUpdateWheel && !isStoryMode()) {
     setWheelActiveIndex(i, true);
   }
   // Re-evalueaza obturatorul pentru noul reper (daca avem pozitie).
@@ -1210,9 +2055,13 @@ function selectTargetByIndex(i, shouldUpdateWheel = true) {
 }
 
 function initRouteDots(){
-  renderRouteDots();
-  setWheelActiveIndex(0, false);
+  if (isStoryMode()) {
+    target = getCurrentStoryLandmark();
+  } else {
+    target = REPERE[0];
+  }
   $("#targetName").textContent = `AradLens \u00b7 ${target.nume}`;
+  updateStoryUI();
 }
 
 /* Arrow keys walk the ordered route (clamped at both ends, no wrap). */
@@ -1223,10 +2072,18 @@ function initRouteDots(){
     if (e.key !== "ArrowRight" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowUp") return;
     e.preventDefault();
     const dir = (e.key === "ArrowRight" || e.key === "ArrowDown") ? 1 : -1;
-    const next = Math.min(REPERE.length - 1, Math.max(0, activeWheelIndex + dir));
-    selectTargetByIndex(next, true);
-    const btn = rail.querySelector(`.snap-dot[data-index="${next}"]`);
-    if (btn) btn.focus();
+    if (isStoryMode()) {
+      const ch = getActiveChapter();
+      const prog = getActiveChapterProgress();
+      const nextStep = Math.min(prog.currentStep, Math.max(0, activeWheelIndex + dir));
+      activeWheelIndex = nextStep;
+      selectTargetByIndex(ch.landmarkIndices[nextStep], false);
+    } else {
+      const next = Math.min(REPERE.length - 1, Math.max(0, activeWheelIndex + dir));
+      selectTargetByIndex(next, true);
+      const btn = rail.querySelector(`.snap-dot[data-index="${next}"]`);
+      if (btn) btn.focus();
+    }
   });
 })();
 
@@ -1739,19 +2596,28 @@ function checkLandmarkProximity(lat, lon) {
 
 // Utilitar de testare în consolă pentru simularea apropierii pe PC / DevTools
 // (doar consolă — niciun text vizibil utilizatorului nu face trimitere la el)
-window.simulateProximity = function(landmarkIndexOrName = 0) {
-  let l = typeof landmarkIndexOrName === "number"
-    ? REPERE[landmarkIndexOrName]
-    : REPERE.find(r => r.nume === landmarkIndexOrName);
+window.simulateProximity = function(landmarkIndexOrName) {
+  let l;
+  if (landmarkIndexOrName !== undefined) {
+    l = typeof landmarkIndexOrName === "number"
+      ? REPERE[landmarkIndexOrName]
+      : REPERE.find(r => r.nume === landmarkIndexOrName);
+  } else {
+    // În Mod Poveste, simulează sosirea la obiectivul activ curent din cronologie
+    l = isStoryMode() ? getCurrentStoryLandmark() : target;
+  }
   if (!l) l = REPERE[0];
   userLat = l.lat;
   userLon = l.lon;
   const idx = REPERE.findIndex(r => r.nume === l.nume);
-  if (idx >= 0) {
+  if (idx >= 0 && !isStoryMode()) {
     selectTargetByIndex(idx);
+  } else if (idx >= 0 && isStoryMode()) {
+    selectTargetByIndex(idx, false);
   }
   updateWheelDistances();
   currentProximityLandmark = l;
+  updateShutterState(35);
   showProximityNotification(l, 35);
   scheduleUpdate();
 };
@@ -1873,7 +2739,6 @@ function executePhotoCapture() {
     console.warn("Storage quota depășită sau mod privat:", err);
     storageFull = true;
     try {
-      // Eliberăm intrarea curentă din memorie? Nu — o păstrăm pentru sesiune.
       const all = JSON.parse(localStorage.getItem(USER_PHOTOS_STORAGE_KEY) || "{}");
       userCapturedPhotos = all;
       userCapturedPhotos[currentLandmark.nume] = {
@@ -1884,16 +2749,55 @@ function executePhotoCapture() {
     } catch (e2) {}
   }
 
-  // Afișare confirmare explicită (limita local-only, menționată o singură dată)
-  showCaptureFeedback(
-    storageFull ? "warn" : "check",
-    storageFull ? "Stocarea e plină" : "Fotografie realizată!",
-    storageFull
-      ? `Stocarea locală e plină, așa că fotografia reperului „${currentLandmark.nume}” e păstrată doar pentru sesiunea curentă. Eliberează spațiu pentru a o salva în album.`
-      : `Obiectivul „${currentLandmark.nume}” a fost fotografiat. Vezi fotografia în Album → Acum (fotografiile sunt păstrate local, pe acest dispozitiv).`,
-    !storageFull,
-    currentLandmark.nume
-  );
+  // Bifare și avansare în Modul Poveste vs Modul Liber
+  if (isStoryMode()) {
+    const ch = getActiveChapter();
+    const prog = getActiveChapterProgress();
+    const curTarget = getCurrentStoryLandmark();
+
+    // Verificăm dacă reperul fotografiat corespunde pasului cronologic activ
+    if (currentLandmark.nume === curTarget.nume) {
+      prog.photos[currentLandmark.nume] = photoDataUrl;
+      const isFinalStep = (prog.currentStep + 1 >= ch.landmarkIndices.length);
+      const stepRevealed = prog.currentStep;
+
+      if (isFinalStep) {
+        prog.completed = true;
+        prog.completedDate = new Date().toISOString();
+        if (!storyState.rewards.includes(ch.reward.id)) {
+          storyState.rewards.push(ch.reward.id);
+        }
+      } else {
+        prog.currentStep++;
+      }
+      saveStoryState();
+      updateStoryUI();
+
+      // Afișează fila de istorie deblocată (Lore Unfold)!
+      setTimeout(() => {
+        openStoryLoreModal(currentLandmark, ch, stepRevealed, isFinalStep);
+      }, 350);
+    } else {
+      showCaptureFeedback(
+        "warn",
+        "Reper în afara ordinii cronologice",
+        `Ai fotografiat ${currentLandmark.nume}, dar cronologia din ${ch.numar} cere să fotografiezi mai întâi ${curTarget.nume} (${curTarget.an})!`,
+        true,
+        currentLandmark.nume
+      );
+    }
+  } else {
+    // Afișare confirmare standard în Mod Liber
+    showCaptureFeedback(
+      storageFull ? "warn" : "check",
+      storageFull ? "Stocarea e plină" : "Fotografie realizată!",
+      storageFull
+        ? `Stocarea locală e plină, așa că fotografia reperului „${currentLandmark.nume}” e păstrată doar pentru sesiunea curentă. Eliberează spațiu pentru a o salva în album.`
+        : `Obiectivul „${currentLandmark.nume}” a fost fotografiat. Vezi fotografia în Album → Acum (fotografiile sunt păstrate local, pe acest dispozitiv).`,
+      !storageFull,
+      currentLandmark.nume
+    );
+  }
 
   // Revenire cameră la starea estompată după 1.5s
   setTimeout(() => {
@@ -1903,6 +2807,185 @@ function executePhotoCapture() {
   // Dacă albumul e deschis, îl actualizăm
   if ($("#albumModal").style.display === "flex") {
     renderAlbum();
+  }
+}
+
+/* =====================================================================
+   FILĂ DE ISTORIE (LORE UNLOCK) & MODAL DE RECOMPENSĂ
+   ===================================================================== */
+function openStoryLoreModal(landmark, chapter, stepIdx, isFinal) {
+  const modal = $("#storyLoreModal");
+  if (!modal) return;
+
+  $("#loreStepBadge").textContent = `${chapter.numar} · Pasul ${stepIdx + 1} din ${chapter.landmarkIndices.length}`;
+  $("#loreYearStamp").textContent = landmark.an || "Istoric";
+  $("#loreTitle").textContent = landmark.nume;
+  $("#loreMeta").textContent = [landmark.stil, landmark.arhitect ? "Arh. " + landmark.arhitect : null].filter(Boolean).join(" · ");
+  $("#loreStoryText").textContent = landmark.loreStory || landmark.descriere;
+
+  const photosRow = $("#lorePhotosRow");
+  if (photosRow) {
+    const userPhoto = userCapturedPhotos[landmark.nume];
+    let html = "";
+    if (userPhoto && userPhoto.dataUrl) {
+      html += `<img src="${userPhoto.dataUrl}" alt="Fotografia ta" class="lore-photo-thumb" style="border: 2px solid var(--accent-green);">`;
+    }
+    if (landmark.foto) {
+      html += `<img src="${landmark.foto}" alt="Arhivă istorică" class="lore-photo-thumb">`;
+    }
+    photosRow.innerHTML = html;
+    photosRow.style.display = html ? "flex" : "none";
+  }
+
+  const nextPreview = $("#loreNextPreview");
+  const continueBtn = $("#loreContinueBtn");
+
+  if (isFinal) {
+    if (nextPreview) {
+      nextPreview.innerHTML = `<strong>★ Capitol Finalizat!</strong><span>Ai parcurs cu succes întreaga cronologie istorică a acestui capitol!</span>`;
+    }
+    if (continueBtn) {
+      continueBtn.textContent = "Revendică Recompensa de Cronicar! 🏆";
+      continueBtn.onclick = () => {
+        closeStoryLoreModal();
+        openRewardModal(chapter);
+      };
+    }
+  } else {
+    const nextIdx = chapter.landmarkIndices[stepIdx + 1];
+    const nextLandmark = REPERE[nextIdx];
+    if (nextPreview && nextLandmark) {
+      nextPreview.innerHTML = `<strong>Următorul reper în timp:</strong><span>${stepIdx + 2}. ${nextLandmark.nume} (${nextLandmark.an})</span>`;
+    }
+    if (continueBtn) {
+      continueBtn.textContent = "Continuă Călătoria în Timp ➔";
+      continueBtn.onclick = () => {
+        closeStoryLoreModal();
+        target = getCurrentStoryLandmark();
+        $("#targetName").textContent = `AradLens \u00b7 ${target.nume}`;
+        updateDetailsBtn();
+        updateStoryUI();
+        scheduleUpdate();
+      };
+    }
+  }
+
+  modal.style.display = "flex";
+}
+
+function closeStoryLoreModal() {
+  const modal = $("#storyLoreModal");
+  if (modal) modal.style.display = "none";
+}
+
+function openRewardModal(chapter) {
+  const modal = $("#rewardModal");
+  if (!modal) return;
+
+  const rew = chapter.reward;
+  $("#rewardIconHuge").textContent = rew.icon;
+  $("#rewardTitle").textContent = `Felicitări! ${chapter.numar} Desăvârșit!`;
+  $("#rewardSubtitle").textContent = `Ai reconstituit cronologia „${chapter.titlu}” (${chapter.perioada})`;
+  $("#diplomaSeal").textContent = rew.seal;
+  $("#diplomaRewardName").textContent = rew.badgeTitle;
+  $("#diplomaText").textContent = rew.diplomaDesc;
+
+  const prog = storyState.chapters[chapter.id];
+  const dateFormatted = prog && prog.completedDate ? new Date(prog.completedDate).toLocaleDateString("ro-RO", {
+    day: "numeric", month: "long", year: "numeric"
+  }) : new Date().toLocaleDateString("ro-RO");
+  $("#diplomaMeta").textContent = `Acordat la: ${dateFormatted} · Registrul de Patrimoniu AradLens`;
+
+  const stepsEl = $("#diplomaSteps");
+  if (stepsEl) {
+    stepsEl.innerHTML = chapter.landmarkIndices.map((idx, i) => {
+      const lm = REPERE[idx];
+      return `<span>✓ Pasul ${i + 1}: ${lm.nume} (${lm.an}) — ${lm.stil}</span>`;
+    }).join("");
+  }
+
+  modal.style.display = "flex";
+}
+
+function closeRewardModal() {
+  const modal = $("#rewardModal");
+  if (modal) modal.style.display = "none";
+}
+
+function switchAlbumTab(tab) {
+  const mapTab = $("#albumMapTab");
+  const rewTab = $("#albumRewardsTab");
+  const tabMapBtn = $("#tabMapBtn");
+  const tabRewardsBtn = $("#tabRewardsBtn");
+
+  if (tab === "rewards") {
+    if (mapTab) mapTab.style.display = "none";
+    if (rewTab) rewTab.style.display = "block";
+    if (tabRewardsBtn) tabRewardsBtn.classList.add("active");
+    if (tabMapBtn) tabMapBtn.classList.remove("active");
+    renderAlbumRewards();
+  } else {
+    if (mapTab) mapTab.style.display = "block";
+    if (rewTab) rewTab.style.display = "none";
+    if (tabMapBtn) tabMapBtn.classList.add("active");
+    if (tabRewardsBtn) tabRewardsBtn.classList.remove("active");
+    renderAlbum();
+  }
+}
+
+function renderAlbumRewards() {
+  const listEl = $("#albumRewardsList");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+
+  // Distincții / Diplome pe capitole
+  CHAPTERS.forEach(ch => {
+    const prog = storyState.chapters[ch.id];
+    const isUnlocked = prog && prog.completed;
+    const card = document.createElement("div");
+    card.className = `reward-badge-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+    const dateStr = isUnlocked && prog.completedDate
+      ? `Deblocat la ${new Date(prog.completedDate).toLocaleDateString("ro-RO")}`
+      : "Blocat · Parcurge capitolul în ordine cronologică pentru a debloca";
+
+    card.innerHTML = `
+      <div class="rbc-icon">${isUnlocked ? ch.reward.icon : "🔒"}</div>
+      <div class="rbc-info">
+        <div class="rbc-title">${ch.reward.badgeTitle} (${ch.badge})</div>
+        <div class="rbc-desc">${ch.reward.diplomaDesc}</div>
+        <div class="rbc-meta">${dateStr}</div>
+      </div>
+    `;
+    listEl.appendChild(card);
+  });
+
+  // Secțiune de cronici istorice deblocate
+  const loreTitle = document.createElement("div");
+  loreTitle.style.cssText = "font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--text-main); margin-top: 14px; margin-bottom: 8px;";
+  loreTitle.textContent = "📜 Cronica Aradului — File Deblocate";
+  listEl.appendChild(loreTitle);
+
+  let hasAnyLore = false;
+  REPERE.forEach(r => {
+    const hasPhoto = !!(userCapturedPhotos[r.nume]);
+    if (hasPhoto || storyState.rewards.length > 0) {
+      hasAnyLore = true;
+      const loreBox = document.createElement("div");
+      loreBox.className = "lore-story-box";
+      loreBox.innerHTML = `
+        <div class="lore-ribbon">${r.an}: ${r.nume}</div>
+        <div class="lore-text">${r.loreStory}</div>
+      `;
+      listEl.appendChild(loreBox);
+    }
+  });
+
+  if (!hasAnyLore) {
+    const emptyLore = document.createElement("div");
+    emptyLore.style.cssText = "font-size: 12px; color: var(--text-muted); padding: 10px; text-align: center;";
+    emptyLore.textContent = "Nicio filă de istorie deblocată încă. Pornește Modul Poveste pentru a descoperi cronicile orașului!";
+    listEl.appendChild(emptyLore);
   }
 }
 
@@ -2035,7 +3118,7 @@ let selectedAlbumIndex = 0;
 function openAlbum() {
   const activeIdx = REPERE.findIndex(r => r.nume === target.nume);
   selectedAlbumIndex = activeIdx >= 0 ? activeIdx : 0;
-  renderAlbum();
+  switchAlbumTab("map");
   $("#albumModal").style.display = "flex";
 }
 
@@ -2137,6 +3220,84 @@ $("#albumCloseBtn").onclick = closeAlbum;
 $("#albumBackBtn").onclick = closeAlbum;
 $("#albumGuideBtn").onclick = guideToSelectedLandmark;
 
+/* Tab-uri Album */
+const tabMapBtn = $("#tabMapBtn");
+if (tabMapBtn) tabMapBtn.onclick = () => switchAlbumTab("map");
+
+const tabRewardsBtn = $("#tabRewardsBtn");
+if (tabRewardsBtn) tabRewardsBtn.onclick = () => switchAlbumTab("rewards");
+
+const albumRewardsCloseBtn = $("#albumRewardsCloseBtn");
+if (albumRewardsCloseBtn) albumRewardsCloseBtn.onclick = closeAlbum;
+
+const albumRewardsLaunchBtn = $("#albumRewardsLaunchBtn");
+if (albumRewardsLaunchBtn) {
+  albumRewardsLaunchBtn.onclick = () => {
+    closeAlbum();
+    openChapterModal();
+  };
+}
+
+/* Butoane Mod de Joc & Capitole */
+const gameModeBadge = $("#gameModeBadge");
+if (gameModeBadge) gameModeBadge.onclick = openGamemodeModal;
+
+const gamemodeRailBtn = $("#gamemodeRailBtn");
+if (gamemodeRailBtn) gamemodeRailBtn.onclick = openGamemodeModal;
+
+const storyObjectiveBanner = $("#storyObjectiveBanner");
+if (storyObjectiveBanner) storyObjectiveBanner.onclick = openChapterModal;
+
+const gmCloseBtn = $("#gmCloseBtn");
+if (gmCloseBtn) gmCloseBtn.onclick = closeGamemodeModal;
+
+const btnChooseStoryMode = $("#btnChooseStoryMode");
+if (btnChooseStoryMode) {
+  btnChooseStoryMode.onclick = () => {
+    closeGamemodeModal();
+    openChapterModal();
+  };
+}
+
+const btnChooseFreeMode = $("#btnChooseFreeMode");
+if (btnChooseFreeMode) {
+  btnChooseFreeMode.onclick = () => {
+    selectGamemode("free");
+    closeGamemodeModal();
+  };
+}
+
+const chapterCloseBtn = $("#chapterCloseBtn");
+if (chapterCloseBtn) chapterCloseBtn.onclick = closeChapterModal;
+
+const chapterBackToModeBtn = $("#chapterBackToModeBtn");
+if (chapterBackToModeBtn) {
+  chapterBackToModeBtn.onclick = () => {
+    selectGamemode("free");
+    closeChapterModal();
+  };
+}
+
+const rewardNextChapterBtn = $("#rewardNextChapterBtn");
+if (rewardNextChapterBtn) {
+  rewardNextChapterBtn.onclick = () => {
+    closeRewardModal();
+    openChapterModal();
+  };
+}
+
+const rewardViewAlbumBtn = $("#rewardViewAlbumBtn");
+if (rewardViewAlbumBtn) {
+  rewardViewAlbumBtn.onclick = () => {
+    closeRewardModal();
+    openAlbum();
+    switchAlbumTab("rewards");
+  };
+}
+
+const rewardCloseBtn = $("#rewardCloseBtn");
+if (rewardCloseBtn) rewardCloseBtn.onclick = closeRewardModal;
+
 $("#startBtn").onclick = async () => {
   $("#start").style.display = "none";
 
@@ -2147,6 +3308,7 @@ $("#startBtn").onclick = async () => {
   await startCamera();
   startSensors();
   startGeo();
+  initRouteDots();
 
   // Watchdog: dacă în 6s nu a venit niciun heading, afișează notificarea cu colțuri rotunjite
   setTimeout(() => {
