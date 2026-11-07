@@ -2,7 +2,8 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0e12">
 <title>AradLens</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0e12'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='system-ui,sans-serif' font-size='34' font-weight='800' fill='%23e8a33d'%3EA%3C/text%3E%3C/svg%3E">
 <style>
@@ -46,6 +47,7 @@
     --btn-bg: rgba(5,7,10,.55);
     --btn-border: rgba(246,242,233,.35);
     --btn-text: #f6f2e9;
+    color-scheme: dark;
   }
 
   /* Light lens: overlays, modals and cards only. The camera field
@@ -65,6 +67,7 @@
     --btn-bg: rgba(23,17,6,.06);
     --btn-border: rgba(23,17,6,.28);
     --btn-text: #171106;
+    color-scheme: light;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -72,9 +75,14 @@
   ::selection { background: var(--amber); color: var(--amber-ink); }
   :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 6px; }
   input, textarea { caret-color: var(--amber); }
+  /* Fără întârzierea de double-tap zoom pe butoane. Oprirea din banda busolei
+     rămâne pe touch-action: none — glisarea nu trebuie citită ca pan/zoom. */
+  button { touch-action: manipulation; }
+  #snapRail button { touch-action: none; }
   #albumModal::-webkit-scrollbar, #card::-webkit-scrollbar { width: 10px; }
   #albumModal::-webkit-scrollbar-thumb, #card::-webkit-scrollbar-thumb { background: rgba(246,242,233,.35); border-radius: 8px; }
   #albumModal::-webkit-scrollbar-track, #card::-webkit-scrollbar-track { background: transparent; }
+  body.light-theme #albumModal::-webkit-scrollbar-thumb, body.light-theme #card::-webkit-scrollbar-thumb { background: rgba(23,17,6,.40); }
   .sr-only {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -304,6 +312,7 @@
   #start {
     position: fixed; inset: 0; z-index: 5; background: var(--ground);
     color: var(--bone); display: flex; overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .start-photo { position: fixed; inset: 0; z-index: 0; }
   .start-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -329,7 +338,7 @@
     color: var(--bone); max-width: 34ch; margin-bottom: 14px;
   }
   .start-teaser {
-    width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
+    width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block;
     border-radius: 12px; border: 1px solid var(--hud-hairline);
     box-shadow: 2px 8px 22px rgba(0,0,0,.7);
   }
@@ -396,7 +405,7 @@
     color: var(--text-main); border-top:1px solid var(--border-color);
     padding:16px 16px calc(20px + env(safe-area-inset-bottom)) 16px;
     border-radius:12px 12px 0 0; box-shadow:2px -8px 28px rgba(0,0,0,.55);
-    max-height:72vh; overflow-y:auto;
+    max-height:72vh; overflow-y:auto; overscroll-behavior: contain;
   }
   #card .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
   #card .card-title {
@@ -522,7 +531,7 @@
      tipar os, rigle de păr; chihlimbariul marchează pinul activ */
   #albumModal {
     position: fixed; inset: 0; z-index: 6; display: none; flex-direction: column;
-    background: var(--bg-modal); color: var(--text-main);
+    background: var(--bg-modal); color: var(--text-main); overscroll-behavior: contain;
     overflow-y: auto; padding: calc(14px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) 16px;
   }
   .album-header {
@@ -565,11 +574,11 @@
     padding: 8px;
   }
   .schematic-svg-wrap svg { width: 100%; height: 100%; display: block; }
-  .schematic-pin { transition: all .2s ease; cursor: pointer; }
+  .schematic-pin { transition: transform .2s ease; cursor: pointer; }
   .schematic-pin.active-pin { filter: none; }
   .schematic-pin-group { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .schematic-pin-group:active .schematic-pin { transform: scale(.93); }
-  .schematic-pin-group:focus { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .schematic-pin-group:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .schematic-note { font-size: 12px; margin-top: 8px; line-height: 1.35; color: var(--text-muted); }
 
   /* Secțiunea de comparație Atunci / Acum — suprafețe de lume cu rigle de păr */
@@ -712,7 +721,7 @@
     display: none; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 30px;
   }
-  #desktopPlaceholder h2 {
+  #desktopPlaceholder h1 {
     font-family: var(--display); font-size: 30px; font-weight: 600;
     letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; text-wrap: balance;
   }
@@ -747,7 +756,7 @@
     font-size: 12px; font-weight: 700; color: var(--bone);
     display: flex; align-items: center; gap: 8px; max-width: 95%;
     margin-left: auto; margin-right: auto; box-shadow: 2px 6px 18px rgba(0,0,0,.5);
-    font-variant-numeric: tabular-nums; cursor: pointer;
+    font-variant-numeric: tabular-nums; cursor: pointer; font-family: inherit;
   }
   .story-objective-banner .sob-icon { font-size: 15px; }
   body.light-theme .mode-badge {
@@ -761,13 +770,13 @@
   .full-modal {
     position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center;
     background: rgba(0,0,0,.75); padding: 16px; backdrop-filter: blur(5px);
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   }
   .modal-card {
     background: var(--bg-surface); border: 1px solid var(--border-color);
     border-radius: 16px; padding: 20px; color: var(--text-main);
     max-width: 440px; width: 100%; box-shadow: 2px 14px 40px rgba(0,0,0,.8);
-    position: relative; max-height: 90vh; overflow-y: auto;
+    position: relative; max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;
   }
   .modal-card.wide { max-width: 520px; }
   .modal-header {
@@ -965,7 +974,7 @@
     flex: 1; padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 10px;
     border: 1.5px solid transparent; background: transparent; color: var(--text-muted);
     cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: center;
-    gap: 6px; transition: all .2s ease;
+    gap: 6px; transition: background-color .2s ease, color .2s ease, border-color .2s ease;
   }
   .album-tab-btn.active {
     background: rgba(232,163,61,.15); color: var(--amber); border-color: var(--amber);
@@ -986,12 +995,47 @@
   .rbc-title { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
   .rbc-desc { font-size: 12px; color: var(--text-muted); line-height: 1.35; margin-bottom: 4px; }
   .rbc-meta { font-size: 11px; font-weight: 700; color: var(--amber); }
+
+  /* Titluri: rânduri echilibrate (progressive enhancement, ignorat de browserele vechi) */
+  .card-title, .modal-header h2, .chapter-title, .mode-card-title,
+  .lore-title, .reward-title { text-wrap: balance; }
+
+  /* Feedback la hover — doar pe dispozitive cu cursor real (touch-ul nu e afectat). */
+  @media (hover: hover) {
+    .btn:hover, .card-x:hover, .album-close-btn:hover, .modal-close-btn:hover,
+    .cs-cancel-btn:hover, .album-action-btn.secondary:hover { border-color: currentColor; }
+    .album-tab-btn:not(.active):hover { color: var(--text-main); border-color: currentColor; }
+    #rail .ring:hover { border-color: var(--bone); }
+    #card .card-actions .btn:hover,
+    #startBtn:hover, #desktopPreviewBtn:hover, .album-action-btn.primary:hover {
+      box-shadow: 0 0 0 3px rgba(232,163,61,.35), 2px 8px 22px rgba(0,0,0,.7);
+    }
+    .mode-badge:hover, .story-objective-banner:hover { filter: brightness(1.15); }
+    /* Cursor real: indiciu de hover fără a atinge transformările de :active. */
+    .compass-stop:hover { filter: brightness(1.18); }
+    #compassWarningBadge:hover { filter: brightness(1.12); }
+    .cs-shutter:hover { border-color: var(--bone); }
+    .schematic-pin-group:hover .schematic-pin { filter: brightness(1.18); }
+  }
+
+  /* Mișcare redusă: animațiile decorative sunt oprite; stările funcționale
+     (direcția, distanțele, poziția benzii busolei) se aplică instant, fără tranziții. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+    /* Flash alb pur decorativ: omis la mișcare redusă. */
+    #captureFlash { opacity: 0 !important; }
+  }
 </style>
 </head>
 <body>
 
 <div id="desktopPlaceholder">
-  <h2>Experiență AR</h2>
+  <h1>Experiență AR</h1>
   <p>Această aplicație este concepută pentru a fi explorată pe teren. Te rugăm să o accesezi de pe un telefon mobil.</p>
   <p>Pe desktop poți doar previzualiza macheta, fără cameră, busolă sau GPS.</p>
   <button id="desktopPreviewBtn" class="btn">Continuă în mod previzualizare (Desktop)</button>
@@ -1048,7 +1092,7 @@
 <div id="captureFlash"></div>
 
 <!-- Modal confirmare / informare fotografiere -->
-<div id="captureModal">
+<div id="captureModal" role="dialog" aria-modal="true" aria-labelledby="cmTitle" aria-live="polite">
   <div class="cm-card">
     <div class="cm-icon" id="cmIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
     <div class="cm-title" id="cmTitle">Fotografie realizată!</div>
@@ -1068,10 +1112,10 @@
 
 
 <!-- Ecran / Panou de Album și Hartă Schematică -->
-<div id="albumModal">
+<div id="albumModal" role="dialog" aria-modal="true" aria-labelledby="albumTitle">
   <div class="album-header">
     <div>
-      <h2>Album &amp; Hartă Arad</h2>
+      <h2 id="albumTitle">Album &amp; Hartă Arad</h2>
       <p>Hartă schematică demonstrativă, comparații istorice și cronologie</p>
     </div>
     <button class="album-close-btn" id="albumCloseBtn">Închide</button>
@@ -1079,8 +1123,8 @@
 
   <!-- Comutator Tab-uri Album -->
   <div class="album-tab-bar">
-    <button class="album-tab-btn active" id="tabMapBtn">📷 Repere &amp; Hartă</button>
-    <button class="album-tab-btn" id="tabRewardsBtn">🏆 Recompense &amp; Cronologie (<span id="rewardsCountBadge">0</span>)</button>
+    <button class="album-tab-btn active" id="tabMapBtn" aria-pressed="true">📷 Repere &amp; Hartă</button>
+    <button class="album-tab-btn" id="tabRewardsBtn" aria-pressed="false">🏆 Recompense &amp; Cronologie (<span id="rewardsCountBadge">0</span>)</button>
   </div>
 
   <!-- Tab 1: Hartă și comparație -->
@@ -1092,7 +1136,7 @@
         <div class="schematic-instruction">Selectează un reper</div>
       </div>
       <div class="schematic-svg-wrap">
-        <svg viewBox="0 0 380 230" preserveAspectRatio="xMidYMid meet">
+        <svg viewBox="0 0 380 230" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Hartă schematică a reperelor Aradului">
           <defs>
             <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
               <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(246,242,233,0.06)" stroke-width="1"/>
@@ -1197,7 +1241,7 @@
       <!-- Modul Poveste / Lore -->
       <div class="mode-select-card featured" id="selectStoryModeCard">
         <div class="mode-badge-pill">⭐ Recomandat · Modul Poveste</div>
-        <div class="mode-icon">📜</div>
+        <div class="mode-icon" aria-hidden="true">📜</div>
         <div class="mode-card-title">Cronica Aradului (Story &amp; Lore)</div>
         <div class="mode-card-subtitle">Călătorie Cronologică pe Capitole</div>
         <p class="mode-card-desc">
@@ -1213,7 +1257,7 @@
 
       <!-- Modul Liber -->
       <div class="mode-select-card" id="selectFreeModeCard">
-        <div class="mode-icon">🧭</div>
+        <div class="mode-icon" aria-hidden="true">🧭</div>
         <div class="mode-card-title">Modul Liber (Explorer)</div>
         <div class="mode-card-subtitle">Explorare la alegerea ta</div>
         <p class="mode-card-desc">
@@ -1251,7 +1295,7 @@
 </div>
 
 <!-- Modal 3: Filă de Istorie Deblocată (Lore Unfold Popup la fotografiere) -->
-<div id="storyLoreModal" class="full-modal" role="dialog" aria-modal="true">
+<div id="storyLoreModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="loreTitle">
   <div class="modal-card">
     <div class="lore-header">
       <div class="lore-badge" id="loreStepBadge">Capitolul I · Pasul 1 din 3</div>
@@ -1282,10 +1326,10 @@
 </div>
 
 <!-- Modal 4: Recompensă & Diplomă Capitol Finalizat -->
-<div id="rewardModal" class="full-modal" role="dialog" aria-modal="true">
+<div id="rewardModal" class="full-modal" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
   <div class="modal-card celebratory">
     <div class="reward-ribbon">★ CAPITOL FINALIZAT ★</div>
-    <div class="reward-icon-huge" id="rewardIconHuge">🏆</div>
+    <div class="reward-icon-huge" id="rewardIconHuge" aria-hidden="true">🏆</div>
     <h2 class="reward-title" id="rewardTitle">Diplomă de Cronicar</h2>
     <div class="reward-subtitle" id="rewardSubtitle">Ai reconstituit cu succes cronologia istorică a Aradului!</div>
 
@@ -1311,14 +1355,14 @@
 <!-- Fundalul live: pe dispozitiv real arata imaginea camerei. In testele headless cu
      --use-fake-device-for-media-stream, Chromium deseneaza peste cadre un tipar de test
      (cronometru verde + cerc mobil) — nu este continut DOM si nu se stilizeaza din CSS. -->
-<video id="cam" autoplay muted playsinline></video>
+<video id="cam" autoplay muted playsinline aria-hidden="true"></video>
 
 <div id="overlay">
   <div class="top">
     <div class="top-row">
       <div class="brand">AradLens</div>
       <div class="top-actions">
-        <button id="gameModeBadge" class="mode-badge" aria-label="Mod de joc curent" title="Schimbă modul de joc sau capitolul">
+        <button id="gameModeBadge" class="mode-badge" title="Schimbă modul de joc sau capitolul">
           <span class="mode-badge-dot"></span>
           <span id="gameModeBadgeText">Mod Poveste: Cap. I</span>
         </button>
@@ -1329,10 +1373,10 @@
       </div>
     </div>
 
-    <div id="storyObjectiveBanner" class="story-objective-banner" style="display:none;" title="Apasă pentru detalii capitol">
-      <span class="sob-icon">⏳</span>
-      <span id="storyObjectiveText">Obiectiv cronologic: Fotografiază Catedrala Veche (1865)</span>
-    </div>
+    <button type="button" id="storyObjectiveBanner" class="story-objective-banner" style="display:none;" title="Apasă pentru detalii capitol">
+      <span class="sob-icon" aria-hidden="true">⏳</span>
+      <span id="storyObjectiveText" aria-live="polite">Obiectiv cronologic: Fotografiază Catedrala Veche (1865)</span>
+    </button>
     
     <div id="humanStatus" class="sr-only" aria-live="polite">Alege un reper și pornește ghidarea.</div>
     <div id="diag" class="debug-only" style="font-size:12px;opacity:.7;margin-top:3px;font-variant-numeric:tabular-nums;">busolă: — · direcție reper: —</div>
@@ -1355,20 +1399,20 @@
     </button>
     <button id="detailsBtn" class="ring" style="display:none;" aria-label="Deschide fișa reperului" title="Fișă & audio"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="12" y1="7" x2="12.01" y2="7"/></svg></button>
     <button id="photoCaptureBtn" class="ring" aria-label="Fotografiază reperul selectat" title="Fotografiază reperul selectat" disabled>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
     <circle cx="12" cy="13" r="4"/>
   </svg>
 </button>
     <button id="albumBtn" class="ring" aria-label="Deschide albumul și harta" title="Deschide albumul și harta">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
     <circle cx="8.5" cy="8.5" r="1.5"/>
     <polyline points="21 15 16 10 5 21"/>
   </svg>
 </button>
     <button id="themeToggleBtn" class="theme-toggle-btn ring" aria-label="Comută modul de lumină / întuneric" title="Comută modul de lumină / întuneric">
-          <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -1379,7 +1423,7 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
@@ -1439,16 +1483,16 @@
   <div class="cmp-credit" id="cmpCredit"></div>
 </div>
 
-<div id="status"></div>
+<div id="status" role="status" aria-live="polite"></div>
 
 <div id="start">
-  <div class="start-photo" aria-hidden="true"><img src="primaria-1901.jpg" alt=""></div>
+  <div class="start-photo" aria-hidden="true"><img src="primaria-1901.jpg" alt="" width="1100" height="834"></div>
   <div class="start-scrim" aria-hidden="true"></div>
   <div class="start-inner">
     <div class="start-brand">AradLens</div>
     <h1>Stai unde a stat 1901.</h1>
     <p class="start-promise">La reperele cu fotografie de arhivă, AradLens ține imaginea de atunci lângă priveliștea de azi. Prima pereche: Primăria, 1901.</p>
-    <img class="start-teaser" src="primaria-1901.jpg" alt="Fotografie de arhivă — Primăria Arad, 1901">
+    <img class="start-teaser" src="primaria-1901.jpg" alt="Fotografie de arhivă — Primăria Arad, 1901" width="1100" height="834" fetchpriority="high">
     <div class="start-credit">Fortepan / Schoch Frigyes — Arad, 1901 (domeniu public)</div>
     <ul class="perm-rows">
       <li>
@@ -1739,6 +1783,8 @@ function applyTheme(theme) {
   currentTheme = theme;
   const isLight = (theme === "light");
   document.body.classList.toggle("light-theme", isLight);
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) metaThemeColor.setAttribute("content", isLight ? "#f6f2e9" : "#0b0e12");
   const iconSun = $("#themeIconSun");
   const iconMoon = $("#themeIconMoon");
   if (iconSun && iconMoon) {
@@ -3233,14 +3279,14 @@ function switchAlbumTab(tab) {
   if (tab === "rewards") {
     if (mapTab) mapTab.style.display = "none";
     if (rewTab) rewTab.style.display = "block";
-    if (tabRewardsBtn) tabRewardsBtn.classList.add("active");
-    if (tabMapBtn) tabMapBtn.classList.remove("active");
+    if (tabRewardsBtn) { tabRewardsBtn.classList.add("active"); tabRewardsBtn.setAttribute("aria-pressed", "true"); }
+    if (tabMapBtn) { tabMapBtn.classList.remove("active"); tabMapBtn.setAttribute("aria-pressed", "false"); }
     renderAlbumRewards();
   } else {
     if (mapTab) mapTab.style.display = "block";
     if (rewTab) rewTab.style.display = "none";
-    if (tabMapBtn) tabMapBtn.classList.add("active");
-    if (tabRewardsBtn) tabRewardsBtn.classList.remove("active");
+    if (tabMapBtn) { tabMapBtn.classList.add("active"); tabMapBtn.setAttribute("aria-pressed", "true"); }
+    if (tabRewardsBtn) { tabRewardsBtn.classList.remove("active"); tabRewardsBtn.setAttribute("aria-pressed", "false"); }
     renderAlbum();
   }
 }
