@@ -59,6 +59,34 @@
     --btn-bg: rgba(255,253,248,.72);
     --btn-border: rgba(20,24,29,.18);
     --btn-text: #14181d;
+    --on-dark: #f6f2e9;          /* pigment care rămâne deschis peste media */
+    /* Șina laterală: umplere și contur mai ferme, ca inelele să se citească. */
+    --rail-border: rgba(20,24,29,.44);
+    --rail-fill-top: rgba(255,255,255,.40);
+    --rail-fill-bottom: rgba(246,242,233,.24);
+    --rail-shadow: 0 4px 14px rgba(20,24,29,.26);
+    /* Butoane și pastile din foile de sticlă: umplere vizibilă, contur clar. */
+    --btn-surface: rgba(255,255,255,.34);
+    --btn-line: rgba(20,24,29,.30);
+    --chip-surface: rgba(255,255,255,.30);
+    --chip-line: rgba(20,24,29,.26);
+    --panel-surface: rgba(20,24,29,.04);
+    --panel-line: rgba(20,24,29,.18);
+    /* Cadranul busolei: cerneală pe scrimul luminos. */
+    --dial-fill: rgba(255,255,255,.82);
+    --dial-stroke: rgba(20,24,29,.64);
+    --dial-tick: rgba(20,24,29,.38);
+    --dial-tick-strong: rgba(20,24,29,.58);
+    --dial-ahead: rgba(20,24,29,.66);
+    --dial-tip: rgba(20,24,29,.72);
+    --dial-tail: rgba(20,24,29,.30);
+    --dial-hub: #14181d;
+    --dial-lock: rgba(20,24,29,.76);
+    --dial-name: #14181d;
+    --dial-dist: rgba(20,24,29,.80);
+    --dial-accent: #6f5527;
+    --dial-accent-soft: rgba(111,85,39,.42);
+    --dial-complete: #14655a;
     color-scheme: light;
   }
 
@@ -140,10 +168,10 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Șina dreaptă: acțiunile reperului , inele compacte de 46px, un
-     comutator de temă întâi, fără a părăsi obiectivul */
+  /* Șina dreaptă: acțiunile reperului , inele compacte de 46px,
+     fără a părăsi obiectivul */
   #rail {
-    position: absolute; right: 14px; top: 22%;
+    position: absolute; right: 14px; top: calc(76px + env(safe-area-inset-top));
     display: flex; flex-direction: column; gap: 9px; z-index: 2; align-items: center;
   }
   #rail .ring {
@@ -173,7 +201,7 @@
   }
   /* Ecrane scurte: șina se comprimă să nu calce peste banda busolei de jos. */
   @media (max-height: 720px) and (min-height: 630px) {
-    #rail { top: 19%; gap: 7px; }
+    #rail { top: calc(64px + env(safe-area-inset-top)); gap: 7px; }
     #rail .ring { width: 44px; height: 44px; }
     #rail .ring svg { width: 19px; height: 19px; }
   }
@@ -195,14 +223,14 @@
   .band-anim .cb-scale-tick { transition: transform .34s cubic-bezier(.22,.61,.36,1), opacity .34s ease; }
   .cb-reticle {
     position: absolute; left: 50%; top: 0; width: 13px; height: 8px; margin-left: -6.5px;
-    background: var(--amber); z-index: 3; pointer-events: none;
+    background: var(--dial-accent); z-index: 3; pointer-events: none;
     clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
   .cb-scale-tick {
     position: absolute; left: 50%; top: 3px; width: 1px; height: 5px; margin-left: -.5px;
-    background: rgba(246,242,233,.3); pointer-events: none;
+    background: var(--dial-tick); pointer-events: none;
   }
-  .cb-scale-tick.major { height: 9px; background: rgba(246,242,233,.5); }
+  .cb-scale-tick.major { height: 9px; background: var(--dial-tick-strong); }
   .compass-stop {
     position: absolute; left: 50%; top: 15px; width: 104px; margin-left: -52px;
     -webkit-appearance: none; appearance: none;
@@ -216,43 +244,43 @@
   }
   .compass-stop:active .cb-dial { transform: scale(.93); }
   .compass-stop svg { display: block; width: 100%; height: 100%; }
-  .cb-halo { fill: none; stroke: var(--amber); stroke-width: 1; opacity: 0; transition: opacity .2s ease; }
-  .cb-ring { fill: rgba(5,7,10,.42); stroke: rgba(246,242,233,.42); stroke-width: 1.2; transition: stroke .2s ease; }
-  .cb-tick { stroke: rgba(246,242,233,.3); stroke-width: 1; }
-  .cb-tick.major { stroke: rgba(246,242,233,.55); }
-  .cb-ahead { fill: rgba(246,242,233,.45); }
+  .cb-halo { fill: none; stroke: var(--dial-accent); stroke-width: 1; opacity: 0; transition: opacity .2s ease; }
+  .cb-ring { fill: var(--dial-fill); stroke: var(--dial-stroke); stroke-width: 1.2; transition: stroke .2s ease; }
+  .cb-tick { stroke: var(--dial-tick); stroke-width: 1; }
+  .cb-tick.major { stroke: var(--dial-tick-strong); }
+  .cb-ahead { fill: var(--dial-ahead); }
   .cb-rot { transition: opacity .3s ease; }
-  .cb-tip { fill: rgba(246,242,233,.5); }
-  .cb-tail { fill: rgba(246,242,233,.2); }
-  .cb-hub { fill: var(--bone); opacity: .75; }
-  .cb-lock { display: none; fill: none; stroke: rgba(246,242,233,.62); stroke-width: 1.1; stroke-linecap: round; }
+  .cb-tip { fill: var(--dial-tip); }
+  .cb-tail { fill: var(--dial-tail); }
+  .cb-hub { fill: var(--dial-hub); opacity: .75; }
+  .cb-lock { display: none; fill: none; stroke: var(--dial-lock); stroke-width: 1.1; stroke-linecap: round; }
   .compass-stop.no-dir .cb-rot { opacity: .28; }
   .cb-name {
     font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10px; font-weight: 600; line-height: 1.2;
     text-align: center; letter-spacing: 0;
-    color: var(--bone); opacity: .82; width: 100%;
+    color: var(--dial-name); opacity: .9; width: 100%;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .cb-dist { font-size: 10px; font-weight: 700; line-height: 1; opacity: .55; font-variant-numeric: tabular-nums; }
+  .cb-dist { font-size: 10px; font-weight: 700; line-height: 1; opacity: .72; color: var(--dial-dist); font-variant-numeric: tabular-nums; }
   .compass-stop[aria-current="true"] .cb-halo { opacity: .55; }
-  .compass-stop[aria-current="true"] .cb-ring { stroke: var(--amber); stroke-width: 1.6; }
-  .compass-stop[aria-current="true"] .cb-tick.major { stroke: rgba(200,176,136,.8); }
+  .compass-stop[aria-current="true"] .cb-ring { stroke: var(--dial-accent); stroke-width: 1.8; }
+  .compass-stop[aria-current="true"] .cb-tick.major { stroke: var(--dial-accent-soft); }
   .compass-stop[aria-current="true"] .cb-ahead,
-  .compass-stop[aria-current="true"] .cb-tip { fill: var(--amber); }
-  .compass-stop[aria-current="true"] .cb-tail { fill: rgba(200,176,136,.32); }
-  .compass-stop[aria-current="true"] .cb-hub { fill: var(--amber); opacity: 1; }
-  .compass-stop[aria-current="true"] .cb-dial { filter: drop-shadow(0 0 6px rgba(200,176,136,.4)); }
-  .compass-stop[aria-current="true"] .cb-name { color: var(--amber); opacity: 1; }
-  .compass-stop[aria-current="true"] .cb-dist { color: var(--amber); opacity: .95; }
+  .compass-stop[aria-current="true"] .cb-tip { fill: var(--dial-accent); }
+  .compass-stop[aria-current="true"] .cb-tail { fill: var(--dial-accent-soft); }
+  .compass-stop[aria-current="true"] .cb-hub { fill: var(--dial-accent); opacity: 1; }
+  .compass-stop[aria-current="true"] .cb-dial { filter: drop-shadow(0 0 6px var(--dial-accent-soft)); }
+  .compass-stop[aria-current="true"] .cb-name { color: var(--dial-accent); opacity: 1; }
+  .compass-stop[aria-current="true"] .cb-dist { color: var(--dial-accent); opacity: .95; }
   /* Mod Poveste: pași încuiți (viitori) și pași finalizați */
   .compass-stop.locked .cb-rot { opacity: .12; }
   .compass-stop.locked .cb-lock { display: block; }
-  .compass-stop.locked .cb-ring { stroke: rgba(246,242,233,.24); }
-  .compass-stop.locked .cb-tick.major { stroke: rgba(246,242,233,.3); }
+  .compass-stop.locked .cb-ring { stroke: var(--dial-tick); }
+  .compass-stop.locked .cb-tick.major { stroke: var(--dial-tick); }
   .compass-stop.locked .cb-name,
-  .compass-stop.locked .cb-dist { opacity: .5; }
-  .compass-stop.completed .cb-ring { stroke: rgba(47,158,140,.8); }
-  .compass-stop.completed .cb-hub { fill: #2f9e8c; opacity: 1; }
+  .compass-stop.locked .cb-dist { opacity: .62; }
+  .compass-stop.completed .cb-ring { stroke: var(--dial-complete); }
+  .compass-stop.completed .cb-hub { fill: var(--dial-complete); opacity: 1; }
   .compass-stop.completed .cb-name { opacity: .78; }
 
   /* Blocul de legendă, stânga-jos, pe unicul scrim inferior */
@@ -429,12 +457,12 @@
     background: var(--amber); color: var(--amber-ink); font-size: 13px; font-weight: 700; text-align: center;
     padding: 8px 12px; display: none; font-variant-numeric: tabular-nums;
   }
-  .hint { text-align:left; font-size:12px; opacity:.75; margin:10px 0 0; padding: 0; color: var(--bone); }
+  .hint { text-align:left; font-size:12px; opacity:.85; margin:10px 0 0; padding: 0; color: var(--bone); }
 
   /* Butoane mici reutilizabile , pastilă de scrim cu tipar os;
-     peste obiectiv rămân întunecate în ambele teme, din proiectare */
+     peste obiectiv rămân întunecate, din proiectare */
   .btn {
-    background: rgba(5,7,10,.55); color: var(--bone); border: 1.5px solid rgba(246,242,233,.35);
+    background: rgba(5,7,10,.55); color: var(--on-dark); border: 1.5px solid rgba(246,242,233,.35);
     border-radius:12px; padding:8px 15px; font-size:13px; font-weight:600; cursor:pointer;
     min-height: 44px; font-variant-numeric: tabular-nums;
   }
@@ -521,7 +549,7 @@
     position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 14px; right: 14px;
     max-width: 400px; margin: 0 auto; z-index: 10;
     background: #141a21;
-    color: var(--bone); border-radius: 12px; padding: 12px 14px;
+    color: var(--ink); border-radius: 12px; padding: 12px 14px;
     box-shadow: 2px 8px 24px rgba(0,0,0,.55); border: 1.5px solid var(--amber);
     display: none; animation: toastIn .25s ease-out;
   }
@@ -529,14 +557,14 @@
     display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;
   }
   .cw-title {
-    display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--bone);
+    display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--ink);
   }
   .cw-close {
-    background: transparent; border: none; color: var(--bone); font-size: 20px;
+    background: transparent; border: none; color: var(--ink); font-size: 20px;
     line-height: 1; cursor: pointer; padding: 2px 6px; min-width: 44px; min-height: 44px; opacity: .85;
   }
   .cw-close:hover { opacity: 1; }
-  .cw-body { font-size: 12px; line-height: 1.45; opacity: 1; color: var(--bone); }
+  .cw-body { font-size: 12px; line-height: 1.45; opacity: 1; color: var(--ink); }
 
   /* Pictogramă mică de avertizare (colțul din dreapta sus) , chihlimbar semnal */
   #compassWarningBadge {
@@ -591,7 +619,7 @@
   }
   .album-header p { font-size: 12px; margin-top: 4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
   .album-close-btn {
-    background: transparent; border: 1.5px solid var(--border-color);
+    background: var(--btn-surface); border: 1.5px solid var(--btn-line);
     color: var(--text-main); border-radius: 12px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
     min-height: 44px; font-variant-numeric: tabular-nums;
   }
@@ -601,7 +629,7 @@
   .level-chipbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .level-chip {
     padding: 8px 14px; min-height: 44px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
-    background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+    background: var(--chip-surface); border: 1px solid var(--chip-line); color: var(--text-muted);
     cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s ease, border-color .2s ease;
   }
   .level-chip.active {
@@ -649,7 +677,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .level-lock svg { width: 9px; height: 9px; stroke: currentColor; fill: none; }
-  .level-stop.done .level-node { background: var(--deep-teal); border-color: var(--deep-teal); color: var(--bone); }
+  .level-stop.done .level-node { background: var(--deep-teal); border-color: var(--deep-teal); color: var(--on-dark); }
   .level-stop.current .level-node {
     background: var(--amber); border-color: var(--amber); color: var(--amber-ink);
     animation: levelPulse 1.8s ease-in-out infinite;
@@ -786,7 +814,7 @@
   }
   .cm-card {
     background: #141a21; border: 1px solid var(--hud-hairline); border-radius: 12px;
-    padding: 22px 20px; text-align: center; color: var(--bone); max-width: 340px; width: 100%;
+    padding: 22px 20px; text-align: center; color: var(--ink); max-width: 340px; width: 100%;
     box-shadow: 2px 12px 32px rgba(0,0,0,.7);
   }
   body.light-theme .cm-card { background: #fffdf7; color: var(--amber-ink); border-color: rgba(23,17,6,.2); box-shadow: 2px 12px 32px rgba(23,17,6,.25); }
@@ -795,10 +823,10 @@
   .cm-icon svg { width: 40px; height: 40px; }
   .cm-title {
     font-family: var(--display); font-size: 22px; font-weight: 600;
-    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 6px; color: var(--bone); text-wrap: balance;
+    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 6px; color: var(--ink); text-wrap: balance;
   }
   body.light-theme .cm-title { color: var(--amber-ink); }
-  .cm-desc { font-size: 13px; line-height: 1.45; margin-bottom: 18px; color: var(--bone); font-variant-numeric: tabular-nums; }
+  .cm-desc { font-size: 13px; line-height: 1.45; margin-bottom: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
 
   /* Placeholder Desktop , aceeași lume: fond aproape negru, tipar os */
   #desktopPlaceholder {
@@ -860,7 +888,7 @@
   }
   .modal-header p { font-size: 12px; margin-top: 4px; color: var(--text-muted); }
   .modal-close-btn {
-    background: transparent; border: 1.5px solid var(--border-color);
+    background: var(--btn-surface); border: 1.5px solid var(--btn-line);
     color: var(--text-main); border-radius: 10px; width: 36px; height: 36px;
     font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center;
     justify-content: center; flex-shrink: 0;
@@ -870,7 +898,7 @@
   /* Grile și carduri de mod de joc */
   .mode-cards-grid { display: flex; flex-direction: column; gap: 14px; }
   .mode-select-card {
-    background: rgba(246,242,233,.04); border: 1px solid var(--border-color);
+    background: var(--panel-surface); border: 1px solid var(--panel-line);
     border-radius: 10px; padding: 16px; position: relative; transition: border-color .2s ease;
   }
   .mode-select-card.featured {
@@ -899,7 +927,7 @@
   /* Grile și carduri de capitole */
   .chapters-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
   .chapter-card {
-    background: rgba(246,242,233,.04); border: 1px solid var(--border-color);
+    background: var(--panel-surface); border: 1px solid var(--panel-line);
     border-radius: 10px; padding: 16px; position: relative;
   }
   .chapter-card.active-chapter {
@@ -1101,7 +1129,7 @@
   }
   .cat-link.danger { color: var(--amber-deep); }
   .cat-btn {
-    border: 1px solid var(--border-color); background: transparent;
+    border: 1px solid var(--btn-line); background: var(--btn-surface);
     color: var(--text-main); border-radius: 10px; padding: 8px 16px; min-height: 44px;
     font-weight: 700; font-size: 13px; cursor: pointer; font-variant-numeric: tabular-nums;
   }
@@ -1361,31 +1389,38 @@
 
   /* Buttons/chips that live inside a glass sheet are not glass themselves. */
   .btn, .level-chip, .album-action-btn.secondary {
-    background: rgba(255,255,255,.10);
-    border: 1px solid var(--lg-border);
-    box-shadow: inset 0 1px 0 var(--lg-rim-top);
+    background: var(--btn-surface);
+    border: 1px solid var(--btn-line);
+    color: var(--btn-text);
+    box-shadow: inset 0 1px 0 var(--lg-rim-top), 0 1px 2px rgba(20,24,29,.06);
   }
 
   /* ---------- 3. Rail ---------- */
-  #rail { width: 46px; padding-top: 43px; }
+  #rail { width: 46px; padding-top: 0; }
   #rail .ring {
     border-radius: 50%;
     color: var(--ink);
+    border-color: var(--rail-border);
+    background: linear-gradient(180deg, var(--rail-fill-top), var(--rail-fill-bottom));
+    box-shadow:
+      var(--rail-shadow),
+      inset 0 1px 0 var(--lg-rim-top),
+      inset 0 0 0 1px var(--lg-rim-hairline);
     transition: transform var(--dur-press) var(--spring-snappy),
                 box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
   }
   #rail .ring:active { transform: scale(.96); }
-  #rail .ring:disabled { opacity: .45; }
+  #rail .ring:disabled { opacity: .58; }
   #rail .ring.capture-ready {
     border-color: var(--amber-deep);
     box-shadow:
       inset 0 0 0 1px rgba(200,176,136,.45),
       inset 0 1px 0 var(--lg-rim-top),
-      var(--lg-shadow);
+      var(--rail-shadow);
   }
-  .rail-state-dot { box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+  .rail-state-dot { box-shadow: 0 0 0 2px var(--paper); }
   @media (max-height: 720px) and (min-height: 630px) {
-    #rail { padding-top: 53px; }
+    #rail { gap: 7px; }
   }
 
   /* ---------- 4. Caption ---------- */
@@ -1409,7 +1444,7 @@
   body.has-arrived .dist .arrived { color: var(--amber-ink); text-shadow: none; }
 
   /* ---------- 5. Compass ---------- */
-  .cb-ring { fill: rgba(255,255,255,.18); stroke: rgba(20,24,29,.24); stroke-width: 1.1; }
+  .cb-ring { fill: var(--dial-fill); stroke: var(--dial-stroke); stroke-width: 1.3; }
   .compass-stop.is-held .cb-dial { transform: scale(1.12); }
   .compass-stop.is-held .cb-halo { opacity: .9; }
   .compass-stop.is-held .cb-ring { stroke: var(--amber-deep); stroke-width: 1.8; }
@@ -1471,9 +1506,9 @@
   .level-chipbar { gap: 8px; }
   .level-chip {
     border-radius: 999px;
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
+    border-color: var(--chip-line);
+    background: var(--chip-surface);
+    box-shadow: inset 0 1px 0 var(--lg-rim-top);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     color: var(--ink-muted);
@@ -1497,7 +1532,7 @@
   .level-stop.done .level-node {
     background: var(--deep-teal);
     border-color: var(--deep-teal);
-    color: var(--paper);
+    color: var(--on-dark);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
   }
   .level-stop.current .level-node {
@@ -1590,8 +1625,8 @@
   #card { border-radius: 26px 26px 0 0; }
   #card .card-title, #card .card-desc { color: var(--ink); }
   #card .card-meta { color: var(--ink-muted); text-shadow: 0 1px 0 rgba(255,255,255,.45); }
-  #card .card-x { color: var(--ink); border-color: var(--lg-border); }
-  #card .card-actions .btn.alt { background: transparent; border-color: var(--lg-border); color: var(--ink); }
+  #card .card-x { color: var(--ink); background: var(--btn-surface); border-color: var(--btn-line); }
+  #card .card-actions .btn.alt { background: var(--btn-surface); border-color: var(--btn-line); color: var(--ink); }
   .cm-card { border-radius: 24px; color: var(--ink); }
   .cm-title, .cm-desc { color: var(--ink); }
   .cm-icon { color: var(--amber-deep); }
@@ -1685,16 +1720,16 @@
   /* Fără shimmer decorativ: panoul și butonul rămân statice. */
 
   /* ---------- 12. Media surfaces keep paper text ---------- */
-  #captureScreen { color: var(--paper); }
-  .cs-top, .cs-title, .cs-sub, .cs-badge, .cs-cancel-btn { color: var(--paper); }
+  #captureScreen { color: var(--on-dark); }
+  .cs-top, .cs-title, .cs-sub, .cs-badge, .cs-cancel-btn { color: var(--on-dark); }
   .cs-badge { background: rgba(5,7,10,.62); border-color: var(--amber); }
-  .cs-shutter { background: var(--paper); border-color: rgba(251,250,247,.55); }
-  .cs-shutter-inner { border-color: var(--paper); }
-  .cs-cancel-btn { background: rgba(5,7,10,.55); border-color: rgba(251,250,247,.35); }
-  #photoCmp { background: #0b0e12; color: var(--paper); }
-  #photoCmp .cmp-tag { background: rgba(5,7,10,.78); color: var(--paper); border-color: rgba(251,250,247,.2); }
-  #photoCmp .cmp-hint, #photoCmp .cmp-credit { color: var(--paper); }
-  #photoCmp .btn { background: rgba(5,7,10,.6); color: var(--paper); border-color: rgba(251,250,247,.35); }
+  .cs-shutter { background: var(--on-dark); border-color: rgba(246,242,233,.55); }
+  .cs-shutter-inner { border-color: var(--on-dark); }
+  .cs-cancel-btn { background: rgba(5,7,10,.55); border-color: rgba(246,242,233,.35); }
+  #photoCmp { background: #0b0e12; color: var(--on-dark); }
+  #photoCmp .cmp-tag { background: rgba(5,7,10,.78); color: var(--on-dark); border-color: rgba(246,242,233,.2); }
+  #photoCmp .cmp-hint, #photoCmp .cmp-credit { color: var(--on-dark); }
+  #photoCmp .btn { background: rgba(5,7,10,.6); color: var(--on-dark); border-color: rgba(246,242,233,.35); }
 
   /* ---------- 13. Story surfaces (no nested glass) ---------- */
   .mode-select-card, .chapter-card, .reward-badge-card {
@@ -1713,7 +1748,7 @@
   .chapter-reward-snippet { background: transparent; border: 0; border-left: 2px solid var(--amber-deep); border-radius: 0; padding-left: 10px; color: var(--ink); }
   .lore-story-box { background: transparent; border: 0; border-left: 2px solid var(--amber-deep); border-radius: 0; padding-left: 14px; }
   .lore-next-preview { background: transparent; border: 0; border-left: 2px solid var(--amber-deep); border-radius: 0; padding-left: 12px; }
-  .lore-badge { background: var(--deep-teal); color: var(--paper); }
+  .lore-badge { background: var(--deep-teal); color: var(--on-dark); }
   .cl-item { background: transparent; border: 0; border-radius: 0; padding: 0; color: var(--ink); }
   .cl-item.done { color: var(--deep-teal); }
   .cl-item.current { color: var(--amber-deep); }
@@ -1739,15 +1774,6 @@
   .reward-icon-huge { animation: popBounce 0.48s var(--spring-bouncy); }
 
   /* ---------- 16. Fallbacks ---------- */
-  @media (prefers-reduced-transparency: reduce) {
-    #rail .ring, #caption, .modal-card, #card,
-    .cm-card, #compassWarning, #proximityToast,
-    .start-foot, .api-gate-card, .album-detail, #albumModal {
-      -webkit-backdrop-filter: none !important;
-      backdrop-filter: none !important;
-      background: var(--glass-solid) !important;
-    }
-  }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     #rail .ring, #caption, .modal-card, #card,
     .cm-card, #compassWarning, #proximityToast,
@@ -1760,7 +1786,7 @@
     .cm-card, #compassWarning, #proximityToast,
     .start-foot, .api-gate-card, .album-detail, #albumModal {
       background: var(--glass-solid);
-      border-color: rgba(20,24,29,.28);
+      border-color: var(--rail-border);
     }
   }
 
@@ -2226,7 +2252,7 @@
     <div id="steerEdge" aria-hidden="true"></div>
   </div>
   <nav id="rail" aria-label="Acțiuni reper">
-    <!-- Theme switch removed: the app is light-only; the rail keeps the slot as negative space. -->
+    <!-- Acțiunile reperului: mod de joc, fișă, fotografiere, album. -->
     <button id="gamemodeRailBtn" class="ring" aria-label="Mod de joc &amp; Capitole" title="Mod de joc &amp; Capitole">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -2726,9 +2752,6 @@ function formatDistance(d) {
   return `${km} km`;
 }
 
-/* ---------- Temă: doar lumină ----------
-   Aplicația e daylight-only. Comutatorul întunecat a fost eliminat;
-   `aradlens_theme` rămâne în localStorage fără efect (nu-l ștergem). */
 
 /* ---------- Detectare Dispozitiv (Mobil / Desktop) ---------- */
 let isMobile = false;

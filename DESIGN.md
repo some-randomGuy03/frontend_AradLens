@@ -520,14 +520,9 @@ on the compass band is an amber reticle, not a fill. Hairlines are 1px at
 - **Rest:** translucent dark wash, bone 20px stroke glyph.
 - **Press:** scale .92 on `--spring-snappy`. Disabled: .5 opacity. Capture-ready
   (≤200 m): beige border + 1.6s shutter pulse.
-- **Slots (top to bottom):** theme capsule, game mode, details, photo, album.
+- **Slots (top to bottom):** game mode, details, photo, album.
   Route and location/category browsing moved out of the rail: tours live as album
   modules, and a location page opens on **long-press** of an objective.
-- **Theme switch:** a horizontal 56×30px glass capsule (`#themeToggleBtn`,
-  `role="switch"`, `aria-checked` kept in sync by `applyTheme`): sun slot left,
-  moon slot right, a 24px bone knob that springs between them. State is
-  CSS-driven from `body.light-theme`; the meta theme-color and the
-  `aradlens_theme` key follow.
 
 ### Compass band (objective selector)
 - **Style:** curved tape of stops (`#snapRail` + `renderCompassBand`), 108px slot
