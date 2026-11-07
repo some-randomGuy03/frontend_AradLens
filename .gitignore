@@ -1,0 +1,20 @@
+# AI / local tooling — never commit
+.agents/
+.codex/
+.impeccable/
+skills-lock.json
+
+# Agent-generated GitHub extensions (workflows are tracked, these are not)
+.github/agents/
+.github/hooks/
+.github/skills/
+
+# Accidental `man less` dumps currently in repo root (untracked, do not commit)
+Mobile*isDesktop*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
