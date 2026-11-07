@@ -4,7 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#fbfaf7">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
+<script>
+  try {
+    if (localStorage.getItem("aradlens_theme") === "dark") {
+      document.documentElement.classList.add("dark-theme");
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.content = "#15171c";
+    }
+  } catch (e) {}
+</script>
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>AradLens</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23fbfaf7'/%3E%3Crect x='.5' y='.5' width='63' height='63' rx='14.5' fill='none' stroke='%2314181d' stroke-opacity='.14'/%3E%3Cpath d='M20 46 L32 18 L44 46' fill='none' stroke='%2314181d' stroke-width='4.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M25 37 H39' stroke='%2314181d' stroke-width='4.5' stroke-linecap='round'/%3E%3Cpath d='M20 52 H44' stroke='%23c8b088' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
@@ -143,6 +152,31 @@
   .top-actions {
     display: flex; align-items: center; gap: 8px;
   }
+  .lang-btn {
+    width: 44px; height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--lg-border);
+    background: rgba(255,255,255,.42);
+    color: var(--ink);
+    font: 800 11px/1 'Segoe UI', system-ui, sans-serif;
+    letter-spacing: .06em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    -webkit-backdrop-filter: blur(10px) saturate(125%);
+    backdrop-filter: blur(10px) saturate(125%);
+    transition: transform var(--dur-press) var(--spring), background-color 160ms ease;
+  }
+  .lang-btn:hover { background: rgba(255,255,255,.64); }
+  .lang-btn:active { transform: scale(.94); }
+  .lang-btn:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; }
+  @media (max-width: 350px) {
+    .top { padding-left: 14px; padding-right: 14px; }
+    .top-actions { gap: 6px; }
+  }
   .route-step {
     font-family: var(--display); font-size: 18px; font-weight: 600;
     letter-spacing: 0.02em; color: var(--amber);
@@ -195,6 +229,45 @@
   #rail .ring:active { transform: scale(.92); }
   #rail .ring svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
   #rail .ring:disabled { opacity: .55; cursor: default; }
+  /* Slider de temă: pastilă de sticlă cu soare/lună, deasupra inelelor. */
+  .theme-switch {
+    width: 58px; height: 44px;
+    padding: 0; border: 0; background: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .ts-track {
+    position: relative;
+    width: 58px; height: 32px;
+    border-radius: 999px;
+    border: 1px solid var(--lg-border);
+    background: linear-gradient(180deg, var(--lg-tint-top), var(--lg-tint-bottom));
+    box-shadow: inset 0 1px 0 var(--lg-rim-top), var(--lg-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(125%);
+    backdrop-filter: blur(14px) saturate(125%);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 8px;
+  }
+  .ts-ico {
+    width: 13px; height: 13px;
+    position: relative; z-index: 1;
+    color: var(--ink-muted);
+    transition: opacity 220ms ease, color 220ms ease;
+  }
+  .ts-sun { opacity: 1; }
+  .ts-moon { opacity: .38; }
+  .ts-knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 2px 6px rgba(0,0,0,.20), inset 0 1px 0 var(--lg-rim-top);
+    transition: transform 280ms var(--spring), background-color 220ms ease;
+  }
+  html.dark-theme .ts-knob { transform: translateX(26px); background: #2b3039; }
+  html.dark-theme .ts-sun { opacity: .35; }
+  html.dark-theme .ts-moon { opacity: 1; color: var(--amber-deep); }
+  .theme-switch:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; border-radius: 999px; }
   #rail .ring.capture-ready {
     border-color: var(--amber-deep);
     animation: shutterPulse 1.6s ease-in-out infinite;
@@ -216,9 +289,12 @@
     overflow: hidden; overflow: clip;
     touch-action: none; -webkit-user-select: none; user-select: none;
     cursor: grab;
-    transform: perspective(760px) rotateX(13deg);
+    transform: perspective(760px) rotateX(13deg) scaleX(var(--band-stretch, 1));
     transform-origin: 50% 100%;
+    transition: transform 260ms var(--spring);
+    will-change: transform;
   }
+  #snapRail.band-dragging { transition: none; }
   .band-anim .compass-stop,
   .band-anim .cb-scale-tick { transition: transform .34s cubic-bezier(.22,.61,.36,1), opacity .34s ease; }
   .cb-reticle {
@@ -294,10 +370,6 @@
     border-radius: 12px; padding: 10px 12px; margin: 0 0 10px 0;
     transition: background .3s ease;
   }
-  #caption .cap-author {
-    font-family: var(--display); font-size: 16px; font-weight: 600;
-    letter-spacing: -0.005em; color: var(--bone);
-  }
   #arLabel {
     position: static; opacity: 1; background: none; border: none;
     border-radius: 0; padding: 0; box-shadow: none; white-space: normal;
@@ -313,7 +385,6 @@
   body.has-arrived #caption {
     background: var(--amber);
   }
-  body.has-arrived #caption .cap-author,
   body.has-arrived #arLabel .al-name,
   body.has-arrived #arLabel .al-meta {
     color: var(--amber-ink);
@@ -613,11 +684,16 @@
     display: flex; align-items: center; justify-content: space-between;
     padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;
   }
+  .album-header > div { min-width: 0; }
   .album-header h2 {
     font-family: var(--display); font-size: 22px; font-weight: 600;
     letter-spacing: -0.005em; line-height: 1.15; color: var(--text-main); text-wrap: balance;
   }
-  .album-header p { font-size: 12px; margin-top: 4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .album-header p {
+    font-size: 12px; margin-top: 4px; color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .album-close-btn {
     background: var(--btn-surface); border: 1.5px solid var(--btn-line);
     color: var(--text-main); border-radius: 12px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -733,6 +809,40 @@
     width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;
   }
   .cmp-card-credit { font-size: 12px; line-height: 1.25; margin-top: 4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .cmp-inline-archive {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--lg-border);
+    text-align: left;
+  }
+  .cmp-inline-archive img {
+    width: 54px; height: 40px; object-fit: cover; border-radius: 7px; flex-shrink: 0;
+  }
+  .cmp-inline-archive span { font-size: 11px; line-height: 1.3; font-weight: 700; color: var(--ink-muted); }
+  .album-archive-strip { margin-top: 14px; }
+  .album-archive-strip[hidden] { display: none; }
+  .album-archive-strip-title {
+    margin-bottom: 7px;
+    font: 700 11px/1 'Segoe UI', system-ui, sans-serif;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .album-archive-strip-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .album-archive-strip-row img {
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 9px;
+    flex-shrink: 0;
+    border: 1px solid var(--lg-border);
+  }
   .cmp-placeholder-icon { margin-bottom: 6px; opacity: .85; color: var(--text-muted); }
   .cmp-placeholder-icon svg { width: 26px; height: 26px; display: block; }
   .cmp-placeholder-text { font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
@@ -1284,11 +1394,11 @@
   #cam { background: var(--ground); }
 
   .top {
-    background: linear-gradient(180deg, rgba(251,250,247,.78) 0%, rgba(251,250,247,.28) 62%, rgba(251,250,247,0) 100%);
+    background: linear-gradient(180deg, rgba(251,250,247,.70) 0%, rgba(251,250,247,.20) 48%, rgba(251,250,247,0) 88%);
     color: var(--ink);
   }
   .bottom {
-    background: linear-gradient(0deg, rgba(251,250,247,.86) 0%, rgba(251,250,247,.42) 58%, rgba(251,250,247,0) 100%);
+    background: linear-gradient(0deg, rgba(251,250,247,.92) 0%, rgba(251,250,247,.70) 26%, rgba(251,250,247,.24) 54%, rgba(251,250,247,0) 72%);
     color: var(--ink);
   }
   #overlay { color: var(--ink); }
@@ -1328,6 +1438,9 @@
     font-family: var(--display); font-size: clamp(22px, 5.4vw, 26px); font-weight: 600;
     letter-spacing: 0.01em; color: var(--ink);
   }
+  .start-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .start-actions .legal-open { margin-left: 0; }
+  .start-lang { background: rgba(255,255,255,.55); }
   .legal-open {
     margin-left: auto;
     min-height: 44px;
@@ -1348,7 +1461,7 @@
   .legal-open:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; }
 
   /* ---------- 2. Glass recipes (skill) ---------- */
-  #rail .ring, #caption, .start-foot {
+  #rail .ring, .start-foot {
     position: relative;
     border: 1px solid var(--lg-border);
     background: linear-gradient(180deg, var(--lg-tint-top), var(--lg-tint-bottom));
@@ -1429,14 +1542,12 @@
     overflow: hidden;
     transition: background-color 300ms ease;
   }
-  #caption .cap-author { color: var(--ink); }
   #arLabel .al-name { color: var(--ink); }
   #arLabel .al-meta { color: var(--ink-muted); text-shadow: 0 1px 0 rgba(255,255,255,.45); }
   body.has-arrived #caption {
     background: var(--amber);
     border-color: rgba(36,26,13,.18);
   }
-  body.has-arrived #caption .cap-author,
   body.has-arrived #arLabel .al-name,
   body.has-arrived #arLabel .al-meta,
   body.has-arrived .dist .num,
@@ -1481,19 +1592,25 @@
   #albumMapTab {
     flex: 1; min-height: 0; overflow-y: auto;
     padding-bottom: calc(24px + env(safe-area-inset-bottom));
-    scroll-padding-top: 84px;
+    scroll-padding-top: 12px;
     scrollbar-width: thin;
   }
-  /* A sticky readability wash, not a second glass panel. */
-  #albumModuleBar {
-    position: sticky; top: 0; z-index: 3;
-    margin: 0 -2px 8px; padding: 8px 2px 10px;
-    background: rgba(251,250,247,.90);
+  /* Full-bleed route header; it scrolls away with the map. */
+  .level-selector {
+    position: static;
+    margin: 0 -16px 12px;
+    padding: 10px 16px 12px;
+    background: var(--paper);
     border-bottom: 1px solid var(--lg-border);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
-  #albumModuleBar::after { background-color: rgba(251,250,247,.72); }
+  .level-selector-label {
+    display: block;
+    padding: 0 7px 4px;
+    font: 700 10px/1 'Segoe UI', system-ui, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
 
   /* ---------- 7. Level map (children paint no surface) ---------- */
   .level-box {
@@ -1504,6 +1621,51 @@
     padding: 14px 12px 12px;
   }
   .level-chipbar { gap: 8px; }
+  #albumModuleBar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+    padding: 0 4px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  #albumModuleBar::-webkit-scrollbar { display: none; }
+  #albumModuleBar .level-chip {
+    position: relative;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-height: 40px;
+    padding: 7px 9px 9px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ink-muted);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  #albumModuleBar .level-chip::after {
+    content: "";
+    position: absolute;
+    left: 9px; right: 9px; bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--amber-deep);
+    opacity: 0;
+    transform: scaleX(.4);
+    transform-origin: center;
+    transition: opacity 180ms ease, transform 220ms var(--spring);
+  }
+  #albumModuleBar .level-chip:hover { color: var(--ink); }
+  #albumModuleBar .level-chip.active {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--ink);
+  }
+  #albumModuleBar .level-chip.active::after { opacity: 1; transform: scaleX(1); }
   .level-chip {
     border-radius: 999px;
     border-color: var(--chip-line);
@@ -1692,6 +1854,84 @@
   .legal-updated { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--lg-border); font-size: 12px; color: var(--ink-muted); }
   .legal-section a { color: var(--amber-deep); text-decoration: underline; }
   .legal-section code { font-size: 12px; background: rgba(20,24,29,.06); padding: 1px 4px; border-radius: 4px; }
+
+  /* Setări date, în fila Cookies: totul rămâne pe dispozitiv */
+  .legal-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .legal-settings-btn {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1.5px solid var(--lg-border);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 100ms var(--spring), background-color 160ms ease;
+  }
+  .legal-settings-btn svg { display: block; }
+  .legal-settings-btn:hover { background: rgba(255,255,255,.2); }
+  .legal-settings-btn:active { transform: scale(.97); }
+  .legal-settings {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid var(--lg-border);
+    border-radius: 16px;
+    background: rgba(255,255,255,.32);
+  }
+  .legal-settings-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .legal-settings h4 {
+    margin: 0 0 4px;
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .legal-settings p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-muted); }
+  .legal-settings-confirm { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--lg-border); }
+  .legal-settings-confirm[hidden] { display: none; }
+  .legal-settings-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .legal-danger-btn,
+  .legal-secondary-btn {
+    min-height: 44px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font: 700 13px/1 'Segoe UI', system-ui, sans-serif;
+    cursor: pointer;
+    transition: transform 100ms var(--spring), background-color 160ms ease, border-color 160ms ease;
+  }
+  .legal-danger-btn {
+    flex-shrink: 0;
+    border: 1.5px solid rgba(150,44,37,.42);
+    background: rgba(150,44,37,.10);
+    color: #8b2b24;
+  }
+  .legal-danger-btn:hover { background: rgba(150,44,37,.16); }
+  .legal-secondary-btn {
+    border: 1.5px solid var(--lg-border);
+    background: transparent;
+    color: var(--ink);
+  }
+  .legal-secondary-btn:hover { background: rgba(255,255,255,.22); }
+  .legal-danger-btn:active,
+  .legal-secondary-btn:active { transform: scale(.97); }
+  .legal-danger-btn:disabled { opacity: .45; cursor: default; }
+  .legal-settings-status { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--deep-teal); }
+  .legal-settings-status:empty { display: none; }
+  @media (max-width: 360px) {
+    .legal-settings-head { flex-direction: column; }
+    .legal-danger-btn { align-self: flex-start; }
+  }
+
   .album-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .album-header-actions .legal-open,
   .album-header-actions .album-close-btn {
@@ -1715,6 +1955,13 @@
   .album-header-actions .album-close-btn:hover { background: rgba(255,255,255,.18); }
   .album-header-actions .legal-open:active,
   .album-header-actions .album-close-btn:active { transform: scale(.97); }
+  @media (max-width: 360px) {
+    .album-header { flex-wrap: wrap; gap: 10px; }
+    .album-header-actions { width: 100%; justify-content: flex-end; gap: 6px; }
+    .album-header-actions .legal-open,
+    .album-header-actions .album-close-btn { padding: 6px 9px; font-size: 12px; }
+    .album-header p { display: none; }
+  }
   #legalModal { z-index: 90; }
 
   /* Fără shimmer decorativ: panoul și butonul rămân statice. */
@@ -1773,18 +2020,215 @@
   .cat-link:active { transform: scale(.97); }
   .reward-icon-huge { animation: popBounce 0.48s var(--spring-bouncy); }
 
+  /* ---------- 15b. Bottom HUD: caption quieter, compass band legible ---------- */
+  .bottom {
+    padding: 4px 16px calc(6px + env(safe-area-inset-bottom)) 16px;
+    background: linear-gradient(0deg, rgba(251,250,247,.92) 0%, rgba(251,250,247,.70) 26%, rgba(251,250,247,.24) 54%, rgba(251,250,247,0) 72%);
+  }
+  #caption {
+    margin: 0 0 2px;
+    padding: 0 2px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  body.has-arrived #caption {
+    background: var(--amber);
+    border-radius: 16px;
+    padding: 8px 12px;
+  }
+  #arLabel .al-name {
+    font-size: clamp(21px, 6.2vw, 25px);
+    line-height: 1.1;
+    margin: 0 0 1px;
+  }
+  #arLabel .al-meta { font-size: 13px; line-height: 1.35; }
+  .scrim-row { padding-top: 5px; border-top-color: rgba(20,24,29,.14); }
+  .dist .num { font-size: 23px; }
+  .band-meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin: 5px 0 0;
+    padding: 0 2px;
+  }
+  #routeStepBottom {
+    display: inline-block;
+    flex-shrink: 0;
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--amber-deep);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .hint {
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.35;
+    text-align: left;
+    opacity: .78;
+  }
+  #snapRail { height: 114px; margin-top: 0; }
+  .compass-stop { top: 12px; width: 112px; margin-left: -56px; }
+  .compass-stop .cb-dial { width: 44px; height: 44px; }
+  .cb-name { font-size: 11px; font-weight: 700; opacity: 1; }
+  .cb-dist { font-size: 11px; opacity: .92; }
+  .compass-stop[aria-current="true"] .cb-dial { transform: scale(1.04); }
+  .compass-stop[aria-current="true"] .cb-name { font-weight: 800; }
+  .compass-stop.locked .cb-name,
+  .compass-stop.locked .cb-dist { opacity: .55; }
+
+  /* ---------- 15c. Dark theme: tinted liquid glass, not inverted paper ---------- */
+  html.dark-theme {
+    --ground: #111318;
+    --paper: #1b1e24;
+    --paper-deep: #15181d;
+    --ink: #f4efe6;
+    --ink-muted: #c7bfb2;
+    --ink-faint: #a69d90;
+    --bone: var(--ink);
+    --amber: #c8b088;
+    --amber-ink: #241a0d;
+    --amber-deep: #d8be8b;
+    --accent-strong: #ead7b3;
+    --deep-teal: #4aa696;
+    --hud-scrim-top: linear-gradient(180deg, rgba(10,12,16,.84) 0%, rgba(10,12,16,.42) 58%, rgba(10,12,16,0) 100%);
+    --hud-scrim-bottom: linear-gradient(0deg, rgba(10,12,16,.95) 0%, rgba(10,12,16,.74) 58%, rgba(10,12,16,0) 100%);
+    --hud-hairline: rgba(246,242,233,.16);
+    --bg-main: #15171c;
+    --bg-surface: #20232a;
+    --bg-card: #252932;
+    --bg-modal: #16181d;
+    --text-main: #f4efe6;
+    --text-muted: #c7bfb2;
+    --border-color: rgba(246,242,233,.24);
+    --accent-teal: #5cc7b5;
+    --accent-green: #d8be8b;
+    --btn-bg: rgba(246,242,233,.10);
+    --btn-border: rgba(246,242,233,.24);
+    --btn-text: #f4efe6;
+    --rail-border: rgba(246,242,233,.36);
+    --rail-fill-top: rgba(255,255,255,.10);
+    --rail-fill-bottom: rgba(255,255,255,.03);
+    --rail-shadow: 0 4px 14px rgba(0,0,0,.50);
+    --btn-surface: rgba(246,242,233,.10);
+    --btn-line: rgba(246,242,233,.24);
+    --chip-surface: rgba(246,242,233,.08);
+    --chip-line: rgba(246,242,233,.22);
+    --panel-surface: rgba(255,255,255,.05);
+    --panel-line: rgba(246,242,233,.18);
+    --dial-fill: rgba(24,27,34,.72);
+    --dial-stroke: rgba(246,242,233,.70);
+    --dial-tick: rgba(246,242,233,.42);
+    --dial-tick-strong: rgba(246,242,233,.62);
+    --dial-ahead: rgba(246,242,233,.70);
+    --dial-tip: rgba(246,242,233,.82);
+    --dial-tail: rgba(246,242,233,.32);
+    --dial-hub: #f4efe6;
+    --dial-lock: rgba(246,242,233,.80);
+    --dial-name: #f4efe6;
+    --dial-dist: rgba(246,242,233,.82);
+    --dial-accent: #e2c48f;
+    --dial-accent-soft: rgba(226,196,143,.42);
+    --dial-complete: #6fd6c1;
+    --lg-tint-top: rgba(255,255,255,.10);
+    --lg-tint-bottom: rgba(255,255,255,.03);
+    --lg-rim-top: rgba(255,255,255,.52);
+    --lg-rim-hairline: rgba(255,255,255,.20);
+    --lg-rim-bottom: rgba(255,255,255,.06);
+    --lg-border: rgba(246,242,233,.18);
+    --lg-shadow: 0 12px 34px rgba(0,0,0,.48);
+    --lg-modal-tint: rgba(26,29,36,.78);
+    --lg-menu-surface: rgba(30,33,40,.75);
+    --lg-scrim: rgba(0,0,0,.58);
+    --glass-solid: rgba(26,29,36,.96);
+    color-scheme: dark;
+  }
+  html.dark-theme .top {
+    background: linear-gradient(180deg, rgba(10,12,16,.80) 0%, rgba(10,12,16,.28) 48%, rgba(10,12,16,0) 88%);
+    color: var(--ink);
+  }
+  html.dark-theme .bottom {
+    background: linear-gradient(0deg, rgba(10,12,16,.94) 0%, rgba(10,12,16,.72) 26%, rgba(10,12,16,.25) 54%, rgba(10,12,16,0) 72%);
+    color: var(--ink);
+  }
+  html.dark-theme #overlay { color: var(--ink); }
+  html.dark-theme #cam { background: var(--ground); }
+  html.dark-theme .lang-btn { background: rgba(246,242,233,.10); }
+  html.dark-theme .lang-btn:hover { background: rgba(246,242,233,.18); }
+  html.dark-theme .start-lang { background: rgba(246,242,233,.12); }
+  html.dark-theme .legal-open:hover,
+  html.dark-theme .legal-settings-btn:hover,
+  html.dark-theme .legal-secondary-btn:hover,
+  html.dark-theme .album-header-actions .legal-open:hover,
+  html.dark-theme .album-header-actions .album-close-btn:hover,
+  html.dark-theme .modal-close-btn:hover { background: rgba(255,255,255,.08); }
+  html.dark-theme .start-scrim {
+    background:
+      radial-gradient(120% 80% at 50% 42%, rgba(16,18,23,.12), rgba(16,18,23,.55) 72%),
+      linear-gradient(180deg, rgba(16,18,23,.86) 0%, rgba(16,18,23,.68) 38%, rgba(16,18,23,.92) 100%);
+  }
+  html.dark-theme .start-photo img { filter: saturate(.7) contrast(1.02) brightness(.52); }
+  html.dark-theme .start-head::before {
+    background: rgba(20,23,29,.66);
+    border-color: rgba(255,255,255,.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 12px 30px rgba(0,0,0,.30);
+  }
+  html.dark-theme .start-detail,
+  html.dark-theme .start-credit,
+  html.dark-theme .album-header p,
+  html.dark-theme #arLabel .al-meta,
+  html.dark-theme .level-note { text-shadow: none; }
+  html.dark-theme .level-track::before { border-left-color: rgba(246,242,233,.18); }
+  html.dark-theme .level-lock { background: rgba(20,23,29,.92); }
+  html.dark-theme .cmp-card-content { background: rgba(255,255,255,.06); border-color: rgba(246,242,233,.14); }
+  html.dark-theme .loc-chip { background: rgba(255,255,255,.08); }
+  html.dark-theme .loc-img-confirm { background: rgba(20,23,29,.96); }
+  html.dark-theme .legal-settings { background: rgba(255,255,255,.05); }
+  html.dark-theme .legal-danger-btn {
+    color: #ff9b90;
+    border-color: rgba(255,155,144,.45);
+    background: rgba(150,44,37,.18);
+  }
+  html.dark-theme .legal-danger-btn:hover { background: rgba(150,44,37,.28); }
+  html.dark-theme .legal-section code { background: rgba(255,255,255,.08); }
+  html.dark-theme .story-objective-banner {
+    background: rgba(28,31,38,.92);
+    color: var(--ink);
+    border-color: var(--amber-deep);
+  }
+  html.dark-theme #apiGate {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(180deg, rgba(16,18,23,.72) 0%, rgba(16,18,23,.92) 100%),
+      url("primaria-1901.jpg");
+  }
+  html.dark-theme #desktopPlaceholder { background: var(--paper); color: var(--ink); }
+  html.dark-theme #desktopPlaceholder p { color: var(--ink-muted); }
+  html.dark-theme .theme-switch .ts-track {
+    background: linear-gradient(180deg, var(--lg-tint-top), var(--lg-tint-bottom));
+    border-color: var(--lg-border);
+    box-shadow: inset 0 1px 0 var(--lg-rim-top), var(--lg-shadow);
+  }
+
   /* ---------- 16. Fallbacks ---------- */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    #rail .ring, #caption, .modal-card, #card,
+    #rail .ring, .modal-card, #card,
     .cm-card, #compassWarning, #proximityToast,
-    .start-foot, .api-gate-card, .album-detail, #albumModal {
+    .start-foot, .api-gate-card, .album-detail, #albumModal, .lang-btn, .ts-track {
       background: var(--glass-solid);
     }
   }
   @media (prefers-contrast: more) {
-    #rail .ring, #caption, .modal-card, #card,
+    #rail .ring, .modal-card, #card,
     .cm-card, #compassWarning, #proximityToast,
-    .start-foot, .api-gate-card, .album-detail, #albumModal {
+    .start-foot, .api-gate-card, .album-detail, #albumModal, .lang-btn, .ts-track {
       background: var(--glass-solid);
       border-color: var(--rail-border);
     }
@@ -1896,9 +2340,14 @@
     </div>
   </div>
 
+  <!-- Selectorul de trasee: bară statică, pe toată lățimea, deasupra hărții -->
+  <div class="level-selector">
+    <span class="level-selector-label">Trasee</span>
+    <div class="level-chipbar" id="albumModuleBar" role="group" aria-label="Alege modulul traseului"></div>
+  </div>
+
   <!-- Hartă liniară: o singură coloană de opriri, prima oprire jos, ultima sus -->
   <div id="albumMapTab">
-    <div class="level-chipbar" id="albumModuleBar" role="group" aria-label="Alege modulul traseului"></div>
     <div class="level-box">
       <div class="level-head">
         <span class="level-module-label" id="albumModuleLabel">...</span>
@@ -1932,6 +2381,11 @@
           <!-- Generat dinamic -->
         </div>
       </div>
+    </div>
+
+    <div class="album-archive-strip" id="albumArchiveStrip" hidden>
+      <div class="album-archive-strip-title">Din arhiva site-ului</div>
+      <div class="album-archive-strip-row" id="albumArchiveStripRow"></div>
     </div>
 
     <!-- Butoane acțiune album -->
@@ -2144,7 +2598,10 @@
         <h2 id="legalTitle">Informații legale</h2>
         <p>Rezumat. Documentul complet prevalează.</p>
       </div>
-      <button class="modal-close-btn" id="legalCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="legal-header-actions">
+        <button type="button" class="legal-settings-btn" id="legalSettingsBtn" aria-label="Setări date" title="Setări date"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button class="modal-close-btn" id="legalCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
     </div>
 
     <div class="legal-tabs" role="tablist" aria-label="Secțiuni legale">
@@ -2175,7 +2632,7 @@
       <section class="legal-section" id="legal-privacy" role="tabpanel" aria-labelledby="legalTabPrivacy">
         <h3>Confidențialitate</h3>
         <p><strong>Operator.</strong> AradLens, Arad, România. Pentru API, operatorul API-ului poate fi operator separat; cererile trec prin proxy și pot fi înregistrate de ambele părți.</p>
-        <p><strong>Date locale.</strong> Pozele, progresul și recompensele sunt în localStorage, pe dispozitiv (cheile <code>aradlens_user_photos</code> și <code>aradlens_story_state</code>). Nu le încărcăm și nu le accesăm de la distanță. Pot conține persoane; tu decizi ce faci cu ele. Se pierd la ștergerea datelor site-ului, în modul privat sau la depășirea cotei.</p>
+        <p><strong>Date locale.</strong> Pozele, progresul și recompensele sunt în localStorage, pe dispozitiv (cheile <code>aradlens_user_photos</code> și <code>aradlens_story_state</code>). Nu le încărcăm și nu le accesăm de la distanță. Pot conține persoane; tu decizi ce faci cu ele. Le poți șterge oricând din <strong>Cookies → Setări date</strong>. Se pierd și la ștergerea datelor site-ului, în modul privat sau la depășirea cotei.</p>
         <p><strong>Permisiuni.</strong> Camera pentru AR și captură; geolocația pentru proximitate și direcție; orientarea/mișcarea pentru busolă. Prelucrarea are loc pe dispozitiv. Refuzul limitează funcțiile respective, nu accesul la informațiile statice. Nu cerem microfon. Localizarea poate implica serviciile sistemului de operare, cu politicile lor.</p>
         <p><strong>Jurnale tehnice.</strong> La cererile <code>/api/</code>, găzduirea și proxy-ul pot înregistra IP, user-agent, dată/oră și cerere. API-ul primește cererea prin proxy și poate vedea antetele transmise. Scop: securitate, funcționare, prevenirea abuzurilor; bază legală: interes legitim (art. 6 alin. (1) lit. f) GDPR). Nu facem profiling. Dacă ne contactezi, prelucrăm mesajul pentru a răspunde, pe baza consimțământului sau a interesului legitim.</p>
         <p><strong>Păstrare, destinatari, transferuri.</strong> Jurnalele se păstrează maximum 30 de zile, apoi se șterg sau se anonimizează. Destinatari: furnizorul de găzduire și operatorul API-ului. Dacă folosim furnizori din afara UE/EEA, verificăm existența unei decizii de adecvare sau a clauzelor contractuale standard.</p>
@@ -2193,7 +2650,25 @@
         <h3>Cookies și stocare locală</h3>
         <p>Nu folosim cookie-uri proprii, analytics, publicitate sau pixeli. De aceea nu afișăm banner de consimțământ.</p>
         <p>LocalStorage nu este cookie, ci stocare pe dispozitiv. Este strict necesar pentru album, poveste și comparație, deci se aplică excepția de la consimțământ din Legea nr. 506/2004 (ePrivacy).</p>
-        <p>Șterge datele din setările browserului: Site settings → Date site → Șterge. Pozele și progresul se pierd și nu pot fi recuperate. Dacă vom introduce cookie-uri de analiză sau marketing, vom cere consimțământ înainte. Când urmezi un link extern, se aplică politica site-ului respectiv.</p>
+        <p>Șterge datele din setările browserului: Site settings → Date site → Șterge. Sau folosește butonul <strong>Șterge tot</strong> din <strong>Setări date</strong>, mai jos. Pozele și progresul se pierd și nu pot fi recuperate. Dacă vom introduce cookie-uri de analiză sau marketing, vom cere consimțământ înainte. Când urmezi un link extern, se aplică politica site-ului respectiv.</p>
+
+        <div class="legal-settings" id="dataSettings">
+          <div class="legal-settings-head">
+            <div>
+              <h4>Setări date</h4>
+              <p id="dataSettingsSummary">Se verifică datele locale…</p>
+            </div>
+            <button type="button" class="legal-danger-btn" id="clearDataBtn">Șterge tot</button>
+          </div>
+          <div class="legal-settings-confirm" id="clearDataConfirm" hidden>
+            <p><strong>Sigur ștergi tot?</strong> Se șterg toate pozele făcute de tine și progresul din poveste. Acțiunea nu poate fi anulată.</p>
+            <div class="legal-settings-actions">
+              <button type="button" class="legal-danger-btn" id="clearDataConfirmBtn">Da, șterge tot</button>
+              <button type="button" class="legal-secondary-btn" id="clearDataCancelBtn">Anulează</button>
+            </div>
+          </div>
+          <div class="legal-settings-status" id="clearDataStatus" role="status" aria-live="polite"></div>
+        </div>
       </section>
 
       <section class="legal-section" id="legal-content" role="tabpanel" aria-labelledby="legalTabContent">
@@ -2228,6 +2703,7 @@
         <span class="brand-word">Arad<span class="brand-word-tail"><span class="bw">L</span><span class="bw">e</span><span class="bw">n</span><span class="bw">s</span></span></span>
       </div>
       <div class="top-actions">
+        <button id="langBtn" class="lang-btn" type="button" aria-label="Schimbă limba în engleză" title="Schimbă limba">EN</button>
         <div class="route-step tnum" id="routeStep" aria-live="polite">...</div>
         <button id="compassWarningBadge" aria-label="Avertisment busolă" title="Avertisment busolă: apasă pentru detalii">
           <span>!</span>
@@ -2252,6 +2728,13 @@
     <div id="steerEdge" aria-hidden="true"></div>
   </div>
   <nav id="rail" aria-label="Acțiuni reper">
+    <button id="themeSwitch" class="theme-switch" type="button" role="switch" aria-checked="false" aria-label="Comută tema întunecată" title="Comută tema">
+      <span class="ts-track" aria-hidden="true">
+        <svg class="ts-ico ts-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ts-ico ts-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="ts-knob"></span>
+      </span>
+    </button>
     <!-- Acțiunile reperului: mod de joc, fișă, fotografiere, album. -->
     <button id="gamemodeRailBtn" class="ring" aria-label="Mod de joc &amp; Capitole" title="Mod de joc &amp; Capitole">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2279,7 +2762,6 @@
 
   <div class="bottom">
     <div id="caption">
-      <div class="cap-author" id="targetName">...</div>
       <div id="arLabel">
   <div class="al-name" id="alName">...</div>
   <div class="al-meta" id="alMeta"></div>
@@ -2288,7 +2770,6 @@
     <div class="scrim-row">
       <div class="dist" aria-live="polite">
         <span class="tnum"><span class="num" id="distNum"></span> <span class="unit" id="distUnit"></span><span class="sep" aria-hidden="true">, </span></span>
-        <span class="route-step tnum" id="routeStepBottom" aria-hidden="true">...</span>
         <div class="arrived" id="arrived">Ai ajuns la destinație!</div>
       </div>
     </div>
@@ -2296,7 +2777,10 @@
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
       <button id="flipBtn" class="btn debug-only">Inversează 180°</button>
     </div>
-    <div class="hint">Glisează busola. Ține apăsat pentru toate obiectivele.</div>
+    <div class="band-meta-row">
+      <span class="route-step tnum" id="routeStepBottom" aria-hidden="true">...</span>
+      <div class="hint">Glisează busola. Ține apăsat pentru toate obiectivele.</div>
+    </div>
     <nav id="snapRail" role="group" aria-label="Busolă traseu: alege oprirea"></nav>
   </div>
 </div>
@@ -2338,7 +2822,10 @@
   <div class="start-inner">
     <div class="start-brand">
       <span class="brand-word">Arad<span class="brand-word-tail"><span class="bw">L</span><span class="bw">e</span><span class="bw">n</span><span class="bw">s</span></span></span>
-      <button type="button" id="legalOpenBtn" class="legal-open">Legal</button>
+      <div class="start-actions">
+        <button type="button" id="langBtnStart" class="lang-btn start-lang" aria-label="Schimbă limba în engleză" title="Schimbă limba">EN</button>
+        <button type="button" id="legalOpenBtn" class="legal-open">Legal</button>
+      </div>
     </div>
 
     <div class="start-head">
@@ -2360,6 +2847,361 @@
     </div>
   </div>
 </div>
+
+<script type="application/json" id="i18n-en">
+{
+ "Se încarcă…": "Loading…",
+ "Se verifică serverul…": "Checking the server…",
+ "Încearcă din nou": "Try again",
+ "Deschide aplicația pe telefon.": "Open the app on your phone.",
+ "Pe desktop vezi doar macheta.": "On desktop you only see the mock-up.",
+ "Vezi macheta": "View mock-up",
+ "Busola nu merge": "Compass isn't working",
+ "Deschide pagina pe HTTPS, dă permisiunea la busolă și locație, apoi reîncarcă.": "Open the page over HTTPS, allow motion and location access, then reload.",
+ "Ești aproape": "You're close",
+ "Fă o poză.": "Take a photo.",
+ "Vezi locul": "View place",
+ "Fotografiază": "Take photo",
+ "Mai târziu": "Later",
+ "Încadrează și apasă.": "Frame it and tap.",
+ "Închide": "Close",
+ "Poză făcută": "Photo saved",
+ "Vezi poza în album.": "See the photo in the album.",
+ "Vezi în album": "View in album",
+ "Album": "Album",
+ "Alege un traseu. Atinge o oprire.": "Choose a route. Tap a stop.",
+ "Poze": "Photos",
+ "Traseu pe module. Ordinea e cea a turului, nu pe hartă.": "Modular route. The order follows the tour, not the map.",
+ "Atunci": "Then",
+ "Acum": "Now",
+ "Din arhiva site-ului": "From the site archive",
+ "Ghidează-mă acolo": "Guide me there",
+ "Fotografii": "Photos",
+ "Pozele tale și arhiva AradLens.": "Your photos and the AradLens archive.",
+ "Categorii": "Categories",
+ "Tipurile de locuri.": "The types of places.",
+ "Locații": "Locations",
+ "Locurile din arhivă.": "Places in the archive.",
+ "Toate locațiile": "All locations",
+ "Tururi": "Tours",
+ "Trasee gata făcute.": "Ready-made routes.",
+ "Toate tururile": "All tours",
+ "Cum vrei să explorezi?": "How do you want to explore?",
+ "Alege un mod.": "Choose a mode.",
+ "Modul poveste": "Story mode",
+ "Povestea Aradului": "The story of Arad",
+ "Tururi ghidate": "Guided tours",
+ "Alege un tur. Mergi la fiecare oprire și fă o poză. La final primești o diplomă.": "Choose a tour. Walk to each stop and take a photo. Finish with a diploma.",
+ "Opririle, în ordine": "Stops in order",
+ "Povești la fiecare loc": "A story at every place",
+ "Diplomă la final": "Diploma at the end",
+ "Alege un tur": "Choose a tour",
+ "Mod liber": "Free mode",
+ "Toate locurile": "All places",
+ "Fără ordine": "No fixed order",
+ "Mergi unde vrei. Vezi pozele vechi și fă poze noi.": "Go anywhere. See old photos and take new ones.",
+ "Alegi ce vrei": "Choose what you want",
+ "Poze Atunci / Acum": "Then / Now photos",
+ "Plimbare scurtă": "Short walk",
+ "Începe": "Start",
+ "Alege un tur din arhivă.": "Choose a tour from the archive.",
+ "Mergi liber": "Go free",
+ "Din povestea locului": "From the story of this place",
+ "Urmează:": "Next:",
+ "Continuă": "Continue",
+ "TUR ÎNCHEIAT": "TOUR COMPLETE",
+ "Tur încheiat": "Tour complete",
+ "Diplomă": "Diploma",
+ "Ai terminat turul.": "You finished the tour.",
+ "Cronicar al Aradului": "Chronicler of Arad",
+ "Alege alt tur": "Choose another tour",
+ "Vezi albumul": "View album",
+ "Vezi diploma": "View diploma",
+ "Tur încheiat.": "Tour complete.",
+ "Vezi diploma.": "View your diploma.",
+ "Informații legale": "Legal information",
+ "Rezumat. Documentul complet prevalează.": "Summary. The full document prevails.",
+ "Termeni": "Terms",
+ "Confidențialitate": "Privacy",
+ "Conținut": "Content",
+ "Accesibilitate": "Accessibility",
+ "Setări date": "Data settings",
+ "Șterge tot": "Delete all",
+ "Se verifică datele locale…": "Checking local data…",
+ "Sigur ștergi tot?": "Delete everything?",
+ "Se șterg toate pozele făcute de tine și progresul din poveste. Acțiunea nu poate fi anulată.": "All photos you took and your story progress will be deleted. This cannot be undone.",
+ "Da, șterge tot": "Yes, delete all",
+ "Anulează": "Cancel",
+ "Datele au fost șterse. Reîncarc pagina…": "Data deleted. Reloading…",
+ "Versiunea 1.0 — ultima actualizare: 5 noiembrie 2026.": "Version 1.0 — last updated: 5 November 2026.",
+ "Alege un reper și pornește ghidarea.": "Choose a landmark and start guidance.",
+ "Ai ajuns la destinație!": "You've arrived!",
+ "stradă: ...": "street: ...",
+ "Inversează 180°": "Flip 180°",
+ "Glisează busola. Ține apăsat pentru toate obiectivele.": "Slide the compass. Long-press for all landmarks.",
+ "Ascultă": "Listen",
+ "Stop": "Stop",
+ "Foto 1901 / acum": "1901 / now photo",
+ "Glisează: 1901 / acum": "Slide: 1901 / now",
+ "O plimbare prin Arad.": "A walk through Arad.",
+ "Vezi ce era aici înainte.": "See what used to be here.",
+ "din Arad.": "in Arad.",
+ "Fiecare loc are o poveste. Mergi liber sau pe tururi. La Primărie vezi clădirea din 1901 lângă cea de azi.": "Every place has a story. Walk freely or follow tours. At the Town Hall, see the 1901 building next to today's.",
+ "Cameră": "Camera",
+ "Locație": "Location",
+ "Busolă": "Compass",
+ "doar pe telefonul tău": "on your phone only",
+ "Îți cerem busola, camera și locația.": "We ask for your compass, camera and location.",
+ "Fără cont. Pozele rămân la tine.": "No account. Photos stay with you.",
+ "busolă: ... | direcție: ...": "compass: ... | direction: ...",
+ "Niciun reper selectat": "No landmark selected",
+ "Alege un reper.": "Choose a landmark.",
+ "Camera nu merge": "Camera isn't working",
+ "Dă permisiunea la cameră.": "Allow camera access.",
+ "Locația nu merge": "Location isn't working",
+ "Pornește GPS-ul.": "Turn on GPS.",
+ "Prea departe": "Too far",
+ "Captura a eșuat": "Capture failed",
+ "Camera nu a returnat un cadru. Încearcă din nou.": "The camera didn't return a frame. Try again.",
+ "Memoria e plină": "Storage full",
+ "Poza rămâne doar acum. Memoria e plină.": "The photo only lasts this session. Storage is full.",
+ "Nu e rândul acestui loc": "Not this place's turn",
+ "Nicio poză încă": "No photo yet",
+ "Apropie-te la 200 m și fă o poză.": "Get within 200 m and take a photo.",
+ "Nu avem încă o poză veche.": "We don't have an old photo yet.",
+ "Foto istorică: în curând": "Historic photo: coming soon",
+ "Foto din arhivă": "Photo from the archive",
+ "Foto din arhiva AradLens": "Photo from the AradLens archive",
+ "Din arhiva AradLens": "From the AradLens archive",
+ "Poza ta": "Your photo",
+ "doar acum": "this session only",
+ "Salvată local": "Saved locally",
+ "Doar în sesiunea curentă": "Current session only",
+ "Pozele tale": "Your photos",
+ "niciuna": "none",
+ "gol": "empty",
+ "Arhiva AradLens": "AradLens archive",
+ "Nu există opriri în arhivă.": "No stops in the archive.",
+ "Nu există tururi în arhivă.": "No tours in the archive.",
+ "Poză în album": "Photo in album",
+ "Blocat": "Locked",
+ "Oprirea": "Stop",
+ "Arhiva foto se încarcă din API. Reîncarcă pagina dacă rămâne goală.": "The photo archive loads from the API. Reload the page if it stays empty.",
+ "Nu ai făcut încă nicio poză. Apropie-te la 200 m de un reper și apasă butonul cameră.": "You haven't taken a photo yet. Get within 200 m of a landmark and tap the camera button.",
+ "Nicio poză salvată": "No photo saved",
+ "fără progres de poveste": "no story progress",
+ "progres de poveste salvat": "story progress saved",
+ "Totul rămâne pe acest dispozitiv.": "Everything stays on this device.",
+ "Vocea nu merge în acest browser.": "Speech isn't available in this browser.",
+ "GPS indisponibil pe acest dispozitiv.": "GPS is not available on this device.",
+ "Dă permisiunea la busolă și reîncarcă.": "Allow compass access and reload.",
+ "Calibrează busola (mișcă telefonul desenând un 8) dacă săgeata pare imprecisă.": "Calibrate the compass (move the phone in a figure eight) if the arrow seems inaccurate.",
+ "Busola nu e precisă. Recalibrează și reîncarcă.": "The compass is not accurate. Recalibrate and reload.",
+ "Dacă săgeata arată greșit, calibrează busola din aplicația Busolă și reîncarcă pagina.": "If the arrow looks wrong, calibrate the compass in the Compass app and reload the page.",
+ "Întoarce-te spre dreapta": "Turn right",
+ "Întoarce-te spre stânga": "Turn left",
+ "Se încarcă arhiva categoriilor…": "Loading the category archive…",
+ "Se încarcă locațiile…": "Loading locations…",
+ "Se încarcă tururile…": "Loading tours…",
+ "Se încarcă turul…": "Loading tour…",
+ "Se încarcă detaliile locației…": "Loading location details…",
+ "Eroare necunoscută la încărcare.": "Unknown loading error.",
+ "Reîncearcă": "Retry",
+ "Nicio categorie, încă.": "No categories yet.",
+ "Nicio locație, încă.": "No locations yet.",
+ "Niciun tur, încă.": "No tours yet.",
+ "Vezi locația": "View location",
+ "Vezi turul": "View tour",
+ "Poze din arhivă": "Photos from the archive",
+ "Ghidează spre acest obiectiv în AR": "Guide me to this landmark in AR",
+ "Fișa obiectivului": "Landmark page",
+ "Pagina locației": "Location page",
+ "Turul nu are, încă, obiective asociate.": "This tour has no stops yet.",
+ "Deschide Atunci / Acum": "Open Then / Now",
+ "Alege modulul traseului": "Choose the route module",
+ "Trasee": "Routes",
+ "Termeni de utilizare": "Terms of use",
+ "Operator.": "Operator.",
+ "AradLens, Arad, România. Contact: prin intermediul aplicației AradLens.": "AradLens, Arad, Romania. Contact: through the AradLens app.",
+ "Obiect.": "Purpose.",
+ "AradLens este un ghid turistic AR gratuit pentru Arad. Nu există cont, abonament, plată, publicitate sau cumpărături.": "AradLens is a free AR tourist guide for Arad. There is no account, subscription, payment, advertising or shopping.",
+ "Utilizare acceptată.": "Accepted use.",
+ "Folosește aplicația legal, pentru informare turistică.": "Use the app lawfully, for tourist information.",
+ "Nu o folosi în timp ce conduci și nu te baza pe indicațiile AR pentru siguranță.": "Do not use it while driving and do not rely on AR directions for safety.",
+ "Respectă circulația, proprietatea privată și regulile locale.": "Respect traffic, private property and local rules.",
+ "Nu suprasolicita API-ul, nu extrage masiv date și nu ocoli măsurile tehnice.": "Do not overload the API, scrape data at scale or bypass technical measures.",
+ "Proprietate intelectuală.": "Intellectual property.",
+ "Codul, marca, designul și textele proprii sunt protejate de Legea nr. 8/1996, dacă nu este indicat altfel. Primești o licență limitată, neexclusivă și revocabilă pentru uz personal, necomercial. Nu copia, nu vinde și nu crea opere derivate fără acord scris, în afara cazurilor permise de lege. Dacă repository-ul conține o licență open-source, aceasta prevalează pentru codul respectiv. Conținutul API aparține titularilor.": "The code, brand, design and our own texts are protected by Law no. 8/1996, unless stated otherwise. You receive a limited, non-exclusive, revocable licence for personal, non-commercial use. Do not copy, sell or create derivative works without written consent, except where the law permits. If the repository contains an open-source licence, it prevails for that code. API content belongs to its owners.",
+ "Disponibilitate și modificări.": "Availability and changes.",
+ "Serviciul este gratuit și poate fi suspendat sau modificat. Nu garantăm disponibilitate neîntreruptă. Putem actualiza termenii; versiunea și data sunt afișate. Modificările materiale se anunță în aplicație, cu un preaviz rezonabil, dacă legea o cere.": "The service is free and may be suspended or changed. We do not guarantee uninterrupted availability. We may update the terms; the version and date are shown. Material changes are announced in the app with reasonable notice where the law requires it.",
+ "Răspundere.": "Liability.",
+ "Serviciul este oferit „ca atare”, în limitele legii. Nu garantăm că informațiile din arhivă sau API sunt complete ori exacte. Nu răspundem pentru daune indirecte, întreruperi, erori GPS, pierderea pozelor ori a progresului sau decizii luate exclusiv pe baza conținutului. Nu excludem răspunderea pentru dol, culpă gravă, vătămare corporală ori deces și nici drepturile consumatorilor care nu pot fi limitate.": "The service is provided 'as is', to the extent permitted by law. We do not guarantee that archive or API information is complete or accurate. We are not liable for indirect damages, interruptions, GPS errors, loss of photos or progress, or decisions based solely on the content. We do not exclude liability for wilful misconduct, gross negligence, personal injury or death, or consumer rights that cannot be limited.",
+ "Consumatori, lege și instanțe.": "Consumers, law and courts.",
+ "Nu îți limităm drepturile imperative, inclusiv cele prevăzute de Legea nr. 449/2003 și OUG nr. 34/2014, când se aplică. Poți contacta ANPC și o entitate ADR, în condițiile legii. Termenii sunt guvernați de legea română; neînțelegerile se soluționează de instanțele române competente, cu respectarea regulilor imperative pentru consumatori. Dacă o clauză este nulă, celelalte rămân valabile. Termenii și politica de confidențialitate formează înțelegerea părților. Documentul este în română; versiunea română prevalează.": "We do not limit your mandatory rights, including those under Law no. 449/2003 and GEO no. 34/2014, where applicable. You may contact ANPC and an ADR entity under the law. These terms are governed by Romanian law; disputes are resolved by the competent Romanian courts, respecting mandatory consumer rules. If a clause is void, the others remain valid. These terms and the privacy policy form the parties' agreement. The document is in Romanian; the Romanian version prevails.",
+ "AradLens, Arad, România. Pentru API, operatorul API-ului poate fi operator separat; cererile trec prin proxy și pot fi înregistrate de ambele părți.": "AradLens, Arad, Romania. For the API, the API operator may be a separate controller; requests pass through the proxy and may be logged by both parties.",
+ "Date locale.": "Local data.",
+ "Pozele, progresul și recompensele sunt în localStorage, pe dispozitiv (cheile": "Photos, progress and rewards are in localStorage on the device (keys",
+ "și": "and",
+ "). Nu le încărcăm și nu le accesăm de la distanță. Pot conține persoane; tu decizi ce faci cu ele. Le poți șterge oricând din": "). We do not upload or access them remotely. They may contain people; you decide what to do with them. You can delete them at any time from",
+ ". Se pierd și la ștergerea datelor site-ului, în modul privat sau la depășirea cotei.": ". They are also lost when you clear site data, in private mode, or when the quota is exceeded.",
+ "Cookies → Setări date": "Cookies → Data settings",
+ "Permisiuni.": "Permissions.",
+ "Camera pentru AR și captură; geolocația pentru proximitate și direcție; orientarea/mișcarea pentru busolă. Prelucrarea are loc pe dispozitiv. Refuzul limitează funcțiile respective, nu accesul la informațiile statice. Nu cerem microfon. Localizarea poate implica serviciile sistemului de operare, cu politicile lor.": "Camera for AR and capture; location for proximity and direction; orientation/motion for the compass. Processing happens on the device. Refusing limits those features, not access to static information. We do not request a microphone. Location may involve the operating system's services, under their policies.",
+ "Jurnale tehnice.": "Technical logs.",
+ "La cererile": "For",
+ ", găzduirea și proxy-ul pot înregistra IP, user-agent, dată/oră și cerere. API-ul primește cererea prin proxy și poate vedea antetele transmise. Scop: securitate, funcționare, prevenirea abuzurilor; bază legală: interes legitim (art. 6 alin. (1) lit. f) GDPR). Nu facem profiling. Dacă ne contactezi, prelucrăm mesajul pentru a răspunde, pe baza consimțământului sau a interesului legitim.": " requests, the host and proxy may log IP, user-agent, date/time and request. The API receives the request through the proxy and may see the forwarded headers. Purpose: security, operation, abuse prevention; legal basis: legitimate interest (Art. 6(1)(f) GDPR). We do not profile. If you contact us, we process your message to reply, based on consent or legitimate interest.",
+ "Păstrare, destinatari, transferuri.": "Retention, recipients, transfers.",
+ "Jurnalele se păstrează maximum 30 de zile, apoi se șterg sau se anonimizează. Destinatari: furnizorul de găzduire și operatorul API-ului. Dacă folosim furnizori din afara UE/EEA, verificăm existența unei decizii de adecvare sau a clauzelor contractuale standard.": "Logs are kept for a maximum of 30 days, then deleted or anonymised. Recipients: the hosting provider and the API operator. If we use providers outside the EU/EEA, we verify an adequacy decision or standard contractual clauses.",
+ "Drepturi.": "Rights.",
+ "Ai dreptul la:": "You have the right to:",
+ "acces, rectificare, ștergere, restricționare și opoziție;": "access, rectification, erasure, restriction and objection;",
+ "portabilitate și retragere a consimțământului, unde se aplică;": "portability and withdrawal of consent, where applicable;",
+ "plângere la ANSPDCP.": "lodge a complaint with ANSPDCP.",
+ "Pentru datele locale, șterge-le din browser; pentru jurnale, contactează operatorul prin intermediul aplicației. Răspundem în termenul legal de o lună, prelungibil. Nu luăm decizii automatizate.": "For local data, delete it in the browser; for logs, contact the operator through the app. We respond within the legal one-month period, extendable. We do not make automated decisions.",
+ "Copii și DPO.": "Children and DPO.",
+ "Serviciul nu se adresează copiilor sub 16 ani; nu colectăm cu bună știință date de la copii. Recomandăm supravegherea unui adult pentru cameră și locație. Nu am desemnat DPO; dacă prelucrările viitoare impun, vom desemna și vom publica datele.": "The service is not aimed at children under 16; we do not knowingly collect data from children. We recommend adult supervision for camera and location. We have not appointed a DPO; if future processing requires one, we will appoint and publish the details.",
+ "Cookies și stocare locală": "Cookies and local storage",
+ "Nu folosim cookie-uri proprii, analytics, publicitate sau pixeli. De aceea nu afișăm banner de consimțământ.": "We do not use our own cookies, analytics, advertising or pixels. That is why we do not show a consent banner.",
+ "LocalStorage nu este cookie, ci stocare pe dispozitiv. Este strict necesar pentru album, poveste și comparație, deci se aplică excepția de la consimțământ din Legea nr. 506/2004 (ePrivacy).": "LocalStorage is not a cookie, but on-device storage. It is strictly necessary for the album, story and comparison, so the consent exception under Law no. 506/2004 (ePrivacy) applies.",
+ "Șterge datele din setările browserului: Site settings → Date site → Șterge. Sau folosește butonul": "Delete data in your browser settings: Site settings → Site data → Delete. Or use the",
+ "din": "in",
+ ", mai jos. Pozele și progresul se pierd și nu pot fi recuperate. Dacă vom introduce cookie-uri de analiză sau marketing, vom cere consimțământ înainte. Când urmezi un link extern, se aplică politica site-ului respectiv.": " button below. Photos and progress are lost and cannot be recovered. If we introduce analytics or marketing cookies, we will ask for consent first. When you follow an external link, that site's policy applies.",
+ "Conținut și drepturi": "Content and rights",
+ "Textele, fotografiile și datele din API aparțin operatorului API-ului sau terților. Le afișăm în scop informativ, cu atribuirea disponibilă. Nu acordăm drepturi asupra lor.": "Texts, photos and data in the API belong to the API operator or third parties. We display them for information, with available attribution. We grant no rights over them.",
+ "Fotografia „Primăria Arad, 1901” este creditată Fortepan / Schoch Frigyes; drepturile aparțin titularilor. O folosim cu atribuire, în scop ilustrativ, și respectăm condițiile de licență aplicabile.": "The photo 'Primăria Arad, 1901' is credited to Fortepan / Schoch Frigyes; rights belong to the owners. We use it with attribution, for illustration, and comply with applicable licence terms.",
+ "Pozele tale rămân pe dispozitiv și nu sunt publice. Aplicația nu permite încărcare publică și nu găzduiește conținutul altor utilizatori. Dacă le distribui public, îți revine responsabilitatea pentru drepturile persoanelor din imagini.": "Your photos stay on the device and are not public. The app does not allow public uploads and does not host other users' content. If you share them publicly, you are responsible for the rights of the people in the images.",
+ "Pentru notificări de încălcare: contactează operatorul prin intermediul aplicației, cu URL, descriere și dovada drepturilor. Vom confirma și vom elimina sau restricționa accesul, conform legii. Dacă notificarea privește conținutul API, o redirecționăm operatorului API-ului.": "For infringement notices: contact the operator through the app with the URL, description and proof of rights. We will confirm and remove or restrict access as required by law. If the notice concerns API content, we will forward it to the API operator.",
+ "Ne propunem WCAG 2.2 AA, fără a pretinde certificare formală sau accesibilitate „100%”.": "We aim for WCAG 2.2 AA, without claiming formal certification or '100%' accessibility.",
+ "Țintele de atingere pentru acțiunile principale sunt de minimum 44×44 px, focusul este vizibil, iar elementele principale pot fi folosite cu tastatura. Respectăm mișcarea redusă și transparența redusă. Funcțiile AR depind de cameră, GPS și senzori și pot lipsi pe desktop sau fără permisiuni; există mod de previzualizare.": "Touch targets for primary actions are at least 44×44 px, focus is visible, and primary elements can be used with a keyboard. We respect reduced motion and reduced transparency. AR features depend on camera, GPS and sensors and may be unavailable on desktop or without permissions; a preview mode exists.",
+ "Dacă întâmpini o barieră, contactează operatorul prin intermediul aplicației, cu pagina, dispozitivul și descrierea. Legea nr. 448/2022 privește sectorul public, iar Directiva (UE) 2019/882 are propriul domeniu; nu pretindem că ne aflăm sub incidența lor.": "If you encounter a barrier, contact the operator through the app with the page, device and description. Law no. 448/2022 concerns the public sector, and Directive (EU) 2019/882 has its own scope; we do not claim to fall under them.",
+ "Palatul Cultural, inaugurat în toamna anului 1913, reunește Muzeul Județean, Filarmonica de Stat și Biblioteca sub o cupolă arhitecturală somptuoasă.": "The Cultural Palace, inaugurated in autumn 1913, brings together the County Museum, the State Philharmonic and the Library under a sumptuous architectural dome.",
+ "În toamna anului 1913, chiar înainte de izbucnirea Primului Război Mondial, Aradul și-a inaugurat cea mai strălucită perlă: Palatul Cultural, proiectat de arhitectul local Lajos Szántay. Unind sub o singură cupolă grandioasă muzeul, filarmonica și biblioteca, palatul a consacrat Aradul ca o adevărată capitală a culturii vestice.": "In autumn 1913, just before the outbreak of the First World War, Arad inaugurated its most brilliant jewel: the Cultural Palace, designed by local architect Lajos Szántay. Bringing the museum, philharmonic and library under one grand dome, the palace established Arad as a true capital of Western culture.",
+ "1913: Apogeul artelor și al efervescenței culturale pe malul Mureșului.": "1913: The peak of the arts and cultural ferment on the banks of the Mureș.",
+ "Palatul Administrativ al Aradului, sediul Primăriei Municipiului, a fost construit între 1872 și 1876. Fațada îmbină neorenascentismul flamand cu elemente ale primăriilor medievale târzii, iar turnul de 54 m adăpostește un orologiu adus din Elveția în 1878 ce cântă „Oda Bucuriei” la orele fixe.": "The Administrative Palace of Arad, seat of the City Hall, was built between 1872 and 1876. Its façade combines Flemish Neo-Renaissance features with elements of late medieval town halls, and the 54 m tower houses a Swiss clock brought in 1878 that plays the 'Ode to Joy' on the hour.",
+ "Construit între 1872 și 1876 după planurile maestrului Ödön Lechner, Palatul Administrativ a devenit inima civică a Aradului. Turnul înalt de 54 de metri domină bulevardul central, iar orologiul elvețian montat în 1878 măsoară de un secol și jumătate bătăile inimii unui oraș curajos și vizionar.": "Built between 1872 and 1876 to plans by master Ödön Lechner, the Administrative Palace became the civic heart of Arad. The 54-metre tower dominates the central boulevard, and the Swiss clock installed in 1878 has measured the heartbeat of a brave, visionary city for a century and a half.",
+ "1876: Ridicarea grandorii administrative și a turnului cu orologiu.": "1876: The rise of administrative grandeur and the clock tower.",
+ "Teatrul Clasic Ioan Slavici este scena principală a artelor dramatice din Arad, inaugurată în toamna anului 1874 cu participarea marilor personalități ale vremii.": "The Ioan Slavici Classical Theatre is the main stage for dramatic arts in Arad, inaugurated in autumn 1874 with the participation of the great personalities of the time.",
+ "Inaugurat în toamna anului 1874 în prezența împăratului Franz Joseph, Teatrul din Arad a fost sanctuarul dramaturgiei și al marilor adunări culturale. Chiar și după incendiul mistuitor din 1883, teatrul a renăscut din propria cenușă prin dăruirea cetățenilor, devenind altarul teatrului transilvănean.": "Inaugurated in autumn 1874 in the presence of Emperor Franz Joseph, the Arad Theatre was the sanctuary of drama and great cultural gatherings. Even after the devastating fire of 1883, the theatre rose from its own ashes through the dedication of citizens, becoming the altar of Transylvanian theatre.",
+ "1874: Sanctuarul dramaturgiei clasice și al marilor spectacole.": "1874: The sanctuary of classical drama and great performances.",
+ "Catedrala Veche din Arad, sfințită în 1865, a constituit centrul spiritual și comunitar ortodox al orașului pe durata marilor prefaceri istorice.": "The Old Cathedral of Arad, consecrated in 1865, was the spiritual and community centre of the Orthodox city during the great historical transformations.",
+ "Sfințită în 1865 de episcopul Procopie Ivașcovici, Catedrala Veche a fost primul mare monument de zid al renașterii civice a Aradului modern. Aici s-a adunat comunitatea în cele mai grele momente de cumpănă și speranță, marcând piatra de temelie a călătoriei noastre istorice.": "Consecrated in 1865 by Bishop Procopie Ivașcovici, the Old Cathedral was the first great stone monument of the civic rebirth of modern Arad. The community gathered here in the hardest moments of trial and hope, marking the cornerstone of our historical journey.",
+ "1865: Punctul de pornire al spiritualității și identității arădene.": "1865: The starting point of Arad's spirituality and identity.",
+ "Neorenascentist eclectic flamand": "Flemish Neo-Renaissance eclectic",
+ "Eclectic monumental": "Monumental eclectic",
+ "Neoclasic": "Neoclassical",
+ "Baroc târziu / Neoclasic": "Late Baroque / Neoclassical",
+ "Începutul sec. XX": "Early 20th century",
+ "Aeroport": "Airport",
+ "Biserici": "Churches",
+ "Cafenele": "Cafés",
+ "Clădiri istorice": "Historic buildings",
+ "Comunitară": "Community",
+ "Educaționala": "Education",
+ "Financiare": "Financial",
+ "Galerii de artă": "Art galleries",
+ "Monumente": "Monuments",
+ "Muzee": "Museums",
+ "Parcuri": "Parks",
+ "Piețe": "Squares",
+ "Poduri": "Bridges",
+ "Restaurante": "Restaurants",
+ "Rezidențială": "Residential",
+ "Statui": "Statues",
+ "Turnuri": "Towers",
+ "Pe urmele arhitecturii istorice din Arad": "Following Arad's historic architecture",
+ "Acest traseu urmărește Bulevardul Revoluției și prezintă unele dintre cele mai reprezentative clădiri ale orașului. Vizitatorii pot descoperi palate impresionante, biserici și instituții istorice, observând diversitatea stilurilor arhitecturale care au contribuit la dezvoltarea Aradului.": "This route follows Bulevardul Revoluției and presents some of the city's most representative buildings. Visitors can discover impressive palaces, churches and historic institutions while observing the diversity of architectural styles that shaped Arad's development.",
+ "Istoria și tradițiile comunităților din Arad": "The history and traditions of Arad's communities",
+ "Traseul explorează zona veche a orașului și pune în evidență patrimoniul istoric și religios al comunităților locale. Vizitatorii descoperă biserici vechi, clădiri cu valoare istorică și monumente care păstrează amintirea tradițiilor și evenimentelor importante din trecutul Aradului.": "The route explores the old part of the city and highlights the historic and religious heritage of local communities. Visitors discover old churches, buildings of historic value and monuments that preserve the memory of traditions and important events in Arad's past.",
+ "Aradul cultural și artistic": "Cultural and artistic Arad",
+ "Acest traseu este dedicat patrimoniului cultural și arhitectural al orașului, reunind palate elegante, muzee și clădiri reprezentative. Vizitatorii pot descoperi personalități importante, elemente arhitecturale deosebite și locuri care reflectă evoluția culturală și artistică a Aradului.": "This route is dedicated to the city's cultural and architectural heritage, bringing together elegant palaces, museums and representative buildings. Visitors can discover important personalities, remarkable architectural elements and places that reflect Arad's cultural and artistic evolution.",
+ "Biserica Roșie": "Red Church",
+ "Biserica Sârbească „Sfinții Petru și Pavel”": "Serbian Church 'Saints Peter and Paul'",
+ "Biserica Sfântul Anton de Padova": "Saint Anthony of Padua Church",
+ "Casa cu Lacăt": "House with the Padlock",
+ "Catedrala Veche „Sfântul Ioan Botezătorul”": "Old Cathedral 'Saint John the Baptist'",
+ "Muzeul Memorial „Vasile Goldiș”": "'Vasile Goldiș' Memorial Museum",
+ "Palatul Administrativ": "Administrative Palace",
+ "Palatul Andrenyi": "Andrenyi Palace",
+ "Palatul băncii naționale": "National Bank Palace",
+ "Palatul Bohuș": "Bohuș Palace",
+ "Palatul Cenad": "Cenad Palace",
+ "Palatul Cultural": "Cultural Palace",
+ "Palatul Földes": "Földes Palace",
+ "Palatul Justiției": "Palace of Justice",
+ "Palatul Neuman": "Neuman Palace",
+ "Palatul Reinhardt": "Reinhardt Palace",
+ "Palatul Sârbesc": "Serbian Palace",
+ "Palatul Szantay": "Szantay Palace",
+ "Preparandia din Arad": "Arad Preparandia",
+ "Teatrul Clasic „Ioan Slavici”": "'Ioan Slavici' Classical Theatre",
+ "Turnul de Apă": "Water Tower",
+ "Primăria Arad": "Arad City Hall",
+ "Teatrul I. Slavici": "I. Slavici Theatre",
+ "Catedrala Veche": "Old Cathedral",
+ "Biserica Roșie a fost construită între anii 1905 și 1906 și aparține cultului evanghelic luteran. Este realizată în stil neogotic și se remarcă prin cărămida roșie din care este construită. Turnul înalt și vitraliile îi oferă un aspect deosebit.": "The Red Church was built between 1905 and 1906 and belongs to the Evangelical Lutheran faith. It is built in a Neo-Gothic style and stands out for its red brick. Its tall tower and stained-glass windows give it a distinctive appearance.",
+ "Biserica Sârbească „Sfinții Petru și Pavel” a fost construită între anii 1698 și 1702, în stil baroc timpuriu. Este considerată una dintre cele mai vechi clădiri din Arad. Interiorul păstrează picturi și obiecte religioase importante pentru comunitatea sârbească.": "The Serbian Church 'Saints Peter and Paul' was built between 1698 and 1702 in an early Baroque style. It is considered one of the oldest buildings in Arad. Its interior preserves paintings and religious objects important to the Serbian community.",
+ "Biserica Sfântul Anton de Padova este o importantă construcție romano-catolică din centrul Aradului. A fost ridicată între anii 1902 și 1904, în stil renascentist. Interiorul impresionează prin decorațiuni, picturi și vitralii, fiind un loc important pentru comunitatea catolică locală.": "Saint Anthony of Padua Church is an important Roman Catholic building in central Arad. It was erected between 1902 and 1904 in a Renaissance style. Its interior impresses with decorations, paintings and stained glass, and it is an important place for the local Catholic community.",
+ "Casa cu Lacăt este un monument istoric construit în anul 1815. Este cunoscută pentru lacătul metalic amplasat pe fațada sa, care reprezintă un simbol al tradițiilor meșteșugărești. Clădirea este unul dintre cele mai neobișnuite obiective istorice din Arad.": "The House with the Padlock is a historic monument built in 1815. It is known for the metal padlock on its façade, a symbol of craft traditions. The building is one of the most unusual historic landmarks in Arad.",
+ "Catedrala Veche „Sfântul Ioan Botezătorul” a fost construită între anii 1862 și 1865, în stil baroc. Interiorul său este decorat cu fresce bizantine care ilustrează scene biblice și portrete ale sfinților. Este un important reper religios și istoric al orașului.": "The Old Cathedral 'Saint John the Baptist' was built between 1862 and 1865 in a Baroque style. Its interior is decorated with Byzantine frescoes illustrating biblical scenes and portraits of saints. It is an important religious and historic landmark of the city.",
+ "Muzeul Memorial „Vasile Goldiș” este dedicat vieții și activității omului politic Vasile Goldiș, una dintre personalitățile importante ale Marii Uniri din 1918. Muzeul păstrează documente, fotografii și obiecte care ilustrează activitatea sa și contribuția la istoria României.": "The 'Vasile Goldiș' Memorial Museum is dedicated to the life and work of the politician Vasile Goldiș, one of the important figures of the 1918 Great Union. The museum keeps documents, photographs and objects illustrating his work and contribution to Romanian history.",
+ "Palatul Administrativ din Arad a fost construit între anii 1872 și 1874, în stil neorenascentist. Clădirea se remarcă prin turnul său impunător și prin arhitectura elegantă. În prezent, aici funcționează Primăria Municipiului Arad, fiind unul dintre cele mai cunoscute simboluri ale orașului.": "The Administrative Palace in Arad was built between 1872 and 1874 in a Neo-Renaissance style. The building stands out for its imposing tower and elegant architecture. Today it houses the Arad City Hall and is one of the city's best-known symbols.",
+ "Palatul Andrenyi a fost construit de familia de comercianți Andrényi, originară din Ghioroc. Clădirea se remarcă prin stilul neoromanic, ferestrele ornamentate și decorațiunile interioare. După naționalizare a devenit Palatul Pionierilor, iar ulterior Palatul Copiilor.": "Andrenyi Palace was built by the Andrényi merchant family, originally from Ghioroc. The building stands out for its Neo-Romanesque style, ornate windows and interior decorations. After nationalisation it became the Palace of Pioneers, and later the Palace of Children.",
+ "Construit între anii 1905 și 1906, Palatul Băncii Naționale a fost realizat în stil neoclasic. Clădirea a fost destinată activităților bancare și se remarcă prin aspectul său sobru și elegant. Aceasta reflectă dezvoltarea economică a orașului Arad de la începutul secolului al XX-le": "Built between 1905 and 1906, the National Bank Palace was designed in a Neoclassical style. The building was intended for banking activities and stands out for its sober, elegant appearance. It reflects the economic development of Arad at the beginning of the 20th century.",
+ "Palatul Bohuș a fost construit în anul 1910, în stil secession, după planurile arhitectului Ludovic Szántay. Este cunoscut pentru utilizarea betonului armat la realizarea planșeelor, fiind una dintre clădirile moderne ale perioadei. În prezent, cuprinde locuințe și spații comerciale.": "Bohuș Palace was built in 1910 in a Secession style, after plans by architect Ludovic Szántay. It is known for using reinforced concrete for its floors, making it one of the modern buildings of the period. Today it contains homes and commercial spaces.",
+ "Palatul Cenad a fost construit în anul 1894, după planurile arhitectului Jivaszek. Clădirea îmbină elemente neoclasice și eclectice, având o fațadă bogat decorată. De-a lungul timpului, palatul a avut diferite funcții, fiind astăzi unul dintre reperele arhitecturale ale centrului Aradului.": "Cenad Palace was built in 1894 after plans by architect Jivaszek. The building combines Neoclassical and eclectic elements, with a richly decorated façade. Over time the palace has served various functions and is today one of the architectural landmarks of central Arad.",
+ "Palatul Cultural a fost construit între anii 1911 și 1913, după planurile arhitectului arădean Ludovic Szántay. Inaugurat în octombrie 1913, edificiul îmbină elemente neoclasice, gotice și renascentiste. În prezent, găzduiește instituții culturale importante, printre care Complexul Muzeal Arad și Filarmonica.": "The Cultural Palace was built between 1911 and 1913 after plans by Arad architect Ludovic Szántay. Inaugurated in October 1913, the building combines Neoclassical, Gothic and Renaissance elements. Today it houses important cultural institutions, including the Arad Museum Complex and the Philharmonic.",
+ "Palatul Földes a fost construit în anul 1900, la inițiativa farmacistului Földes Kelemen. Proiectat de arhitectul Emil Tabacovici, edificiul este realizat în stil secession. Clădirea este cunoscută pentru legătura sa cu produsele farmaceutice și cosmetice ale proprietarului.": "Földes Palace was built in 1900 at the initiative of pharmacist Földes Kelemen. Designed by architect Emil Tabacovici, the building is in a Secession style. It is known for its connection with the owner's pharmaceutical and cosmetic products.",
+ "Palatul Justiției a fost construit în anul 1892, în stil eclectic. Clădirea a fost destinată activităților judiciare și se remarcă prin arhitectura sa impunătoare și prin simetria fațadei. În prezent, găzduiește instituții ale sistemului judiciar din Arad.": "The Palace of Justice was built in 1892 in an eclectic style. The building was intended for judicial activities and stands out for its imposing architecture and symmetrical façade. Today it houses institutions of the Arad judicial system.",
+ "Palatul Neuman a fost construit la sfârșitul secolului al XIX-lea pentru familia marelui industriaș Neumann. Realizat în stil eclectic, cu influențe renascentiste, edificiul impresionează prin balcoanele și arcadele sale. Astăzi, găzduiește spații comerciale și universitare.": "Neuman Palace was built at the end of the 19th century for the family of industrialist Neumann. Designed in an eclectic style with Renaissance influences, the building impresses with its balconies and arcades. Today it houses commercial and university spaces.",
+ "Palatul Reinhardt este o clădire istorică realizată în stil secession, construită la comanda unei familii de comercianți și fabricanți de mobilă. În prezent, găzduiește o galerie de artă, spații comerciale la parter și locuințe la etaj.": "Reinhardt Palace is a historic building in a Secession style, built for a family of merchants and furniture makers. Today it houses an art gallery, commercial spaces on the ground floor and apartments above.",
+ "Palatul Sârbesc a fost construit la începutul secolului al XX-lea, după planurile arhitectului Milan Tabacovici. Situat în Piața Sârbească, edificiul se remarcă prin dimensiunile sale și prin decorațiunile asimetrice. Clădirea este legată de istoria comunității sârbești din Arad.": "The Serbian Palace was built at the beginning of the 20th century after plans by architect Milan Tabacovici. Located in the Serbian Square, the building stands out for its size and asymmetrical decorations. It is linked to the history of Arad's Serbian community.",
+ "Palatul Szantay a fost construit în jurul anului 1911, după proiectul arhitectului Ludovic Szántay. Clădirea este realizată în stil secession și impresionează prin ornamentele elegante, atlanții și cariatidele care decorează fațada. În prezent, este folosită pentru locuințe și activități comerciale.": "Szantay Palace was built around 1911 after a design by architect Ludovic Szántay. The building is in a Secession style and impresses with its elegant ornaments, atlantes and caryatids decorating the façade. Today it is used for housing and commercial activities.",
+ "Preparandia din Arad a fost înființată în anul 1812 și reprezintă prima școală pedagogică românească din Transilvania. Instituția a avut un rol important în pregătirea învățătorilor și în dezvoltarea învățământului în limba română. Clădirea este astăzi monument istoric.": "The Arad Preparandia was founded in 1812 and is the first Romanian pedagogical school in Transylvania. The institution played an important role in training teachers and developing Romanian-language education. The building is today a historic monument.",
+ "Teatrul Clasic „Ioan Slavici” a fost inaugurat în anul 1874 și construit în stil neoclasic. De-a lungul timpului, clădirea a trecut prin mai multe renovări, inclusiv după un incendiu important. Astăzi, găzduiește spectacole și reprezintă un important centru cultural.": "The 'Ioan Slavici' Classical Theatre was inaugurated in 1874 and built in a Neoclassical style. Over time the building underwent several renovations, including after a major fire. Today it hosts performances and is an important cultural centre.",
+ "Turnul de Apă din Arad a fost construit în anul 1896 pentru alimentarea orașului cu apă și semnalarea incendiilor. Are o înălțime de aproximativ 35 de metri și se remarcă prin aspectul asemănător unei fortărețe. În prezent, găzduiește expoziții și o galerie de artă.": "The Arad Water Tower was built in 1896 to supply the city with water and signal fires. It is about 35 metres tall and stands out for its fortress-like appearance. Today it houses exhibitions and an art gallery.",
+ "Secțiuni legale": "Legal sections",
+ "Avertisment busolă": "Compass warning",
+ "Avertisment busolă: apasă pentru detalii": "Compass warning: tap for details",
+ "Apasă pentru detalii capitol": "Tap for chapter details",
+ "Mod de joc & Capitole": "Game mode & Chapters",
+ "Deschide fișa reperului": "Open landmark page",
+ "Fișă & audio": "Page & audio",
+ "Fotografiază reperul selectat": "Photograph the selected landmark",
+ "Deschide albumul, harta și traseele": "Open the album, map and routes",
+ "Busolă traseu: alege oprirea": "Route compass: choose a stop",
+ "Compară fotografia istorică cu cea actuală": "Compare the historic photo with the current view",
+ "Acțiuni reper": "Landmark actions",
+ "Închide notificarea": "Close notification",
+ "Fă fotografia": "Take the photo",
+ "Închide galeria": "Close gallery",
+ "Vezi toate fotografiile": "View all photos",
+ "Distanță indisponibilă": "Distance unavailable",
+ "Poza ": "Photo of ",
+ "Se pregătesc datele…": "Preparing data…",
+ "Se verifică disponibilitatea serverului…": "Checking server availability…",
+ "Serverul nu răspunde. Încearcă din nou.": "The server is not responding. Try again.",
+ "Răspuns neașteptat de la arhivă.": "Unexpected response from the archive.",
+ "Serverul nu a răspuns la timp. Încearcă din nou.": "The server did not respond in time. Try again.",
+ "Nu merge conexiunea. Încearcă din nou.": "The connection is not working. Try again.",
+ "Ești offline.": "You are offline.",
+ "Nu am găsit locul. Reîncarcă pagina.": "We could not find the place. Reload the page.",
+ "Răspuns neașteptat. Încearcă din nou.": "Unexpected response. Try again.",
+ "Arhiva centrală: un tur": "Central archive: one tour",
+ "Arhiva centrală: o categorie": "Central archive: one category",
+ "Tur": "Tour",
+ "Terminat": "Completed",
+ "Începe turul": "Start tour",
+ "Continuă turul": "Continue tour",
+ "Reia turul": "Restart tour",
+ "Diplomă de tur": "Tour diploma",
+ "Traseu ghidat prin Arad.": "Guided route through Arad.",
+ "Reia": "Restart",
+ "Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.": "Check that the page is open over HTTPS, that you allowed motion/orientation and location access, then reload.",
+ "Arad": "Arad",
+ "Fortepan / Schoch Frigyes, Arad, 1901": "Fortepan / Schoch Frigyes, Arad, 1901",
+ "AradLens": "AradLens"
+}
+</script>
 
 <script>
 /* =====================================================================
@@ -2748,7 +3590,7 @@ function formatDistance(d) {
   if (d < 1000) {
     return `${Math.round(d)} m`;
   }
-  const km = (d / 1000).toFixed(1).replace(".", ",");
+  const km = (d / 1000).toFixed(1).replace(".", appLang === "en" ? "." : ",");
   return `${km} km`;
 }
 
@@ -3057,9 +3899,17 @@ function renderBand(){
 }
 
 /* Animația de așezare (snap): tranziție CSS scurtă, pornită doar la eliberare. */
+function setBandStretch(value, dragging) {
+  const rail = $("#snapRail");
+  if (!rail) return;
+  rail.classList.toggle("band-dragging", !!dragging);
+  rail.style.setProperty("--band-stretch", Number(value).toFixed(3));
+}
+
 function bandAnimate(){
   const rail = $("#snapRail");
   if (!rail) return;
+  setBandStretch(1, false);
   rail.classList.add("band-anim");
   if (bandAnimTimer) clearTimeout(bandAnimTimer);
   bandAnimTimer = setTimeout(() => {
@@ -3390,6 +4240,7 @@ function initRouteDots(){
     bandDrag.vel = (next - bandOffset) / dt;   // px/ms
     bandDrag.lastT = e.timeStamp;
     bandOffset = next;
+    setBandStretch(1.02 + Math.min(0.025, Math.abs(bandDrag.vel) * 0.25), true);
     renderBand();
     liveSelectNearestStop();
     if (bandDrag.moved && e.cancelable) e.preventDefault();
@@ -3400,6 +4251,7 @@ function initRouteDots(){
     const moved = bandDrag.moved;
     const vel = bandDrag.vel || 0;
     bandDrag = null;
+    setBandStretch(1, false);
     detach();
     // Inerție scurtă, apoi așezare pe cea mai apropiată oprire.
     const projected = bandOffset + vel * 130;
@@ -3422,6 +4274,7 @@ function initRouteDots(){
   rail.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     bandDrag = { x0: e.clientX, offset0: bandOffset, moved: false, vel: 0, lastT: e.timeStamp };
+    setBandStretch(1.02, true);
     rail.classList.remove("band-anim");
     if (bandAnimTimer){ clearTimeout(bandAnimTimer); bandAnimTimer = null; }
     window.addEventListener("pointermove", onMove, { passive: false });
@@ -3434,11 +4287,13 @@ function initRouteDots(){
     e.preventDefault();
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     bandOffset += d * 0.5;
+    setBandStretch(1.02 + Math.min(0.025, Math.abs(d) * 0.002), true);
     renderBand();
     liveSelectNearestStop();
     if (bandWheelTimer) clearTimeout(bandWheelTimer);
     bandWheelTimer = setTimeout(() => {
       bandWheelTimer = null;
+      setBandStretch(1, false);
       const idx = nearestStep();
       const el = stopEl(idx);
       if (isStoryMode() && el && el.classList.contains("locked")) setWheelActiveIndex(bandActiveStep(), true);
@@ -3557,7 +4412,6 @@ let lastLabelName = null, lastLabelMeta = null;
    senzorii; când vin, setCaption le înlocuiește cu direcția și distanța. */
 function setCaptionFallback(r) {
   if (!r) return;
-  $("#targetName").textContent = "AradLens";
   $("#alName").textContent = r.apiName || r.nume;
   $("#alMeta").textContent = metaFor(r);
   $("#alMeta").style.display = "";
@@ -3684,12 +4538,12 @@ function updateShutterState(d){
   const btn = $("#photoCaptureBtn");
   if (!btn) return;
   if (d == null || isNaN(d)) {
-    btn.disabled = true;
-    btn.classList.remove("capture-ready");
-    readyNow = false; refreshArrived();
+    btn.disabled = !isDesktop;
+    btn.classList.toggle("capture-ready", isDesktop);
+    readyNow = isDesktop; refreshArrived();
     return;
   }
-  if (d <= PROXIMITY_RADIUS_METERS) {
+  if (d <= PROXIMITY_RADIUS_METERS || isDesktop) {
     btn.disabled = false;
     btn.classList.add("capture-ready");
     readyNow = true; refreshArrived();
@@ -4004,6 +4858,19 @@ try {
   userCapturedPhotos = {};
 }
 
+/* Pozele sunt date URL, deci prea mari pentru cookie-uri (limita ~4 KB).
+   Le păstrăm în localStorage, strict pe acest dispozitiv, și oferim
+   ștergerea lor din fila legală Cookies → Setări date. */
+function persistUserPhotos() {
+  try {
+    localStorage.setItem(USER_PHOTOS_STORAGE_KEY, JSON.stringify(userCapturedPhotos));
+    return true;
+  } catch (err) {
+    console.warn("Storage quota depășită sau mod privat:", err);
+    return false;
+  }
+}
+
 let activeCaptureLandmark = null;
 let lastCapturedLandmarkName = null;
 
@@ -4055,24 +4922,27 @@ function executePhotoCapture() {
     return;
   }
 
-  // 2. Verificare proximitate (raza de 200 m)
+  // 2. Verificare proximitate (raza de 200 m). Pe desktop (mod machetă)
+  //    nu există GPS util, așa că permitem testarea capturii locale.
   if (userLat == null || userLon == null) {
-    showCaptureFeedback(
-      "pin",
-      "Locația nu merge",
-      "Pornește GPS-ul."
-    );
-    return;
-  }
-
-  const d = distance(userLat, userLon, currentLandmark.lat, currentLandmark.lon);
-  if (d > PROXIMITY_RADIUS_METERS) {
-    showCaptureFeedback(
-      "pin",
-      "Prea departe",
-      "Apropie-te la 200 m. Ești la " + formatDistance(d) + "."
-    );
-    return;
+    if (!isDesktop) {
+      showCaptureFeedback(
+        "pin",
+        "Locația nu merge",
+        "Pornește GPS-ul."
+      );
+      return;
+    }
+  } else {
+    const d = distance(userLat, userLon, currentLandmark.lat, currentLandmark.lon);
+    if (d > PROXIMITY_RADIUS_METERS && !isDesktop) {
+      showCaptureFeedback(
+        "pin",
+        "Prea departe",
+        "Apropie-te la 200 m. Ești la " + formatDistance(d) + "."
+      );
+      return;
+    }
   }
 
   // 3. Declanșare captură foto: camera devine clară, flash vizual
@@ -4083,17 +4953,27 @@ function executePhotoCapture() {
     setTimeout(() => flash.classList.remove("flash-active"), 220);
   }
 
-  // Captură cadru video pe canvas ascuns
+  // Captură cadru video pe canvas ascuns (max. 1280 px, ca să încapă mai
+  // multe poze în stocarea locală a dispozitivului).
   let photoDataUrl = "";
   try {
+    const maxSide = 1280;
+    const vw = cam.videoWidth || 1280;
+    const vh = cam.videoHeight || 720;
+    const scale = Math.min(1, maxSide / Math.max(vw, vh));
     const canvas = document.createElement("canvas");
-    canvas.width = cam.videoWidth || 1280;
-    canvas.height = cam.videoHeight || 720;
+    canvas.width = Math.max(1, Math.round(vw * scale));
+    canvas.height = Math.max(1, Math.round(vh * scale));
     const ctx = canvas.getContext("2d");
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
-    photoDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    photoDataUrl = canvas.toDataURL("image/jpeg", 0.82);
   } catch (err) {
     console.error("Eroare la captură video:", err);
+  }
+
+  if (!photoDataUrl) {
+    showCaptureFeedback("warn", "Captura a eșuat", "Camera nu a returnat un cadru. Încearcă din nou.");
+    return;
   }
 
   // Asociere strictă cu reperul selectat în acel moment
@@ -4103,20 +4983,9 @@ function executePhotoCapture() {
   };
 
   let storageFull = false;
-  try {
-    localStorage.setItem(USER_PHOTOS_STORAGE_KEY, JSON.stringify(userCapturedPhotos));
-  } catch (err) {
-    console.warn("Storage quota depășită sau mod privat:", err);
+  if (!persistUserPhotos()) {
     storageFull = true;
-    try {
-      const all = JSON.parse(localStorage.getItem(USER_PHOTOS_STORAGE_KEY) || "{}");
-      userCapturedPhotos = all;
-      userCapturedPhotos[currentLandmark.nume] = {
-        dataUrl: photoDataUrl,
-        timestamp: new Date().toISOString(),
-        sessionOnly: true
-      };
-    } catch (e2) {}
+    userCapturedPhotos[currentLandmark.nume].sessionOnly = true;
   }
 
   // Bifare și avansare în Modul Poveste vs Modul Liber
@@ -4264,9 +5133,9 @@ function openRewardModal(chapter) {
   $("#diplomaText").textContent = rew.diplomaDesc;
 
   const prog = chapterProgress(chapter.id);
-  const dateFormatted = prog && prog.completedDate ? new Date(prog.completedDate).toLocaleDateString("ro-RO", {
+  const dateFormatted = prog && prog.completedDate ? new Date(prog.completedDate).toLocaleDateString(trLocale(), {
     day: "numeric", month: "long", year: "numeric"
-  }) : new Date().toLocaleDateString("ro-RO");
+  }) : new Date().toLocaleDateString(trLocale());
   $("#diplomaMeta").textContent = `Terminat: ${dateFormatted}`;
 
   const stepsEl = $("#diplomaSteps");
@@ -4297,7 +5166,7 @@ function renderAlbumRewards() {
     const card = document.createElement("div");
     card.className = `reward-badge-card ${isUnlocked ? 'unlocked' : 'locked'}`;
     const dateStr = isUnlocked && prog.completedDate
-      ? `Deblocat: ${new Date(prog.completedDate).toLocaleDateString("ro-RO")}`
+      ? `Deblocat: ${new Date(prog.completedDate).toLocaleDateString(trLocale())}`
       : "Blocat";
     card.innerHTML = `
       <div class="rbc-info">
@@ -4350,11 +5219,13 @@ const viewInAlbumBtn = $("#viewInAlbumBtn");
 if (viewInAlbumBtn) {
   viewInAlbumBtn.onclick = () => {
     hideCaptureModal();
+    let idx = -1;
     if (lastCapturedLandmarkName) {
-      const idx = REPERE.findIndex(r => r.nume === lastCapturedLandmarkName);
+      idx = REPERE.findIndex(r => r.nume === lastCapturedLandmarkName);
       if (idx >= 0) selectedAlbumIndex = idx;
     }
     openAlbum();
+    if (idx >= 0) selectAlbumLandmark(idx);
   };
 }
 
@@ -4509,6 +5380,10 @@ function renderAlbumModuleBar() {
     b.onclick = () => { albumModuleId = c.id; renderAlbumModuleBar(); renderLevelMap(); };
     bar.appendChild(b);
   });
+  const activeChip = bar.querySelector(".level-chip.active");
+  if (activeChip && bar.scrollWidth > bar.clientWidth) {
+    bar.scrollLeft = Math.max(0, activeChip.offsetLeft - 12);
+  }
 }
 
 const LEVEL_LOCK_SVG = '<span class="level-lock"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>';
@@ -4608,17 +5483,18 @@ function renderAlbumCompare() {
 
   const nowBox = $("#albumNowBox");
   const userPhoto = userCapturedPhotos[landmark.nume];
+  const apiImg = (landmark.imagini || [])[0];
   if (userPhoto && userPhoto.dataUrl) {
-    const dateFormatted = userPhoto.timestamp ? new Date(userPhoto.timestamp).toLocaleString("ro-RO", {
+    const dateFormatted = userPhoto.timestamp ? new Date(userPhoto.timestamp).toLocaleString(trLocale(), {
       day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
     }) : "";
     nowBox.innerHTML = `
       <img src="${userPhoto.dataUrl}" alt="Poza ta" class="cmp-card-img" style="border: 1.5px solid var(--accent-green);">
       <div style="font-size:12px;font-weight:700;color:var(--accent-green);margin-top:4px;">Poza ta</div>
       <div class="cmp-card-credit">${dateFormatted ? dateFormatted : ""}${userPhoto.sessionOnly ? ", doar acum" : ""}</div>
+      ${apiImg ? `<div class="cmp-inline-archive"><img src="${LocationsApi.imageUrl(apiImg)}" alt="${esc(name)} din arhiva site-ului"><span>Din arhiva AradLens</span></div>` : ""}
     `;
   } else {
-    const apiImg = (landmark.imagini || [])[0];
     if (apiImg) {
       nowBox.innerHTML = `
         <img src="${LocationsApi.imageUrl(apiImg)}" alt="${name}" class="cmp-card-img">
@@ -4630,6 +5506,21 @@ function renderAlbumCompare() {
         <div class="cmp-placeholder-text">Nicio poză încă</div>
         <div class="cmp-placeholder-sub">Apropie-te la 200 m și fă o poză.</div>
       `;
+    }
+  }
+
+  const archiveStrip = $("#albumArchiveStrip");
+  const archiveRow = $("#albumArchiveStripRow");
+  const archiveImgs = Array.isArray(landmark.imagini) ? landmark.imagini : [];
+  if (archiveStrip && archiveRow) {
+    if (archiveImgs.length > 1) {
+      archiveRow.innerHTML = archiveImgs.map((img, i) =>
+        `<img src="${LocationsApi.imageUrl(img)}" alt="${esc(name)} din arhiva site-ului, imaginea ${i + 1}" width="96" height="72" decoding="async">`
+      ).join("");
+      archiveStrip.hidden = false;
+    } else {
+      archiveRow.innerHTML = "";
+      archiveStrip.hidden = true;
     }
   }
 }
@@ -5089,7 +5980,7 @@ function setTourErrorState(msg, retryFn) {
 function formatTourDate(v) {
   const d = new Date(v);
   if (!v || isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("ro-RO", { year: "numeric", month: "long", day: "numeric" });
+  return d.toLocaleDateString(trLocale(), { year: "numeric", month: "long", day: "numeric" });
 }
 
 function tourCard(tour) {
@@ -5319,6 +6210,7 @@ function showLegalSection(id) {
 function openLegal(id = "terms") {
   legalReturnFocus = document.activeElement;
   showLegalSection(id);
+  updateDataSettingsSummary();
   const modal = $("#legalModal");
   if (modal) {
     modal.style.display = "flex";
@@ -5341,6 +6233,15 @@ const legalOpenAlbumBtn = $("#legalOpenAlbumBtn");
 if (legalOpenAlbumBtn) legalOpenAlbumBtn.onclick = () => openLegal("terms");
 const legalCloseBtn = $("#legalCloseBtn");
 if (legalCloseBtn) legalCloseBtn.onclick = closeLegal;
+const legalSettingsBtn = $("#legalSettingsBtn");
+if (legalSettingsBtn) {
+  legalSettingsBtn.onclick = () => {
+    showLegalSection("cookies");
+    updateDataSettingsSummary();
+    const block = document.getElementById("dataSettings");
+    if (block) setTimeout(() => block.scrollIntoView({ block: "center", behavior: "smooth" }), 60);
+  };
+}
 document.querySelectorAll("[data-legal]").forEach(btn => {
   btn.onclick = () => showLegalSection(btn.dataset.legal);
 });
@@ -5375,6 +6276,114 @@ if (legalModal) {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
 }
+
+/* ---------- Setări date (fila legală Cookies) ---------- */
+function storyProgressExists() {
+  try {
+    const raw = localStorage.getItem(STORY_STORAGE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (!s) return false;
+    if (Array.isArray(s.rewards) && s.rewards.length) return true;
+    return Object.keys(s.chapters || {}).some(id => {
+      const c = s.chapters[id];
+      if (!c) return false;
+      return Boolean(c.completed) || Number(c.currentStep) > 0 ||
+        Object.keys(c.photos || {}).length > 0;
+    });
+  } catch (e) {
+    return false;
+  }
+}
+
+function localPhotoCount() {
+  return Object.keys(userCapturedPhotos).filter(name => {
+    const p = userCapturedPhotos[name];
+    return p && p.dataUrl;
+  }).length;
+}
+
+function updateDataSettingsSummary() {
+  const summary = $("#dataSettingsSummary");
+  if (!summary) return;
+  const photos = localPhotoCount();
+  const story = storyProgressExists();
+  const photoText = photos === 0
+    ? "Nicio poză salvată"
+    : `${photos} ${photos === 1 ? "poză salvată" : "poze salvate"}`;
+  const storyText = story ? "progres de poveste salvat" : "fără progres de poveste";
+  summary.textContent = `${photoText} · ${storyText}. Totul rămâne pe acest dispozitiv.`;
+  const btn = $("#clearDataBtn");
+  if (btn) btn.disabled = photos === 0 && !story;
+}
+
+function clearSiteCookies() {
+  document.cookie.split(";").forEach((entry) => {
+    const name = entry.split("=")[0].trim();
+    if (!name) return;
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+  });
+}
+
+function clearAllLocalData() {
+  try {
+    Object.keys(localStorage).forEach(key => {
+      if (key === USER_PHOTOS_STORAGE_KEY || key === STORY_STORAGE_KEY || key.indexOf("aradlens_") === 0) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (e) {}
+  clearSiteCookies();
+  userCapturedPhotos = {};
+  storyState = {
+    currentMode: "free",
+    activeChapterId: "cap1",
+    chapters: {
+      cap1: { currentStep: 0, completed: false, completedDate: null, photos: {} },
+      cap2: { currentStep: 0, completed: false, completedDate: null, photos: {} },
+      cap3: { currentStep: 0, completed: false, completedDate: null, photos: {} }
+    },
+    rewards: []
+  };
+  const status = $("#clearDataStatus");
+  if (status) status.textContent = "Datele au fost șterse. Reîncarc pagina…";
+  const confirmBox = $("#clearDataConfirm");
+  if (confirmBox) confirmBox.hidden = true;
+  const btn = $("#clearDataBtn");
+  if (btn) btn.disabled = true;
+  const confirmBtn = $("#clearDataConfirmBtn");
+  if (confirmBtn) confirmBtn.disabled = true;
+  updateDataSettingsSummary();
+  setTimeout(() => window.location.reload(), 900);
+}
+
+const clearDataBtn = $("#clearDataBtn");
+if (clearDataBtn) {
+  clearDataBtn.onclick = () => {
+    const box = $("#clearDataConfirm");
+    if (box) {
+      box.hidden = false;
+      requestAnimationFrame(() => box.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+    }
+    const status = $("#clearDataStatus");
+    if (status) status.textContent = "";
+    const confirmBtn = $("#clearDataConfirmBtn");
+    if (confirmBtn) confirmBtn.focus();
+  };
+}
+const clearDataCancelBtn = $("#clearDataCancelBtn");
+if (clearDataCancelBtn) {
+  clearDataCancelBtn.onclick = () => {
+    const box = $("#clearDataConfirm");
+    if (box) box.hidden = true;
+    const btn = $("#clearDataBtn");
+    if (btn) btn.focus();
+  };
+}
+const clearDataConfirmBtn = $("#clearDataConfirmBtn");
+if (clearDataConfirmBtn) clearDataConfirmBtn.onclick = clearAllLocalData;
+updateDataSettingsSummary();
 
 $("#startBtn").onclick = async () => {
   $("#start").style.display = "none";
@@ -5587,7 +6596,7 @@ $("#startBtn").onclick = async () => {
 
   function targets() {
     return document.querySelectorAll(
-      "#rail .ring, #caption, .start-foot, .modal-card, #albumModal, #card, .cm-card, .api-gate-card, .album-detail"
+      "#rail .ring, .start-foot, .modal-card, #albumModal, #card, .cm-card, .api-gate-card, .album-detail"
     );
   }
   function attachAll() {
@@ -5608,6 +6617,361 @@ $("#startBtn").onclick = async () => {
     }, 180);
   }, { passive: true });
 })();
+
+/* =====================================================================
+   LANGUAGE / LIMBĂ , RO ⇄ EN
+   ---------------------------------------------------------------------
+   The HTML stays Romanian (the source language). When English is chosen,
+   this layer translates text nodes and user-facing attributes at runtime,
+   and a MutationObserver keeps dynamic views (album, archive, toasts)
+   translated. Switching back restores the original Romanian strings.
+   Editorial content coming from the API is translated through the
+   embedded map; unknown future strings simply remain in Romanian.
+   ===================================================================== */
+var appLang = "ro";
+try {
+  const savedLang = localStorage.getItem("aradlens_lang");
+  if (savedLang === "en" || savedLang === "ro") appLang = savedLang;
+} catch (e) {}
+
+const I18N_EN = (() => {
+  try {
+    const el = document.getElementById("i18n-en");
+    return el ? JSON.parse(el.textContent) : {};
+  } catch (e) {
+    console.warn("[AradLens i18n] dicționar indisponibil:", e);
+    return {};
+  }
+})();
+
+function trLocale() {
+  return appLang === "en" ? "en-GB" : "ro-RO";
+}
+
+/* Names and labels that can appear inside a larger string, such as an
+   aria-label or an alt text built from a landmark name. Sorted longest
+   first so "Biserica Sârbească …" wins over shorter fragments. */
+const I18N_PROPER = Object.keys(I18N_EN)
+  .filter((key) => key.length > 2 && key.length <= 90 &&
+    /^[A-ZĂÂÎȘȚ]/.test(key) && !/[.!?;]$/.test(key) && I18N_EN[key] !== key)
+  .sort((a, b) => b.length - a.length);
+
+function applyProperNames(text) {
+  let out = text;
+  for (let i = 0; i < I18N_PROPER.length; i++) {
+    const key = I18N_PROPER[i];
+    if (out.indexOf(key) === -1) continue;
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp("(^|[^\\p{L}])(" + escaped + ")(?![\\p{L}])", "gu");
+    out = out.replace(re, (m, pre) => pre + I18N_EN[key]);
+  }
+  const MONTHS_EN = {
+    ianuarie: "January", februarie: "February", martie: "March",
+    aprilie: "April", mai: "May", iunie: "June", iulie: "July",
+    august: "August", septembrie: "September", octombrie: "October",
+    noiembrie: "November", decembrie: "December"
+  };
+  out = out.replace(/\b(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\b/gi,
+    (m) => MONTHS_EN[m.toLowerCase()]);
+  return out;
+}
+
+const DIRECTION_EN = {
+  N: "north", NE: "northeast", E: "east", SE: "southeast",
+  S: "south", SV: "southwest", V: "west", NV: "northwest"
+};
+
+const I18N_RULES = [
+  [/^(\d+) (poză salvată|poze salvate) · (progres de poveste salvat|fără progres de poveste)\. Totul rămâne pe acest dispozitiv\.$/,
+    (m, n, pics, story) => `${n} ${n === "1" ? "photo" : "photos"} saved · ${story.indexOf("fără") === 0 ? "no story progress" : "story progress saved"}. Everything stays on this device.`],
+  [/^Nicio poză salvată · (progres de poveste salvat|fără progres de poveste)\. Totul rămâne pe acest dispozitiv\.$/,
+    (m, story) => `No photo saved · ${story.indexOf("fără") === 0 ? "no story progress" : "story progress saved"}. Everything stays on this device.`],
+  [/^(\d+) (fotografii|fotografie) · pozele tale și arhiva site-ului\.$/,
+    (m, n) => `${n} ${n === "1" ? "photo" : "photos"} · your photos and the site archive.`],
+  [/^Tur: (\d+)\s*\/\s*(\d+)$/, (m, a, b) => `Tour: ${a}/${b}`],
+  [/^Tur: (.+) \((\d+)\)$/, (m, name, n) => `Tour: ${name} (${n})`],
+  [/^Obiectivele turului \((\d+)\)$/, (m, n) => `Tour stops (${n})`],
+  [/^Urmează: (.+)$/, (m, x) => `Next: ${x}`],
+  [/^Tur încheiat: (.+)$/, (m, x) => `Tour complete: ${x}`],
+  [/^Mod de joc: turul (.+), pasul (\d+)$/, (m, t, n) => `Game mode: tour ${t}, step ${n}`],
+  [/^Mod de joc: mod liber$/, () => `Game mode: free mode`],
+  [/^Fotografiază mai întâi (.+)\.$/, (m, x) => `Photograph ${x} first.`],
+  [/^Ești aproape de (.+)!$/, (m, x) => `You're near ${x}!`],
+  [/^Te afli la aproximativ (.+) m\. Te invităm să fotografiezi obiectivul\.$/,
+    (m, d) => `You are about ${d} m away. We invite you to photograph the landmark.`],
+  [/^Apropie-te la 200 m\. Ești la (.+)\.$/, (m, d) => `Get within 200 m. You are ${d} away.`],
+  [/^stradă: (.+), precizie GPS: (.+)m$/, (m, s, a) => `street: ${s}, GPS accuracy: ${a} m`],
+  [/^Camera nu a putut fi pornită: (.+)$/, (m, e) => `The camera could not start: ${e}`],
+  [/^Locație: (.+) \(activează GPS și ieși afară\)$/, (m, e) => `Location: ${e} (enable GPS and go outside)`],
+  [/^Busol[ăa]: (.+)$/, (m, e) => `Compass: ${e}`],
+  [/^Terminat: (.+)$/, (m, d) => `Completed: ${d}`],
+  [/^Deblocat: (.+)$/, (m, d) => `Unlocked: ${d}`],
+  [/^Mergi spre (.+)$/, (m, d) => `Head ${DIRECTION_EN[d] || d}`],
+  [/^Arhiva centrală: (\d+) (?:categorii|o categorie)$/, (m, n) => `Central archive: ${n} categories`],
+  [/^Arhiva centrală: (\d+) (?:tururi|un tur)$/, (m, n) => `Central archive: ${n} tours`],
+  [/^Arhiva AradLens · (.+) · (\d+) fotografii$/, (m, street, n) => `AradLens archive · ${street} · ${n} photos`],
+  [/^Atunci · (.+) · (\d+) fotografii$/, (m, info, n) => `Then · ${info} · ${n} photos`],
+  [/^Arhiva AradLens · (.+)$/, (m, x) => `AradLens archive · ${x}`],
+  [/^Atunci · (.+)$/, (m, x) => `Then · ${x}`],
+  [/^Pasul (\d+) \/ (\d+)$/, (m, a, b) => `Step ${a} / ${b}`],
+  [/^Oprirea (\d+) din (\d+): (.+)$/, (m, a, b, name) => `Stop ${a} of ${b}: ${name}`],
+  [/^Poza ta: (.+)$/, (m, name) => `Your photo: ${name}`],
+  [/^Arhiva AradLens: (.+)$/, (m, name) => `AradLens archive: ${name}`],
+  [/^Atunci: (.+)$/, (m, name) => `Then: ${name}`],
+  [/^Foto: (.+)$/, (m, name) => `Photo: ${name}`],
+  [/^(\d+) locații, (.+)$/, (m, n, rest) => `${n} locations, ${rest}`],
+  [/^(\d+) locație, (.+)$/, (m, n, rest) => `${n} location, ${rest}`],
+  [/^Din (.+)$/, (m, d) => `Since ${d}`],
+  [/^Poza (.+)$/, (m, x) => `Photo of ${x}`],
+  [/^(.+), (.+), deschide Atunci \/ Acum$/, (m, n, s) => `${n}, ${s}, open Then / Now`],
+  [/^(\d+) \/ (\d+) opriri$/, (m, a, b) => `${a} / ${b} stops`],
+  [/^(\d+) \/ (\d+) locuri$/, (m, a, b) => `${a} / ${b} places`],
+  [/^(\d+) poze pe acest dispozitiv$/, (m, n) => `${n} photos on this device`],
+  [/^(\d+) poză pe acest dispozitiv$/, (m, n) => `${n} photo on this device`],
+  [/^(\d+) fotografii$/, (m, n) => `${n} photos`],
+  [/^(\d+) fotografie$/, (m, n) => `${n} photo`],
+  [/^(\d+) poze$/, (m, n) => `${n} photos`],
+  [/^(\d+) poză$/, (m, n) => `${n} photo`],
+  [/^(\d+) locuri$/, (m, n) => `${n} places`],
+  [/^(\d+) loc$/, (m, n) => `${n} place`],
+  [/^(\d+) locații$/, (m, n) => `${n} locations`],
+  [/^(\d+) locație$/, (m, n) => `${n} location`],
+  [/^(\d+) tururi$/, (m, n) => `${n} tours`],
+  [/^(\d+) tur$/, (m, n) => `${n} tour`],
+  [/^(\d+) categorii$/, (m, n) => `${n} categories`],
+  [/^(\d+) categorie$/, (m, n) => `${n} category`],
+  [/^(\d+) opriri$/, (m, n) => `${n} stops`],
+  [/^(\d+) oprire$/, (m, n) => `${n} stop`],
+  [/^Oprirea (\d+)$/, (m, n) => `Stop ${n}`],
+  [/^Serverul a răspuns cu eroarea (\d+)\. Încearcă din nou\.$/, (m, n) => `The server responded with error ${n}. Try again.`]
+];
+
+function trString(raw) {
+  const core = String(raw == null ? "" : raw).trim();
+  if (!core) return core;
+  if (Object.prototype.hasOwnProperty.call(I18N_EN, core)) return I18N_EN[core];
+  for (let i = 0; i < I18N_RULES.length; i++) {
+    const rule = I18N_RULES[i];
+    if (rule[0].test(core)) return applyProperNames(core.replace(rule[0], rule[1]));
+  }
+  return applyProperNames(core);
+}
+
+const I18N_ATTRS = ["title", "aria-label", "placeholder", "alt"];
+const i18nTextState = new WeakMap();
+const i18nAttrState = new WeakMap();
+let i18nObserver = null;
+let i18nRaf = 0;
+
+function trTextNode(node) {
+  const value = node.nodeValue;
+  if (!value || !value.trim()) return;
+  let state = i18nTextState.get(node);
+  if (!state) {
+    state = { orig: value, translated: value };
+    i18nTextState.set(node, state);
+  } else if (value !== state.translated) {
+    state.orig = value;
+  }
+  const orig = state.orig;
+  const lead = orig.match(/^\s*/)[0];
+  const trail = orig.match(/\s*$/)[0];
+  const out = trString(orig.trim());
+  state.translated = lead + out + trail;
+  if (node.nodeValue !== state.translated) node.nodeValue = state.translated;
+}
+
+function trAttr(el, attr) {
+  if (!el || !attr) return;
+  const value = el.getAttribute(attr);
+  if (value == null || !value.trim()) return;
+  let state = i18nAttrState.get(el);
+  if (!state) {
+    state = {};
+    i18nAttrState.set(el, state);
+  }
+  let rec = state[attr];
+  if (!rec) {
+    rec = { orig: value, translated: value };
+    state[attr] = rec;
+  } else if (value !== rec.translated) {
+    rec.orig = value;
+  }
+  const orig = rec.orig;
+  const lead = orig.match(/^\s*/)[0];
+  const trail = orig.match(/\s*$/)[0];
+  const out = trString(orig.trim());
+  rec.translated = lead + out + trail;
+  if (value !== rec.translated) el.setAttribute(attr, rec.translated);
+}
+
+function translateTree(root) {
+  if (!root) return;
+  if (root.nodeType === Node.TEXT_NODE) {
+    trTextNode(root);
+    return;
+  }
+  if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      const tag = parent.tagName;
+      if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  let node;
+  while ((node = walker.nextNode())) trTextNode(node);
+  const elements = root.querySelectorAll ? root.querySelectorAll("*") : [];
+  const all = root.nodeType === Node.ELEMENT_NODE ? [root].concat(Array.from(elements)) : Array.from(elements);
+  all.forEach((el) => {
+    if (el.tagName === "SCRIPT" || el.tagName === "STYLE") return;
+    I18N_ATTRS.forEach((attr) => trAttr(el, attr));
+  });
+}
+
+function restoreRomanian() {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  let node;
+  while ((node = walker.nextNode())) {
+    const state = i18nTextState.get(node);
+    if (state && node.nodeValue !== state.orig) node.nodeValue = state.orig;
+  }
+  document.body.querySelectorAll("*").forEach((el) => {
+    const state = i18nAttrState.get(el);
+    if (!state) return;
+    Object.keys(state).forEach((attr) => {
+      const rec = state[attr];
+      if (rec && el.getAttribute(attr) !== rec.orig) el.setAttribute(attr, rec.orig);
+    });
+  });
+}
+
+const I18N_OBSERVER_OPTS = {
+  childList: true,
+  subtree: true,
+  characterData: true,
+  attributes: true,
+  attributeFilter: I18N_ATTRS
+};
+
+function startI18nObserver() {
+  if (i18nObserver || typeof MutationObserver === "undefined") return;
+  i18nObserver = new MutationObserver((mutations) => {
+    if (appLang !== "en" || !i18nObserver) return;
+    i18nObserver.disconnect();
+    mutations.forEach((mutation) => {
+      if (mutation.type === "characterData") {
+        trTextNode(mutation.target);
+      } else if (mutation.type === "attributes") {
+        trAttr(mutation.target, mutation.attributeName);
+      } else {
+        mutation.addedNodes.forEach((added) => {
+          if (added.nodeType === Node.TEXT_NODE) trTextNode(added);
+          else if (added.nodeType === Node.ELEMENT_NODE) translateTree(added);
+        });
+      }
+    });
+    if (appLang === "en" && i18nObserver) i18nObserver.observe(document.body, I18N_OBSERVER_OPTS);
+  });
+  i18nObserver.observe(document.body, I18N_OBSERVER_OPTS);
+}
+
+function stopI18nObserver() {
+  if (i18nObserver) {
+    i18nObserver.disconnect();
+    i18nObserver = null;
+  }
+  cancelAnimationFrame(i18nRaf);
+}
+
+const META_RO = (document.querySelector('meta[name="description"]') || {}).content || "";
+const META_EN = "AradLens. A walk through Arad: see today's places and how they looked before.";
+
+function updateLangButton() {
+  const toEnglish = appLang !== "en";
+  ["#langBtn", "#langBtnStart"].forEach((selector) => {
+    const btn = $(selector);
+    if (!btn) return;
+    btn.textContent = toEnglish ? "EN" : "RO";
+    btn.setAttribute("aria-label", toEnglish ? "Schimbă limba în engleză" : "Switch to Romanian");
+    btn.title = toEnglish ? "Schimbă limba în engleză" : "Switch to Romanian";
+  });
+}
+
+function updateMetaLanguage() {
+  const meta = document.querySelector('meta[name="description"]');
+  if (meta) meta.content = appLang === "en" ? META_EN : META_RO;
+}
+
+function setLanguage(next) {
+  appLang = next === "en" ? "en" : "ro";
+  try { localStorage.setItem("aradlens_lang", appLang); } catch (e) {}
+  document.documentElement.lang = appLang;
+  stopI18nObserver();
+  if (appLang === "en") {
+    translateTree(document.body);
+    startI18nObserver();
+  } else {
+    restoreRomanian();
+  }
+  updateLangButton();
+  updateMetaLanguage();
+  updateThemeSwitch();
+}
+
+const langBtn = $("#langBtn");
+const langBtnStart = $("#langBtnStart");
+[langBtn, langBtnStart].forEach((btn) => {
+  if (btn) btn.onclick = () => setLanguage(appLang === "en" ? "ro" : "en");
+});
+
+document.documentElement.lang = appLang;
+updateLangButton();
+updateMetaLanguage();
+if (appLang === "en") {
+  translateTree(document.body);
+  startI18nObserver();
+}
+
+
+
+/* =====================================================================
+   THEME / TEMĂ , light paper glass ⇄ dark tinted glass
+   ===================================================================== */
+const THEME_STORAGE_KEY = "aradlens_theme";
+
+function isDarkTheme() {
+  return document.documentElement.classList.contains("dark-theme");
+}
+
+function updateThemeSwitch() {
+  const btn = $("#themeSwitch");
+  if (!btn) return;
+  const dark = isDarkTheme();
+  const en = appLang === "en";
+  const label = en
+    ? (dark ? "Switch to light theme" : "Switch to dark theme")
+    : (dark ? "Comută tema deschisă" : "Comută tema întunecată");
+  btn.setAttribute("aria-checked", String(dark));
+  btn.setAttribute("aria-label", label);
+  btn.title = label;
+}
+
+function setTheme(dark, persist = true) {
+  document.documentElement.classList.toggle("dark-theme", !!dark);
+  if (persist) {
+    try { localStorage.setItem(THEME_STORAGE_KEY, dark ? "dark" : "light"); } catch (e) {}
+  }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = dark ? "#15171c" : "#fbfaf7";
+  updateThemeSwitch();
+}
+
+const themeSwitch = $("#themeSwitch");
+if (themeSwitch) themeSwitch.onclick = () => setTheme(!isDarkTheme());
+setTheme(isDarkTheme(), false);
 
 </script>
 </body>

@@ -1,6 +1,7 @@
 # AradLens_frontend — codebase explanation
 
-Tourism AR web app for Arad (Romanian-language UI). Points the phone camera at
+Tourism AR web app for Arad (Romanian UI with a runtime English translation
+layer). Points the phone camera at
 the city, shows distance + direction to a selected landmark, lets the user view
 historic info, compare 1901 vs now, and "capture" a photo when close.
 
@@ -32,9 +33,9 @@ and two `Mobile*isDesktop*` files (accidental `man less` dumps, 1.6 KB / 16 KB).
 
 1. `<video id="cam">` — live camera background. Blurred/dim by default (`opacity .28, blur(6px)`), class `camera-clear` removes the filter in capture mode.
 2. `#overlay` — main AR HUD: `.top` (brand lockup `AradLens` with the `.brand-lens` disc, `#routeStep` + `#compassWarningBadge`, `#storyObjectiveBanner`/`#storyObjectiveText`, `#diag` debug readout), `.center` (`#steerArrow` chevron + `#steerEdge` degree readout when the target is behind), `#rail` vertical action stack of **glass rings** (46px, 9px gap; compacted to 44px/7px at 630–720px viewport heights): `#gamemodeRailBtn` + `#railModeDot`, `#detailsBtn`, `#photoCaptureBtn`, `#albumBtn`. There are **no** locations/categories/tours rings any more — tours are album modules and the location page opens on long-press of a compass stop. `.bottom`: `#caption`/`#arLabel` (target name, "Mergi spre …" phrase, distance), `#distNum` + `#routeStepBottom`, `#coords`/`#flipBtn` (debug only, now prints the street), `.hint` and `#snapRail` — the bottom **compass band** (curved, draggable stop selector; see §4).
-3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#gamemodeModal` (`#selectStoryModeCard` / `#selectFreeModeCard`), `#chapterModal` (`#chaptersList`), `#storyLoreModal` (`#loreStepBadge`, `#loreStoryText`), `#rewardModal` (`#diplomaRewardName`, `#rewardNextChapterBtn`, `#rewardViewAlbumBtn`), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (**album + tours + level map**: sticky header, sticky `#albumModuleBar` chips `Liber / Cap. I–III / <tour names>`, stop nodes rendered into `#albumLevelTrack` by `renderLevelMap()`, first stop at the bottom, scroll upward) + `#albumCompareModal` (Then/Now cards `#albumThenBox`/`#albumNowBox`, opened by tapping a stop), `#arLabel` floating AR tag, `#locationsModal` (read-only, public: opens as an **objective page** from a long-press on a compass stop, or as the locations list; `#locDetail` is painted from cache instantly and refreshed silently via `GET /locations/{id}`), `#categoriesModal` (plain read-only list, no rail entry point), `#status` bar. `#toursModal` still exists in the DOM but is no longer reachable from the rail.
+3. Overlays (hidden by default): `#start` (permission gate + `#startBtn`), `#desktopPlaceholder` (+ `#desktopPreviewBtn` bypass), `#gamemodeModal` (`#selectStoryModeCard` / `#selectFreeModeCard`), `#chapterModal` (`#chaptersList`), `#storyLoreModal` (`#loreStepBadge`, `#loreStoryText`), `#rewardModal` (`#diplomaRewardName`, `#rewardNextChapterBtn`, `#rewardViewAlbumBtn`), `#compassWarning`, `#proximityToast` (`#toastCaptureBtn`), `#captureScreen` (`#shutterBtn`, `#cancelCaptureBtn`), `#captureFlash`, `#captureModal`, `#card` (info + `#speakBtn` TTS + `#photoBtn`), `#photoCmp` (1901/now slider: `canvas#cmpNow`, `img#cmpOld`, `input#cmpRange`), `#albumModal` (**album + tours + level map**: full-bleed static header, full-bleed non-sticky `.level-selector` Routes band with `#albumModuleBar` chips, stop nodes rendered into `#albumLevelTrack` by `renderLevelMap()`, first stop at the bottom, scroll upward; only `#albumMapTab` scrolls) + `#albumCompareModal` (Then/Now cards `#albumThenBox`/`#albumNowBox` + `#albumArchiveStrip`, opened by tapping a stop; the only photo surface), `#arLabel` floating AR tag, `#locationsModal` (read-only, public: opens as an **objective page** from a long-press on a compass stop, or as the locations list; `#locDetail` is painted from cache instantly and refreshed silently via `GET /locations/{id}`), `#categoriesModal` (plain read-only list, no rail entry point), `#legalModal` (tabs; the **Cookies** tab contains `#dataSettings` with the destructive `#clearDataBtn` flow), `#status` bar. `#toursModal` still exists in the DOM but is no longer reachable from the rail.
 
-Theming: CSS variables on `:root` (plus legacy `body.light-theme` overrides). The app is light-only — no theme switch and no theme persistence. On top of those base variables sits one **liquid-glass layer** (iOS 26): `--glass-blur/sat/tint/tint-thick/tint-thin/edge/hairline/inner-hi/inner-lo/shadow/sheen`, `--glass-solid`/`--glass-veil`/`--bar-solid` for the no-transparency fallback, the optic-lens colours (`--optic-warm/cool/violet`) and four spring curves (`--spring`, `-snappy`, `-bouncy`, `-soft`). Layout rules live at the end of `<style>` (~line 1252–1800) so they win the cascade over the original flat rules; `DESIGN.md` documents the material.
+Theming: CSS variables on `:root`, plus `html.dark-theme` overrides for a tinted dark liquid-glass palette. The sun/moon `#themeSwitch` sits at the top of `#rail`; the choice persists in `localStorage["aradlens_theme"]` and a tiny `<head>` script applies the class before paint. On top of the base variables sits one **liquid-glass layer** (iOS 26): `--glass-blur/sat/tint/tint-thick/tint-thin/edge/hairline/inner-hi/inner-lo/shadow/sheen`, `--glass-solid`/`--glass-veil`/`--bar-solid` for the no-transparency fallback, the optic-lens colours (`--optic-warm/cool/violet`) and four spring curves (`--spring`, `-snappy`, `-bouncy`, `-soft`). Layout rules live at the end of `<style>` (~line 1252–1800) so they win the cascade over the original flat rules; `DESIGN.md` documents the material. The top and bottom HUD scrims use short, soft fades so the camera view stays clear.
 
 ## 3. Data
 
@@ -68,8 +69,28 @@ meta, the `#coords` debug line, location cards and detail, tour stops and the
 album's compare header and level-map subtitles.
 
 Photos users take are stored in `localStorage["aradlens_user_photos"]` as
-`{ [nume]: { dataUrl, timestamp } }` (`USER_PHOTOS_STORAGE_KEY`). No backend —
-capture modal explicitly says permanent album save "will be available later".
+`{ [nume]: { dataUrl, timestamp, sessionOnly? } }` (`USER_PHOTOS_STORAGE_KEY`).
+The canvas is downscaled to max 1280 px / JPEG 0.82 so several photos fit in the
+~5 MB local quota. Data URLs cannot live in cookies (~4 KB limit), so
+`localStorage` is the on-device store; nothing is uploaded. On desktop preview
+(when GPS is absent) capture is allowed without the 200 m proximity gate.
+Photos are reached by tapping an album stop: the `Atunci/Acum` compare popup
+shows the user's photo, the historic photo, and every API image for that
+landmark; there is no separate gallery. The legal **Cookies → Setări date**
+block deletes all `aradlens_*` keys, the site cookies, and reloads.
+
+**Language (RO ⇄ EN):** the source stays Romanian. An embedded JSON map
+(`<script type="application/json" id="i18n-en">`) plus the final script block
+translate text nodes and `title`/`aria-label`/`placeholder`/`alt`, and a
+`MutationObserver` translates every dynamically rendered view. `I18N_RULES`
+covers interpolated strings (counts, distances, dates, tour labels) and
+`applyProperNames()` translates landmark/category/tour names inside larger
+strings, plus Romanian month names. `formatDistance()`, `formatPhotoDate()` and
+`formatTourDate()` use `trLocale()` / `appLang` for decimal separators and
+dates. `#langBtn` (HUD top-right) and `#langBtnStart` (start gate, next to
+Legal) toggle the language, persist it in `aradlens_lang`, and update
+`<html lang>` and the meta description. New UI strings need a map entry or a
+rule; unknown future API content falls back to Romanian.
 
 There is deliberately **no admin authentication on this site** — the AradLens
 API writes (categories/locations/tours/images) belong to the separate admin
@@ -113,8 +134,8 @@ Key functions by area:
 - Bottom compass band (`#snapRail`): `renderCompassBand` (scale ticks + one `compass-stop` button per stop — the 5 `REPERE` in free mode, the chapter's steps in story mode, with `.locked` / `.completed` states; dial SVG from `compassDialMarkup`), `bandStops` (stop list + state), `renderBand` (arc placement — `bandDrop`/`bandArcDeg` give the sag + rotation per element, opacity fades outward), pointer drag handlers + `wheel` (`bandOffset`, rubber band at the ends), `liveSelectNearestStop` / snap on release, `setWheelActiveIndex` (compat name; clamps to unlocked steps, sets `aria-current`, re-centres the tape), `updateBandData` (distances + needle angle `bearing − heading`, 0° = dead ahead), `selectTargetByIndex`. `renderRouteDots` / `updateWheelDistances` remain as compat wrappers.
 - Story / mode: `isStoryMode`, `getActiveChapter`, `getActiveChapterProgress`, `getCurrentStoryLandmark`, `selectGamemode`, `selectChapter`, `renderChaptersList`, `updateStoryUI`, `showStoryLockedToast`, `openStoryLoreModal`, `openRewardModal`, `renderAlbumRewards`, `saveStoryState`.
 - Info/audio: `openCard/closeCard`, `toggleSpeech/stopSpeech` (Web Speech API, `ro-RO`), `snapshotNow` (video → canvas), `setCmpPos/openPhoto/closePhoto`.
-- Capture: `enterCaptureMode/exitCaptureMode` (toggles `#captureScreen` + `camera-clear`), `executePhotoCapture` (flash + canvas → localStorage + modal), `showCaptureFeedback/hideCaptureModal`.
-- Album: `openAlbum/closeAlbum`, `selectAlbumLandmark` (exposed on `window` for SVG `onclick`), `renderAlbum` (pins + Then/Now boxes), `guideToSelectedLandmark` (selects target, closes album).
+- Capture: `enterCaptureMode/exitCaptureMode` (toggles `#captureScreen` + `camera-clear`), `executePhotoCapture` (flash + canvas snapshot downscaled to 1280 px → `persistUserPhotos()` → localStorage + modal), `showCaptureFeedback/hideCaptureModal`, `userPhotoEntries/formatPhotoDate` (gallery helpers).
+- Album: `openAlbum/closeAlbum`, `selectAlbumLandmark` (exposed on `window` for SVG `onclick`), `renderAlbum` (pins + Then/Now boxes), `renderAlbumModuleBar`/`renderLevelMap`, `guideToSelectedLandmark` (selects target, closes album). Photos live inside the compare popup (`#albumArchiveStrip`).
 - AradLens API (**public, read-only**, block at ~3880): `apiRequest(path, {timeoutMs})` — shared **GET-only** fetch through `API_PREFIX = "/api"`, JSON in/out (`"json"` content-type else "răspuns neașteptat"), AbortController timeout (default off, 8 s for health), error objects `{kind: network|timeout|offline|http|server, message}` with Romanian UI text that never leaks internals (401 keeps the API's own `detail` string; `console.warn` notes unexpected statuses for debugging); `esc()` escapes API strings before innerHTML. Only public GET endpoints: `ApiHealth.check` (`/health`), `CategoriesApi.list/get`, `LocationsApi.list/get` + `locationImageUrl` (`/locations/images/{id}` — displayed as plain `<img src>`; no lazy attribute: inside `display:flex` modals lazy-load stalls), `ToursApi.list/get` (Tours embed their `locations` array). **No auth, no tokens, no POST/PUT/PATCH/DELETE, no login forms — management lives in the separate admin site.**
 - API health gate: `#apiGate` (z 80 over the UI) + `runApiGate()`/`setApiGateState()` — runs at script load, loading spinner → on success hides gate → on failure shows the Romanian "Serverul AradLens nu este momentan disponibil…" message + `#apiGateRetry` ("Încearcă din nou") which re-runs the check manually; no automatic retry loop, no blank screen.
 - **Preload before the first tap:** the gate's success handler also runs `preloadAppData()` — `GET /locations`, `/tours`, `/categories` in parallel, `applyApiLocations()`, image warm-up, then it pre-renders the category list, the location list, the compass band, the album module bar and the level map. The gate text reads "Se pregătesc obiectivele, traseele și albumul…" while it runs, so opening a menu never waits on a spinner.
@@ -124,7 +145,7 @@ Key functions by area:
 
 - Edit `index.html` directly; verify by serving the directory and opening on a phone (or desktop preview bypass). There is no build step to keep in sync.
 - Liquid glass rules: exactly one `backdrop-filter` per stacking path (veils are scrims, sheets blur, sticky children get a solid fill); glass values come from the `--glass-*` tokens, never hardcoded in a new component; press/hover motion uses the `--spring*` curves. Both fallbacks (`prefers-reduced-transparency: reduce` — what Windows reports when transparency effects are off — and `@supports not (backdrop-filter)`) must keep the sheen/edge, otherwise the app looks like flat panels on those machines.
-- The album's header and module chips are sticky: `#albumModal` no longer scrolls, `#albumMapTab` does, and `scroll-padding-top` keeps a centred stop clear of the chip bar.
+- The album's Routes band is a full-bleed static row above the scroll area; only `#albumMapTab` scrolls. It is not sticky, so the map never scrolls behind it. The band's chips scroll horizontally in one row; `scroll-padding-top` is small now that no sticky chip bar overlays the map.
 - Keep the schematic-map disclaimer on the album ("Traseu schematic pe module, nu o proiecție GPS") — the level map reflects the module’s chronological order, not GPS positions.
 - `index.html` is UTF-8 (CRLF, no BOM); Romanian diacritics are intact. A tool that decodes it with a legacy codepage (PowerShell `Get-Content` without `-Encoding UTF8`, some editors) shows mojibake (`ș` → `ET`, `ț` → `E>`); that is a display artifact, not corruption — read/write UTF-8 and never "fix" strings from a garbled view.
 - Tuning the compass band: `BAND_SLOT` (108 px) sets stop spacing, `BAND_SAG` (26 px) the arc depth, `rotateX(13deg)` on `#snapRail` the tilt; `updateBandHalfWidth()` keeps fade/curve matched to the rail width, `renderCompassBand()` re-centres on `activeWheelIndex` after every story update.
