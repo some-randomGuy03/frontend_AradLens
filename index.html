@@ -818,52 +818,221 @@
   #albumCompareModal { overflow: hidden; }
   #albumCompareModal .album-detail {
     max-height: calc(100dvh - 24px);
-    overflow: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 14px;
-  }
-
-  .cmp-grid {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 4px;
     scrollbar-width: thin;
   }
-  .cmp-card {
-    flex: 1 0 46%;
-    min-width: 160px;
-    scroll-snap-align: start;
-    background: transparent; border-radius: 12px; border: 1px solid var(--border-color);
-    padding: 10px; display: flex; flex-direction: column; min-height: 0; color: var(--text-main);
+
+  /* Un singur cadran cu slider de comparare Atunci / Acum */
+  .album-cmp-stage {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    max-height: 42vh;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(20, 24, 29, 0.08);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    cursor: ew-resize;
   }
-  .cmp-card-title {
-    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--text-main); margin-bottom: 8px; padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums;
+  html.dark-theme .album-cmp-stage {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(246, 242, 233, 0.16);
+    box-shadow: 0 4px 22px rgba(0, 0, 0, 0.4);
   }
-  .cmp-card-title svg.ic { width: 14px; height: 14px; }
-  .cmp-card-content {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; border-radius: 8px; padding: 10px; background: rgba(246,242,233,.07);
-    border: 1px dashed var(--border-color);
+  .album-cmp-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
   }
-  .cmp-card-img {
-    width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;
+  .album-cmp-layer-then {
+    z-index: 2;
+    clip-path: inset(0 calc(100% - var(--cmp-pos, 50%)) 0 0);
+    -webkit-clip-path: inset(0 calc(100% - var(--cmp-pos, 50%)) 0 0);
   }
-  .cmp-card-credit { font-size: 12px; line-height: 1.25; margin-top: 4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .album-cmp-layer-now {
+    z-index: 1;
+  }
+  .album-cmp-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+  .album-cmp-placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    background: rgba(246, 242, 233, 0.25);
+    color: var(--text-main);
+    pointer-events: none;
+  }
+  html.dark-theme .album-cmp-placeholder {
+    background: rgba(15, 18, 23, 0.72);
+  }
+  .album-cmp-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .album-cmp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: rgba(18, 22, 27, 0.72);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-variant-numeric: tabular-nums;
+  }
+  .album-cmp-badge svg {
+    width: 12px;
+    height: 12px;
+  }
+  .album-cmp-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--cmp-pos, 50%);
+    width: 44px;
+    margin-left: -22px;
+    z-index: 5;
+    cursor: ew-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+  }
+  .album-cmp-handle:focus-visible .album-cmp-knob {
+    box-shadow: 0 0 0 3px var(--amber), 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  .album-cmp-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2.5px;
+    margin-left: -1.25px;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+  }
+  .album-cmp-knob {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.96);
+    color: #1a1e24;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32), 0 1px 3px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    pointer-events: none;
+  }
+  .album-cmp-stage.is-dragging .album-cmp-knob,
+  .album-cmp-handle:active .album-cmp-knob {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+  .album-cmp-knob svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+  }
+
+  .album-cmp-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .album-cmp-meta-credit {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .album-cmp-meta-now {
+    flex-shrink: 0;
+  }
+  .album-cmp-meta-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+  .album-cmp-meta-status.is-captured {
+    color: var(--accent-green);
+    font-weight: 700;
+  }
+  .album-cmp-meta-status.is-empty {
+    color: var(--text-muted);
+    opacity: 0.85;
+  }
+  .album-cmp-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    letter-spacing: 0.01em;
+  }
   .cmp-you { font-weight: 700; color: var(--accent-green); }
-  .cmp-inline-archive {
-    display: flex; align-items: center; gap: 8px; width: 100%;
-    margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--lg-border);
-    text-align: left;
+  .album-archive-thumb-btn {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 9px;
+    line-height: 0;
+    transition: transform 140ms ease, opacity 140ms ease;
   }
-  .cmp-inline-archive img {
-    width: 54px; height: 40px; object-fit: cover; border-radius: 7px; flex-shrink: 0;
+  .album-archive-thumb-btn:hover {
+    transform: scale(1.04);
   }
-  .cmp-inline-archive span { font-size: 11px; line-height: 1.3; font-weight: 700; color: var(--ink-muted); }
+  .album-archive-thumb-btn:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
   .album-see-more-row { display: flex; justify-content: center; margin-top: 8px; }
   .album-see-more {
     border: 0; background: transparent; color: var(--amber-deep);
@@ -2502,23 +2671,41 @@
       <button class="modal-close-btn" id="albumCompareCloseBtn" aria-label="Închide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
 
-    <div class="cmp-grid">
-      <!-- Card Atunci -->
-      <div class="cmp-card">
-        <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg> Atunci</div>
-        <div class="cmp-card-content" id="albumThenBox">
-          <!-- Generat dinamic -->
-        </div>
+    <!-- Un singur cadran cu slider de comparare Atunci / Acum -->
+    <div class="album-cmp-stage" id="albumCompareStage" style="--cmp-pos: 50%;">
+      <!-- Stratul Acum (dedesubt) -->
+      <div class="album-cmp-layer album-cmp-layer-now" id="albumCompareLayerNow"></div>
+
+      <!-- Stratul Atunci (deasupra, decupat dinamic de la stânga la --cmp-pos) -->
+      <div class="album-cmp-layer album-cmp-layer-then" id="albumCompareLayerThen"></div>
+
+      <!-- Etichete plutitoare Atunci / Acum -->
+      <div class="album-cmp-badges" aria-hidden="true">
+        <span class="album-cmp-badge left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg>
+          <span>Atunci</span>
+        </span>
+        <span class="album-cmp-badge right">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Acum</span>
+        </span>
       </div>
 
-      <!-- Card Acum -->
-      <div class="cmp-card">
-        <div class="cmp-card-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Acum</div>
-        <div class="cmp-card-content" id="albumNowBox">
-          <!-- Generat dinamic -->
+      <!-- Separator și mâner slider în mijloc -->
+      <div class="album-cmp-handle" id="albumCompareHandle" role="slider" tabindex="0" aria-label="Comparație Atunci și Acum" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <div class="album-cmp-line"></div>
+        <div class="album-cmp-knob" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="8 7 3 12 8 17"></polyline>
+            <polyline points="16 7 21 12 16 17"></polyline>
+          </svg>
         </div>
       </div>
     </div>
+
+    <!-- Metadate / Credite sub cadran -->
+    <div class="album-cmp-meta-row" id="albumCompareMetaRow"></div>
+    <div class="album-cmp-hint">Glisează separatorul pentru a compara</div>
 
     <div class="album-see-more-row">
       <button class="album-see-more" id="albumSeeMoreBtn" type="button" hidden>Vezi mai multe poze</button>
@@ -3343,6 +3530,10 @@
  "Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.": "Check that the page is open over HTTPS, that you allowed motion/orientation and location access, then reload.",
  "Vezi mai multe poze": "See more photos",
  "Ascunde pozele": "Hide photos",
+ "Glisează separatorul pentru a compara": "Slide the divider to compare",
+ "Fără poză capturată": "No captured photo",
+ "Comparație Atunci și Acum": "Then and Now comparison",
+ "Schimbă poza istorică": "Change historic photo",
  "Înapoi": "Back",
  "Voce": "Voice",
  "Voce automată": "Automatic voice",
@@ -6003,10 +6194,85 @@ function archivePhotoPool(landmark) {
   return pool;
 }
 
+let albumCmpPos = 50;
+let isDraggingAlbumCmp = false;
+
+function setAlbumCmpPos(val) {
+  const clamped = Math.max(0, Math.min(100, val));
+  albumCmpPos = clamped;
+  const stage = $("#albumCompareStage");
+  if (stage) {
+    stage.style.setProperty("--cmp-pos", clamped.toFixed(1) + "%");
+  }
+  const handle = $("#albumCompareHandle");
+  if (handle) {
+    handle.setAttribute("aria-valuenow", String(Math.round(clamped)));
+  }
+}
+
+function updateAlbumCmpFromPointer(e) {
+  const stage = $("#albumCompareStage");
+  if (!stage) return;
+  const rect = stage.getBoundingClientRect();
+  if (rect.width <= 0) return;
+  const clientX = e.clientX;
+  const percent = ((clientX - rect.left) / rect.width) * 100;
+  setAlbumCmpPos(percent);
+}
+
+function initAlbumCompareSlider() {
+  const stage = $("#albumCompareStage");
+  const handle = $("#albumCompareHandle");
+  if (!stage || stage._cmpInited) return;
+  stage._cmpInited = true;
+
+  stage.addEventListener("pointerdown", (e) => {
+    if (e.button && e.button !== 0) return;
+    isDraggingAlbumCmp = true;
+    try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    stage.classList.add("is-dragging");
+    updateAlbumCmpFromPointer(e);
+  });
+
+  stage.addEventListener("pointermove", (e) => {
+    if (!isDraggingAlbumCmp) return;
+    updateAlbumCmpFromPointer(e);
+  });
+
+  const stopDrag = (e) => {
+    if (!isDraggingAlbumCmp) return;
+    isDraggingAlbumCmp = false;
+    stage.classList.remove("is-dragging");
+    try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+  };
+
+  stage.addEventListener("pointerup", stopDrag);
+  stage.addEventListener("pointercancel", stopDrag);
+
+  if (handle) {
+    handle.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setAlbumCmpPos(albumCmpPos - 5);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setAlbumCmpPos(albumCmpPos + 5);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setAlbumCmpPos(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setAlbumCmpPos(100);
+      }
+    });
+  }
+}
+
 function selectAlbumLandmark(idx) {
   selectedAlbumIndex = idx;
   albumArchiveExpanded = false;
   albumThenPick = null;
+  albumCmpPos = 50;
   renderAlbumCompare();
   $("#albumCompareModal").style.display = "flex";
 }
@@ -6029,38 +6295,63 @@ function renderAlbumCompare() {
     albumThenPick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   }
 
-  const thenBox = $("#albumThenBox");
-  if (albumThenPick) {
-    thenBox.innerHTML = `
-      <img src="${esc(albumThenPick.src)}" alt="${esc(name)} — Atunci" class="cmp-card-img">
-      <div class="cmp-card-credit">${esc(albumThenPick.credit)}</div>
-    `;
-  } else {
-    thenBox.innerHTML = `
-      <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg></div>
-      <div class="cmp-placeholder-text">Foto istorică: în curând</div>
-      <div class="cmp-placeholder-sub">Nu avem încă o poză veche.</div>
-    `;
+  // 1. Stratul Atunci (istoric)
+  const layerThen = $("#albumCompareLayerThen");
+  if (layerThen) {
+    if (albumThenPick) {
+      layerThen.innerHTML = `<img src="${esc(albumThenPick.src)}" alt="${esc(name)} — Atunci" class="album-cmp-img">`;
+    } else {
+      layerThen.innerHTML = `
+        <div class="album-cmp-placeholder">
+          <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div class="cmp-placeholder-text">Foto istorică: în curând</div>
+          <div class="cmp-placeholder-sub">Nu avem încă o poză veche.</div>
+        </div>
+      `;
+    }
   }
 
-  const nowBox = $("#albumNowBox");
+  // 2. Stratul Acum (actual / poza ta)
+  const layerNow = $("#albumCompareLayerNow");
   const userPhoto = userCapturedPhotos[landmark.nume];
-  if (userPhoto && userPhoto.dataUrl) {
-    const dateFormatted = userPhoto.timestamp ? new Date(userPhoto.timestamp).toLocaleString(trLocale(), {
-      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-    }) : "";
-    nowBox.innerHTML = `
-      <img src="${userPhoto.dataUrl}" alt="Poza ta" class="cmp-card-img" style="border: 1.5px solid var(--accent-green);">
-      <div class="cmp-card-credit"><span class="cmp-you">Poza ta</span>${dateFormatted ? " · " + dateFormatted : ""}${userPhoto.sessionOnly ? ", doar acum" : ""}</div>
-    `;
-  } else {
-    nowBox.innerHTML = `
-      <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-      <div class="cmp-placeholder-text">Nicio poză încă</div>
-      <div class="cmp-placeholder-sub">Apropie-te la 200 m și fă o poză.</div>
+  if (layerNow) {
+    if (userPhoto && userPhoto.dataUrl) {
+      layerNow.innerHTML = `<img src="${userPhoto.dataUrl}" alt="${esc(name)} — Acum" class="album-cmp-img">`;
+    } else {
+      layerNow.innerHTML = `
+        <div class="album-cmp-placeholder">
+          <div class="cmp-placeholder-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div class="cmp-placeholder-text">Nicio poză încă</div>
+          <div class="cmp-placeholder-sub">Apropie-te la 200 m și fă o poză.</div>
+        </div>
+      `;
+    }
+  }
+
+  // 3. Rândul de metadate / credite sub cadran
+  const metaRow = $("#albumCompareMetaRow");
+  if (metaRow) {
+    const thenCreditText = albumThenPick ? (albumThenPick.credit || "Foto din arhivă") : "Arhiva AradLens";
+    let nowStatusHtml = "";
+    if (userPhoto && userPhoto.dataUrl) {
+      const dateFormatted = userPhoto.timestamp ? new Date(userPhoto.timestamp).toLocaleString(trLocale(), {
+        day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+      }) : "";
+      nowStatusHtml = `<span class="album-cmp-meta-status is-captured"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> <span class="cmp-you">Poza ta</span>${dateFormatted ? " · " + esc(dateFormatted) : ""}${userPhoto.sessionOnly ? ", doar acum" : ""}</span>`;
+    } else {
+      nowStatusHtml = `<span class="album-cmp-meta-status is-empty">Fără poză capturată</span>`;
+    }
+    metaRow.innerHTML = `
+      <div class="album-cmp-meta-credit" title="${esc(thenCreditText)}">${esc(thenCreditText)}</div>
+      <div class="album-cmp-meta-now">${nowStatusHtml}</div>
     `;
   }
 
+  // 4. Slider inițializare & poziționare
+  initAlbumCompareSlider();
+  setAlbumCmpPos(albumCmpPos);
+
+  // 5. Mai multe poze din arhivă
   const rest = pool.filter(p => !albumThenPick || p.src !== albumThenPick.src);
   const seeMoreBtn = $("#albumSeeMoreBtn");
   const archiveStrip = $("#albumArchiveStrip");
@@ -6076,8 +6367,14 @@ function renderAlbumCompare() {
   }
   if (archiveStrip && archiveRow) {
     archiveRow.innerHTML = rest.map((p, i) =>
-      `<img src="${esc(p.src)}" alt="${esc(name)} din arhiva site-ului, imaginea ${i + 1}" width="96" height="72" decoding="async">`
+      `<button type="button" class="album-archive-thumb-btn" data-thumb-idx="${i}" aria-label="Schimbă poza istorică"><img src="${esc(p.src)}" alt="${esc(name)} din arhiva site-ului, imaginea ${i + 1}" width="96" height="72" decoding="async"></button>`
     ).join("");
+    archiveRow.querySelectorAll(".album-archive-thumb-btn").forEach((btn, i) => {
+      btn.onclick = () => {
+        albumThenPick = rest[i];
+        renderAlbumCompare();
+      };
+    });
     archiveStrip.hidden = rest.length === 0 || !albumArchiveExpanded;
   }
 }
