@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Arad AR — POC Ghidare</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; background: #000; }
+
+  /* Camera video de fundal */
+  #cam {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; z-index: 0; background: #111;
+  }
+
+  /* Strat de overlay peste cameră */
+  #overlay { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; }
+
+  /* Header sus */
+  .top {
+    padding: 14px 16px calc(14px + env(safe-area-inset-top)) 16px;
+    background: linear-gradient(180deg, rgba(13,59,102,.85), rgba(13,59,102,0));
+    color: #fff;
+  }
+  .top .brand { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+  .top .target { font-size: 22px; font-weight: 700; margin-top: 2px; }
+
+  /* Zona centrală cu săgeata (centrată, ca inițial) */
+  .center { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+  #arrowWrap {
+    width: 220px; height: 220px; display: flex; align-items: center; justify-content: center;
+  }
+  #arrow { width: 190px; height: 190px; filter: drop-shadow(0 8px 24px rgba(0,0,0,.55)); will-change: transform; }
+
+  /* Cardul de jos cu distanța */
+  .bottom {
+    padding: 18px 16px calc(20px + env(safe-area-inset-bottom)) 16px;
+    background: linear-gradient(0deg, rgba(13,59,102,.9), rgba(13,59,102,0));
+    color: #fff;
+  }
+  .dist { text-align: center; margin-bottom: 14px; }
+  .dist .num { font-size: 44px; font-weight: 800; line-height: 1; }
+  .dist .unit { font-size: 16px; opacity: .85; }
+  .dist .arrived { font-size: 20px; font-weight: 700; color: #7CFC98; display: none; }
+
+  /* Selector de repere */
+  .pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .pills::-webkit-scrollbar { display: none; }
+  .pill {
+    flex: 0 0 auto; padding: 9px 15px; border-radius: 22px; font-size: 14px; font-weight: 600;
+    background: rgba(255,255,255,.15); color: #fff; border: 1.5px solid rgba(255,255,255,.35);
+    white-space: nowrap; cursor: pointer;
+  }
+  .pill.active { background: #2a9d8f; border-color: #2a9d8f; }
+
+  /* Ecran de start / permisiuni */
+  #start {
+    position: fixed; inset: 0; z-index: 5; background: linear-gradient(150deg,#0d3b66,#145da0 60%,#2a9d8f);
+    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px;
+  }
+  #start h1 { font-size: 30px; margin-bottom: 8px; }
+  #start p { font-size: 15px; line-height: 1.5; opacity: .92; max-width: 320px; margin-bottom: 26px; }
+  #startBtn {
+    background: #fff; color: #0d3b66; border: none; padding: 15px 34px; font-size: 17px;
+    font-weight: 700; border-radius: 30px; cursor: pointer;
+  }
+  #start .note { margin-top: 22px; font-size: 12px; opacity: .7; max-width: 300px; }
+
+  /* Bara de status/eroare */
+  #status {
+    position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; z-index: 6;
+    background: rgba(232,135,30,.95); color: #fff; font-size: 13px; text-align: center;
+    padding: 8px 12px; display: none;
+  }
+  .hint { text-align:center; font-size:12px; opacity:.75; margin-top:10px; }
+
+  /* Butoane mici reutilizabile */
+  .btn {
+    background: rgba(255,255,255,.15); color:#fff; border:1.5px solid rgba(255,255,255,.35);
+    border-radius:22px; padding:8px 15px; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .btn:active { background: rgba(255,255,255,.3); }
+
+  /* Etichetă AR — ancorată 2D după azimut, deasupra săgeții */
+  #arLabel {
+    position: fixed; left:50%; top:50%; z-index:2; pointer-events:none;
+    background: rgba(13,59,102,.85); color:#fff; border:1.5px solid rgba(255,255,255,.4);
+    border-radius:12px; padding:7px 13px; text-align:center; white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.5); opacity:0; transition:opacity .15s linear;
+  }
+  #arLabel .al-name { font-size:14px; font-weight:700; }
+  #arLabel .al-meta { font-size:11px; opacity:.85; margin-top:1px; }
+
+  /* Fișa reperului (bottom sheet) */
+  #card {
+    position: fixed; left:0; right:0; bottom:0; z-index:4; display:none;
+    background: linear-gradient(180deg, rgba(13,59,102,.97), rgba(13,59,102,1));
+    color:#fff; border-top:2px solid rgba(124,252,152,.6);
+    padding:16px 16px calc(20px + env(safe-area-inset-bottom)) 16px;
+    border-radius:16px 16px 0 0; box-shadow:0 -12px 40px rgba(0,0,0,.55);
+    max-height:72vh; overflow-y:auto;
+  }
+  #card .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  #card .card-title { font-size:20px; font-weight:800; }
+  #card .card-x {
+    flex:0 0 auto; background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.4);
+    border-radius:18px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;
+  }
+  #card .card-meta { font-size:12px; opacity:.85; margin-top:4px; letter-spacing:.3px; }
+  #card .card-desc { font-size:14px; line-height:1.55; margin:12px 0 14px; }
+  #card .card-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  #card .card-actions .btn { background:#2a9d8f; border-color:#2a9d8f; }
+  #card .card-actions .btn.alt { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35); }
+
+  /* Comparație foto istoric vs actual */
+  #photoCmp { position:fixed; inset:0; z-index:5; display:none; background:#000; --pos:50%; }
+  #photoCmp .cmp-wrap { position:absolute; inset:0; overflow:hidden; }
+  #photoCmp .cmp-wrap canvas, #photoCmp .cmp-wrap img {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  }
+  #photoCmp .cmp-old {
+    -webkit-clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+    filter: sepia(.15) contrast(1.05);
+  }
+  #photoCmp .cmp-divider {
+    position:absolute; top:0; bottom:0; width:3px; background:#7CFC98;
+    box-shadow:0 0 12px rgba(124,252,152,.9); transform:translateX(-1.5px);
+  }
+  #photoCmp .cmp-top {
+    position:absolute; top:calc(10px + env(safe-area-inset-top)); left:12px; right:12px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; z-index:2;
+  }
+  #photoCmp .cmp-tag {
+    background:rgba(0,0,0,.6); color:#fff; font-size:12px; font-weight:700;
+    padding:5px 10px; border-radius:14px; border:1px solid rgba(255,255,255,.3);
+  }
+  #photoCmp #cmpRange {
+    position:absolute; left:20px; width:calc(100% - 40px);
+    bottom:calc(64px + env(safe-area-inset-bottom)); z-index:2; accent-color:#2a9d8f;
+  }
+  #photoCmp .cmp-hint {
+    position:absolute; left:0; right:0; bottom:calc(40px + env(safe-area-inset-bottom));
+    text-align:center; color:#fff; font-size:12px; opacity:.85; z-index:2;
+  }
+  #photoCmp .cmp-credit {
+    position:absolute; left:0; right:0; bottom:calc(14px + env(safe-area-inset-bottom));
+    text-align:center; color:#fff; font-size:10px; opacity:.55; padding:0 16px; z-index:2;
+  }
+</style>
+</head>
+<body>
+
+<video id="cam" autoplay muted playsinline></video>
+
+<div id="overlay">
+  <div class="top">
+    <div class="brand">Arad · AR Ghidare (POC)</div>
+    <div class="target" id="targetName">—</div>
+    <div id="diag" style="font-size:11px;opacity:.7;margin-top:3px;font-variant-numeric:tabular-nums;">busolă: — · direcție reper: —</div>
+  </div>
+
+  <div class="center">
+    <div id="arrowWrap">
+      <svg id="arrow" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7CFC98"/>
+            <stop offset="1" stop-color="#2a9d8f"/>
+          </linearGradient>
+        </defs>
+        <path d="M50 6 L82 78 L50 62 L18 78 Z" fill="url(#g)" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="dist">
+      <span><span class="num" id="distNum">—</span> <span class="unit">m</span></span>
+      <div class="arrived" id="arrived">✓ Ai ajuns la destinație!</div>
+    </div>
+    <div id="coords" style="text-align:center;font-size:11px;opacity:.7;font-variant-numeric:tabular-nums;margin-bottom:8px;">lat: — · lon: —</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
+      <button id="detailsBtn" class="btn" style="display:none;">Fișă & audio</button>
+      <button id="flipBtn" class="btn">↻ Inversează 180°</button>
+    </div>
+    <div class="pills" id="pills"></div>
+    <div class="hint">Ține telefonul ridicat și rotește-te până săgeata indică în sus — când înclini telefonul, săgeata se înclină în 3D împreună cu el.</div>
+  </div>
+</div>
+
+<div id="arLabel">
+  <div class="al-name" id="alName">—</div>
+  <div class="al-meta" id="alMeta"></div>
+</div>
+
+<div id="card">
+  <div class="card-head">
+    <div class="card-title" id="cardTitle">—</div>
+    <button class="card-x" id="cardClose">Închide</button>
+  </div>
+  <div class="card-meta" id="cardMeta"></div>
+  <div class="card-desc" id="cardDesc"></div>
+  <div class="card-actions">
+    <button class="btn" id="speakBtn">Ascultă</button>
+    <button class="btn alt" id="photoBtn">Foto 1901 ↔ acum</button>
+  </div>
+</div>
+
+<div id="photoCmp">
+  <div class="cmp-wrap">
+    <canvas id="cmpNow"></canvas>
+    <img class="cmp-old" id="cmpOld" alt="Fotografie istorică — Primăria Arad, 1901">
+    <div class="cmp-divider" id="cmpDivider"></div>
+  </div>
+  <div class="cmp-top">
+    <span class="cmp-tag">1901</span>
+    <button class="btn" id="cmpClose">Închide</button>
+    <span class="cmp-tag">Acum</span>
+  </div>
+  <input type="range" id="cmpRange" min="0" max="100" value="50">
+  <div class="cmp-hint">Glisează pentru a compara 1901 ↔ prezent</div>
+  <div class="cmp-credit" id="cmpCredit"></div>
+</div>
+
+<div id="status"></div>
+
+<div id="start">
+  <h1>Arad în AR</h1>
+  <p>Prototip de ghidare cu realitate augmentată. Alege un reper și lasă-te condus de săgeată — fără hartă.</p>
+  <button id="startBtn">Pornește</button>
+  <div class="note">Aplicația va cere acces la <b>cameră</b> și la <b>locație / busolă</b>. Funcționează cel mai bine afară, cu GPS activ.</div>
+</div>
+
+<script>
+/* =====================================================================
+   POC ARAD AR — GHIDARE DIRECȚIONALĂ CU DATE STATICE
+   ---------------------------------------------------------------------
+   Coordonate preluate din OpenStreetMap / Wikipedia (Wikidata) și
+   rotunjite la ~1 m. Pentru precizie maximă, verifică-le pe teren
+   (mergi la fiecare reper cu telefonul și citește lat/lon reale).
+   Precizia lor determină direct exactitatea săgeții. Acesta este
+   singurul pas de "date" al POC-ului.
+   ===================================================================== */
+const REPERE = [
+  { nume: "Turnul de Apă",        lat: 46.16966, lon: 21.30803 },
+  { nume: "Palatul Cultural",     lat: 46.17411, lon: 21.32017 },
+  {
+    nume: "Primăria Arad",
+    lat: 46.17537, lon: 21.31930,
+    an: "1872–1876",
+    arhitect: "Ödön Lechner (proiect), Francisc Pekar",
+    stil: "Neorenascentist eclectic",
+    descriere: "Palatul Administrativ al Aradului, sediul Primăriei Municipiului, a fost construit între 1872 și 1876. Fațada îmbină neorenascentismul flamand cu elemente ale primăriilor medievale târzii, iar turnul central înalt de 54 m adăpostește un orologiu adus din Elveția în 1878, care cântă „Oda Bucuriei” la orele fixe. Vitraliile holului, realizate de artistul arădean Sever Frențiu, ilustrează anotimpurile și lunile anului.",
+    foto: "primaria-1901.jpg",
+    fotoCredit: "Foto istorică: Fortepan / Schoch Frigyes — Arad, 1901 (domeniu public)"
+  },
+  { nume: "Teatrul I. Slavici",   lat: 46.17109, lon: 21.31577 },
+  { nume: "Catedrala Veche",      lat: 46.17050, lon: 21.31170 }
+];
+
+let target = REPERE[0];
+let userLat = null, userLon = null;
+let bearingToTarget = null;  // direcția geografică spre reper
+
+let heading = null;          // direcția în care privește telefonul (0 = Nord), netezită
+let headingRaw = null;       // valoare brută de la senzori (pentru diagnostic)
+let headingMode = "—";       // sursa: "abs" | "rel" | "iOS"
+let cameraPitch = 0;         // înclinarea camerei față de orizont (grade, + = în sus)
+let lastPitch = null, pitchSpike = 0, angleSpike = 0;
+let headingOffset = 0;       // corecție manuală ±180° (debug inversare săgeată)
+let absSupported = false;    // browserul expune deviceorientationabsolute?
+let absSeen = false;         // au sosit deja date absolute valide?
+let relFbkActive = false;    // să folosim deviceorientation (relativ) ca fallback?
+const SMOOTH = 0.25;         // coeficient de netezire (low-pass pe heading)
+
+const $ = s => document.querySelector(s);
+const statusBar = $("#status");
+function showStatus(msg){ statusBar.textContent = msg; statusBar.style.display = "block"; }
+function hideStatus(){ statusBar.style.display = "none"; }
+
+/* ---------- Construiește pastilele de selecție ---------- */
+const pillsEl = $("#pills");
+REPERE.forEach((r, i) => {
+  const b = document.createElement("div");
+  b.className = "pill" + (i === 0 ? " active" : "");
+  b.textContent = r.nume;
+  b.onclick = () => {
+    const wasOpen = cardEl.style.display === "block";
+    target = r;
+    document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+    b.classList.add("active");
+    $("#targetName").textContent = r.nume;
+    stopSpeech();
+    if (wasOpen) openCard(); else closeCard();
+    updateDetailsBtn();
+    scheduleUpdate();
+  };
+  pillsEl.appendChild(b);
+});
+$("#targetName").textContent = target.nume;
+
+/* =====================================================================
+   FIȘĂ, AUDIO (TTS), FOTO ISTORIC↔ACTUAL, ETICHETĂ AR
+   ===================================================================== */
+const cardEl   = $("#card");
+const photoCmp = $("#photoCmp");
+const arLabel  = $("#arLabel");
+const autoShown = {};   // repere pentru care fișa s-a deschis automat o dată
+
+function targetHasInfo(t){ return !!t.descriere; }
+
+function updateDetailsBtn(){
+  $("#detailsBtn").style.display = targetHasInfo(target) ? "" : "none";
+}
+
+function openCard(){
+  const t = target;
+  if (!targetHasInfo(t)) return;
+  $("#cardTitle").textContent = t.nume;
+  $("#cardMeta").textContent  = [t.stil, t.an, t.arhitect].filter(Boolean).join(" · ");
+  $("#cardDesc").textContent  = t.descriere;
+  $("#photoBtn").style.display = t.foto ? "" : "none";
+  cardEl.style.display = "block";
+  scheduleUpdate();
+}
+
+function closeCard(){
+  cardEl.style.display = "none";
+  stopSpeech();
+}
+
+/* --- Audio: sinteză vocală în română (Web Speech API) --- */
+function stopSpeech(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  $("#speakBtn").textContent = "Ascultă";
+}
+
+function toggleSpeech(){
+  if (!("speechSynthesis" in window)){
+    showStatus("Sinteza vocală nu este disponibilă în acest browser.");
+    return;
+  }
+  if (speechSynthesis.speaking){ stopSpeech(); return; }
+  const t = target;
+  const parts = [t.nume, t.stil, t.an ? ("construit în " + t.an) : null, t.descriere].filter(Boolean);
+  const text = parts.join(". ") + ".";
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ro-RO"; u.rate = 1.0; u.pitch = 1.0;
+  u.onend = u.onerror = () => { $("#speakBtn").textContent = "Ascultă"; };
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+  $("#speakBtn").textContent = "Stop";
+}
+
+/* --- Foto istoric vs. actual: instantaneu din cameră + foto de arhivă --- */
+function snapshotNow(){
+  const v = $("#cam"), c = $("#cmpNow");
+  if (!v || !v.videoWidth) return;
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+}
+
+function setCmpPos(p){
+  photoCmp.style.setProperty("--pos", p + "%");
+  $("#cmpDivider").style.left = p + "%";
+}
+
+function openPhoto(){
+  const t = target;
+  if (!t.foto) return;
+  $("#cmpOld").src = t.foto;
+  $("#cmpCredit").textContent = t.fotoCredit || "";
+  snapshotNow();
+  setCmpPos(50);
+  $("#cmpRange").value = 50;
+  photoCmp.style.display = "block";
+}
+
+function closePhoto(){ photoCmp.style.display = "none"; }
+
+/* --- Etichetă AR: ancorată 2D după azimut și înclinarea camerei --- */
+let lastLabelName = null, lastLabelMeta = null;
+function updateArLabel(az){
+  const t = target;
+  // În spate (la mai mult de ~85°) ascundem eticheta.
+  if (Math.abs(az) > 85){ arLabel.style.opacity = 0; return; }
+  arLabel.style.opacity = 1;
+
+  const w = window.innerWidth;
+  // ~70° câmp vizual orizontal → px per grad; limităm ca să rămână pe ecran.
+  let x = az * (w / 70);
+  const maxX = Math.max(0, w/2 - 95);
+  x = Math.max(-maxX, Math.min(maxX, x));
+  // Când ridici telefonul (pitch>0), clădirea coboară în cadru → și eticheta.
+  const y = -115 + cameraPitch * 3.0;
+  arLabel.style.transform = `translate(calc(-50% + ${x.toFixed(0)}px), calc(-50% + ${y.toFixed(0)}px))`;
+
+  const meta = [t.stil, t.an].filter(Boolean).join(" · ");
+  if (t.nume !== lastLabelName){
+    $("#alName").textContent = t.nume;
+    lastLabelName = t.nume;
+  }
+  if (meta !== lastLabelMeta){
+    $("#alMeta").textContent = meta;
+    $("#alMeta").style.display = meta ? "" : "none";
+    lastLabelMeta = meta;
+  }
+}
+
+$("#detailsBtn").onclick = openCard;
+$("#cardClose").onclick   = closeCard;
+$("#speakBtn").onclick    = toggleSpeech;
+$("#photoBtn").onclick    = openPhoto;
+$("#cmpClose").onclick    = closePhoto;
+$("#cmpRange").oninput    = e => setCmpPos(e.target.value);
+window.addEventListener("pagehide", stopSpeech);
+updateDetailsBtn();
+
+/* ---------- Matematică geografică ---------- */
+const toRad = d => d * Math.PI / 180;
+const toDeg = r => r * 180 / Math.PI;
+
+// Azimutul (bearing) de la punctul curent spre reper, în grade (0=N, 90=E)
+function bearing(lat1, lon1, lat2, lon2){
+  const φ1 = toRad(lat1), φ2 = toRad(lat2), Δλ = toRad(lon2 - lon1);
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+// Distanța Haversine în metri
+function distance(lat1, lon1, lat2, lon2){
+  const R = 6371000;
+  const φ1 = toRad(lat1), φ2 = toRad(lat2);
+  const Δφ = toRad(lat2 - lat1), Δλ = toRad(lon2 - lon1);
+  const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+/* ---------- Actualizare săgeată + distanță ---------- */
+// Actualizăm DOM-ul o dată pe frame (rAF), nu la fiecare eveniment de senzor.
+let rafPending = false;
+function scheduleUpdate(){
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => { rafPending = false; update(); });
+}
+
+function update(){
+  if (userLat == null || heading == null) return;
+
+  bearingToTarget = bearing(userLat, userLon, target.lat, target.lon);
+  const d = distance(userLat, userLon, target.lat, target.lon);
+
+  // Unghi orizontal dintre direcția camerei și clădire ([-180,180])
+  let az = bearingToTarget - heading;
+  az = ((az + 540) % 360) - 180;
+
+  // Înclinare 3D: după cerința explicită a utilizatorului —
+  //   înclin. cameră 0°  → tilt 70°  (săgeata culcată)
+  //   înclin. cameră 90° → tilt 0°   (săgeata dreaptă)
+  // Păstrăm |cameraPitch| ca să nu se blocheze pe dispozitivele cu semn inversat.
+  const t = Math.min(90, Math.abs(cameraPitch));
+  const tilt = 70 * (1 - t / 90);
+  const sc   = d < 80 ? 1.15 : (d < 400 ? 1.05 : 1);
+
+  // Ordinea contează: perspective + rotateX (culcare 3D), apoi rotateZ (orizontal
+  // spre clădire), apoi scale. perspective() inline = proiecție puternică,
+  // astfel încât înclinarea să se vadă clar ca adâncime.
+  $("#arrow").style.transform =
+    `perspective(520px) rotateX(${tilt.toFixed(1)}deg) rotateZ(${az.toFixed(1)}deg) scale(${sc})`;
+
+  // Diagnostic vizibil la testare
+  $("#diag").textContent =
+    `busolă: ${Math.round(heading)}° (${headingMode}) · clădirea la ${Math.round(az)}° · înclin. cameră ${Math.round(cameraPitch)}° → tilt ${Math.round(tilt)}°`;
+
+  // Eticheta AR ancorată pe direcția clădirii
+  updateArLabel(az);
+
+  // Fișa se deschide automat o singură dată, când ești aproape de un reper cu fișă
+  if (targetHasInfo(target) && d < 40 && !autoShown[target.nume] && cardEl.style.display !== "block"){
+    autoShown[target.nume] = true;
+    openCard();
+  }
+
+  // Afișare distanță / stare "ai ajuns"
+  if (d < 20){
+    $("#distNum").parentElement.style.display = "none";
+    $("#arrived").style.display = "block";
+  } else {
+    $("#distNum").parentElement.style.display = "";
+    $("#arrived").style.display = "none";
+    $("#distNum").textContent = d < 1000 ? Math.round(d) : (d/1000).toFixed(2) + " k";
+  }
+}
+
+/* ---------- Pornire: cameră + senzori ---------- */
+async function startCamera(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } }, audio: false
+    });
+    $("#cam").srcObject = stream;
+  } catch(e){
+    showStatus("Camera nu a putut fi pornită: " + e.message);
+  }
+}
+
+function startGeo(){
+  if (!navigator.geolocation){ showStatus("GPS indisponibil pe acest dispozitiv."); return; }
+  navigator.geolocation.watchPosition(
+    pos => { userLat = pos.coords.latitude; userLon = pos.coords.longitude; hideStatus(); $("#coords").textContent = `lat: ${userLat.toFixed(5)} · lon: ${userLon.toFixed(5)} · precizie: ${Math.round(pos.coords.accuracy)}m`; scheduleUpdate(); },
+    err => showStatus("Locație: " + err.message + " (activează GPS și ieși afară)"),
+    { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+  );
+}
+
+function screenAngle(){
+  // Compensează rotirea ecranului telefonului (portrait/landscape)
+  const a = (screen.orientation && typeof screen.orientation.angle === "number")
+    ? screen.orientation.angle
+    : (window.orientation || 0);
+  return a || 0;
+}
+
+// Detectăm iOS printr-un mecanism clar: Safari/iOS expune requestPermission pe
+// DeviceOrientationEvent. (UA sniffing nu e necesar.) Folosit pentru fallbackul
+// „alpha" de pe iOS, când webkitCompassHeading lipsește.
+function isIOSLike(){
+  return typeof DeviceOrientationEvent !== "undefined" &&
+         typeof DeviceOrientationEvent.requestPermission === "function";
+}
+
+/* Netezire circulară cu respingere de spike-uri: la trecerea 0°/360° merge pe
+   drumul SCURT. Un salt de peste 60°/eșantion NU e o rotire reală a userului
+   (nici cea mai rapidă întoarcere nu depășește ~20°/eșantion), ci un salt de
+   senzor — este ignorat; doar dacă persistă 3 eșantioane e acceptat (resync). */
+function robustAngle(prev, raw, k){
+  if (prev == null) return raw;
+  let d = raw - prev;
+  d = ((d + 540) % 360) - 180;   // delta în [-180, 180]
+  if (Math.abs(d) > 60){
+    if (angleSpike < 3){ angleSpike++; return prev; }
+    angleSpike = 0; return raw;
+  }
+  angleSpike = 0;
+  return ((prev + k * d) % 360 + 360) % 360;
+}
+
+/* Același tratament, dar liniar (pitch-ul nu are wrap). */
+function robustPitch(prev, p, k){
+  if (prev == null) return p;
+  const d = p - prev;
+  if (Math.abs(d) > 50){
+    if (pitchSpike < 3){ pitchSpike++; return prev; }
+    pitchSpike = 0; return p;
+  }
+  pitchSpike = 0;
+  return prev + k * d;
+}
+
+/* Înclinarea axei camerei față de orizont (grade). Camera privește prin spatele
+   telefonului (−z); +z (normalul ecranului) are elevația asin(cosβ·cosγ), deci
+   camera are pitch = −asin(cosβ·cosγ). Upright-portrait, în poziție orizontală
+   față de sol, dă 0 → clădirea apare centrată pe verticală. */
+function cameraPitchFromEvent(e){
+  if (e.beta == null || e.gamma == null || isNaN(e.beta) || isNaN(e.gamma)) return null;
+  const cb = Math.cos(toRad(e.beta)), cg = Math.cos(toRad(e.gamma));
+  const p = Math.asin(-cb * cg);
+  return toDeg(isNaN(p) ? 0 : p);
+}
+
+function setHeading(raw, mode){
+  headingRaw = raw;
+  headingMode = mode;
+  heading = robustAngle(heading, raw + headingOffset, SMOOTH);
+  scheduleUpdate();
+}
+
+// Inversare manuală 180°: dacă săgeata arată în partea opusă pe un anumit
+// dispozitiv (convenție alpha diferită), un tap rotește heading-ul cu 180°.
+$("#flipBtn").onclick = () => {
+  headingOffset = (headingOffset + 180) % 360;
+  if (heading != null){
+    heading = ((heading + 180) % 360 + 360) % 360;
+    headingRaw = ((headingRaw + 180) % 360 + 360) % 360;
+  }
+  scheduleUpdate();
+};
+
+function handleOrientation(e){
+  // Înclinarea camerei (beta/gamma) NU depinde de frame-ul abs/rel (diferă doar
+  // alpha), așa că o citim din ORICE eveniment de orientare — altfel pe unele
+  // dispozitive rămâne blocată la 0 și tiltul nu se vede deloc.
+  if (e.beta != null && e.gamma != null && !isNaN(e.beta) && !isNaN(e.gamma)){
+    const p = cameraPitchFromEvent(e);
+    if (p != null){
+      lastPitch = robustPitch(lastPitch, p, 0.3);
+      cameraPitch = lastPitch;
+      scheduleUpdate();
+    }
+  }
+
+  // Android/Chrome — deviceorientationabsolute: alpha e world-based (față de
+  // Nordul magnetic), deci heading = 360 − alpha. Sursa principală.
+  if (e.type === "deviceorientationabsolute" && e.alpha != null && !isNaN(e.alpha)){
+    absSeen = true;
+    setHeading(360 - e.alpha + screenAngle(), "abs");
+    return;
+  }
+
+  // iOS — webkitCompassHeading e deja un heading corect și tilt-compensat.
+  if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)){
+    setHeading(e.webkitCompassHeading + screenAngle(), "iOS");
+    return;
+  }
+
+  // iOS fallback: pe unele dispozitive iOS Safari livrează deviceorientation
+  // (alpha/beta/gamma) fără webkitCompassHeading (magnetometru necalibrat sau
+  // Mișcare & Orientare limitat). Pe iOS, alpha e tot raportat la Nordul real,
+  // deci 360 − alpha e un heading utilizabil (exact formula folosită de
+  // busolele clasice pe iPhone pre-webkitCompassHeading).
+  if (isIOSLike() && typeof e.webkitCompassHeading === "undefined" && e.alpha != null && !isNaN(e.alpha)){
+    setHeading(360 - e.alpha + screenAngle(), "ios-alpha");
+    return;
+  }
+
+  // Fallback relativ — NUMAI dacă absolutul nu a livrat nimic până acum.
+  if (relFbkActive && !absSeen && e.alpha != null && !isNaN(e.alpha)){
+    setHeading(360 - e.alpha + screenAngle(), "rel");
+  }
+}
+
+// iOS 13+ cere permisiune explicită pentru senzori, declanșată de un tap.
+// IMPORTANT: trebuie apelată DIRECT în handler-ul de tap, înainte de orice
+// await (ex. getUserMedia), altfel iOS nu consideră că e în gestul utilizatorului
+// și nu pornește busola.
+async function requestMotionPermission(){
+  if (typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function"){
+    try {
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res !== "granted"){
+        showStatus("Permisiune busolă refuzată — activează Mișcare & Orientare în setări și reîncarcă.");
+      }
+    } catch(err){
+      showStatus("Busolă: " + err.message);
+    }
+  }
+}
+
+function startSensors(){
+  // iOS: după ce permisiunea a fost acordată, atasam deviceorientation.
+  // webkitCompassHeading e sursa principala; daca lipseste, handleOrientation
+  // cade pe alpha (vezi ramura ios-alpha).
+  if (isIOSLike()){
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    showStatus("Calibrează busola (mișcă telefonul desenând un 8) dacă săgeata pare imprecisă.");
+    setTimeout(hideStatus, 4500);
+    return;
+  }
+
+  // Android și restul: folosim DOAR deviceorientationabsolute pentru Nordul real.
+  absSupported = 'ondeviceorientationabsolute' in window;
+  if (absSupported){
+    window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+    // În mod intenționat NU atașăm deviceorientation (relativ) în paralel:
+    // cele două frame-uri ar întrece săgeata. Relativul devine activ doar dacă
+    // absolutul nu trimite NICIUN eveniment valid în primele 3 secunde.
+    setTimeout(() => {
+      if (!absSeen){
+        relFbkActive = true;
+        window.addEventListener("deviceorientation", handleOrientation, true);
+        showStatus("Busolă absolută indisponibilă — folosesc o referință relativă. Recalibrează și reîncarcă pagina.");
+      }
+    }, 3000);
+  } else {
+    // Fără suport absolut (navigatoare vechi): deviceorientation dă măcar mișcare relativă.
+    relFbkActive = true;
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    showStatus("Dacă săgeata arată greșit, calibrează busola din aplicația Busolă și reîncarcă pagina.");
+    setTimeout(hideStatus, 5000);
+  }
+}
+
+$("#startBtn").onclick = async () => {
+  $("#start").style.display = "none";
+
+  // 1) Cerem întâi permisiunea de mișcare (sincron în gestul de tap — esențial iOS).
+  await requestMotionPermission();
+
+  // 2) Apoi camera, senzorii și GPS-ul.
+  await startCamera();
+  startSensors();
+  startGeo();
+
+  // Watchdog: dacă în 6s nu a venit niciun heading, anunță clar utilizatorul
+  setTimeout(() => {
+    if (heading == null){
+      showStatus("Busola nu trimite date. Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.");
+    }
+  }, 6000);
+};
+</script>
+</body>
+</html>
