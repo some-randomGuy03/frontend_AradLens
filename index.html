@@ -3,15 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Arad AR — POC Ghidare</title>
+<title>AradLens</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; background: #000; }
+  :root {
+    --bg-main: #07192b;
+    --bg-surface: rgba(13, 59, 102, 0.95);
+    --bg-card: #0d3b66;
+    --bg-modal: linear-gradient(180deg, #07192b, #0d3b66);
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.75);
+    --border-color: rgba(255, 255, 255, 0.25);
+    --accent-teal: #2a9d8f;
+    --accent-green: #7CFC98;
+    --btn-bg: rgba(255, 255, 255, 0.15);
+    --btn-border: rgba(255, 255, 255, 0.35);
+    --btn-text: #ffffff;
+    --top-gradient: linear-gradient(180deg, rgba(13,59,102,.88), rgba(13,59,102,0));
+    --bottom-gradient: linear-gradient(0deg, rgba(13,59,102,.94), rgba(13,59,102,0));
+    --wheel-active-bg: linear-gradient(135deg, rgba(42, 157, 143, 0.95), rgba(13, 59, 102, 0.95));
+    --wheel-active-border: #7CFC98;
+    --wheel-inactive-bg: rgba(255, 255, 255, 0.1);
+    --wheel-inactive-border: rgba(255, 255, 255, 0.22);
+    --fab-bg: linear-gradient(135deg, rgba(13,59,102,.95), rgba(42,157,143,.9));
+    --fab-border: rgba(255,255,255,.45);
+    --fab-color: #ffffff;
+  }
 
-  /* Camera video de fundal */
+  body.light-theme {
+    --bg-main: #eef3f8;
+    --bg-surface: rgba(255, 255, 255, 0.96);
+    --bg-card: #ffffff;
+    --bg-modal: linear-gradient(180deg, #f5f8fc, #e1ecf6);
+    --text-main: #0c2b44;
+    --text-muted: #4e657c;
+    --border-color: rgba(12, 43, 68, 0.18);
+    --accent-teal: #1f8577;
+    --accent-green: #0d8342;
+    --btn-bg: rgba(12, 43, 68, 0.08);
+    --btn-border: rgba(12, 43, 68, 0.22);
+    --btn-text: #0c2b44;
+    --top-gradient: linear-gradient(180deg, rgba(238,243,248,.96), rgba(238,243,248,0));
+    --bottom-gradient: linear-gradient(0deg, rgba(238,243,248,.96), rgba(238,243,248,0));
+    --wheel-active-bg: #ffffff;
+    --wheel-active-border: #1f8577;
+    --wheel-inactive-bg: rgba(255, 255, 255, 0.75);
+    --wheel-inactive-border: rgba(12, 43, 68, 0.16);
+    --fab-bg: linear-gradient(135deg, #ffffff, #e5eef6);
+    --fab-border: rgba(31, 133, 119, 0.45);
+    --fab-color: #0c2b44;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-main); color: var(--text-main); transition: background .3s ease, color .3s ease; }
+
+  /* Camera video de fundal: estompată în starea implicită, clară la fotografiere */
   #cam {
     position: fixed; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; z-index: 0; background: #111;
+    object-fit: cover; z-index: 0; background: var(--bg-main);
+    opacity: 0.28; filter: blur(6px) brightness(0.65);
+    transition: opacity .4s ease, filter .4s ease;
+  }
+  #cam.camera-clear {
+    opacity: 1; filter: none;
   }
 
   /* Strat de overlay peste cameră */
@@ -20,53 +73,129 @@
   /* Header sus */
   .top {
     padding: 14px 16px calc(14px + env(safe-area-inset-top)) 16px;
-    background: linear-gradient(180deg, rgba(13,59,102,.85), rgba(13,59,102,0));
-    color: #fff;
+    background: var(--top-gradient);
+    color: var(--text-main); position: relative;
   }
-  .top .brand { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
-  .top .target { font-size: 22px; font-weight: 700; margin-top: 2px; }
-
-  /* Zona centrală cu săgeata (centrată, ca inițial) */
-  .center { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-  #arrowWrap {
-    width: 220px; height: 220px; display: flex; align-items: center; justify-content: center;
+  .top-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px;
   }
-  #arrow { width: 190px; height: 190px; filter: drop-shadow(0 8px 24px rgba(0,0,0,.55)); will-change: transform; }
+  .top .brand {
+    font-size: 19px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-main);
+  }
+  .top-actions {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .theme-toggle-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--btn-bg); border: 1.5px solid var(--btn-border);
+    color: var(--text-main); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform .15s ease, background .2s ease;
+  }
+  .theme-toggle-btn:active { transform: scale(.92); }
+  .theme-toggle-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; }
 
-  /* Cardul de jos cu distanța */
+  .top .target { font-size: 22px; font-weight: 700; margin-top: 2px; color: var(--text-main); }
+
+  /* Zona centrală (fără săgeată) */
+  .center { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; pointer-events: none; }
+
+  /* Cardul de jos */
   .bottom {
-    padding: 18px 16px calc(20px + env(safe-area-inset-bottom)) 16px;
-    background: linear-gradient(0deg, rgba(13,59,102,.9), rgba(13,59,102,0));
-    color: #fff;
+    padding: 14px 16px calc(20px + env(safe-area-inset-bottom)) 16px;
+    background: var(--bottom-gradient);
+    color: var(--text-main); position: relative;
   }
-  .dist { text-align: center; margin-bottom: 14px; }
-  .dist .num { font-size: 44px; font-weight: 800; line-height: 1; }
+  .dist { text-align: center; margin-bottom: 8px; }
+  .dist .num { font-size: 40px; font-weight: 800; line-height: 1; color: var(--text-main); }
   .dist .unit { font-size: 16px; opacity: .85; }
-  .dist .arrived { font-size: 20px; font-weight: 700; color: #7CFC98; display: none; }
+  .dist .arrived { font-size: 19px; font-weight: 700; color: var(--accent-green); display: none; }
 
-  /* Selector de repere */
-  .pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
-  .pills::-webkit-scrollbar { display: none; }
-  .pill {
-    flex: 0 0 auto; padding: 9px 15px; border-radius: 22px; font-size: 14px; font-weight: 600;
-    background: rgba(255,255,255,.15); color: #fff; border: 1.5px solid rgba(255,255,255,.35);
-    white-space: nowrap; cursor: pointer;
+  /* Selector de repere — carusel orizontal tip rotiță (scrollwheel) */
+  .wheel-container {
+    position: relative;
+    width: 100%;
+    height: 62px;
+    margin: 4px 0 8px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+    cursor: grab;
   }
-  .pill.active { background: #2a9d8f; border-color: #2a9d8f; }
+  .wheel-container:active {
+    cursor: grabbing;
+  }
+  .wheel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .wheel-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 175px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5px 12px;
+    background: var(--wheel-inactive-bg);
+    border: 1.5px solid var(--wheel-inactive-border);
+    color: var(--text-main);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    cursor: pointer;
+    will-change: transform, opacity;
+    transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1),
+                opacity 0.28s ease,
+                border-color 0.25s ease,
+                background 0.25s ease;
+  }
+  .wheel-card.is-center {
+    background: var(--wheel-active-bg);
+    border-color: var(--wheel-active-border);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+  .wheel-card.is-dragging {
+    transition: none !important;
+  }
+  .wheel-card .wc-name {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.2;
+    color: var(--text-main);
+  }
+  .wheel-card .wc-dist {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-green);
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+  .wheel-card:not(.is-center) .wc-dist {
+    opacity: 0.85;
+  }
 
   /* Ecran de start / permisiuni */
   #start {
-    position: fixed; inset: 0; z-index: 5; background: linear-gradient(150deg,#0d3b66,#145da0 60%,#2a9d8f);
-    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: fixed; inset: 0; z-index: 5; background: var(--bg-modal);
+    color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 30px;
   }
-  #start h1 { font-size: 30px; margin-bottom: 8px; }
-  #start p { font-size: 15px; line-height: 1.5; opacity: .92; max-width: 320px; margin-bottom: 26px; }
+  #start h1 { font-size: 30px; margin-bottom: 8px; color: var(--text-main); }
+  #start p { font-size: 15px; line-height: 1.5; opacity: .92; max-width: 320px; margin-bottom: 26px; color: var(--text-muted); }
   #startBtn {
-    background: #fff; color: #0d3b66; border: none; padding: 15px 34px; font-size: 17px;
+    background: var(--text-main); color: var(--bg-main); border: none; padding: 15px 34px; font-size: 17px;
     font-weight: 700; border-radius: 30px; cursor: pointer;
   }
-  #start .note { margin-top: 22px; font-size: 12px; opacity: .7; max-width: 300px; }
+  #start .note { margin-top: 22px; font-size: 12px; opacity: .7; max-width: 300px; color: var(--text-muted); }
 
   /* Bara de status/eroare */
   #status {
@@ -74,21 +203,21 @@
     background: rgba(232,135,30,.95); color: #fff; font-size: 13px; text-align: center;
     padding: 8px 12px; display: none;
   }
-  .hint { text-align:center; font-size:12px; opacity:.75; margin-top:10px; }
+  .hint { text-align:center; font-size:11px; opacity:.75; margin-top:4px; padding: 0 68px; color: var(--text-muted); }
 
   /* Butoane mici reutilizabile */
   .btn {
-    background: rgba(255,255,255,.15); color:#fff; border:1.5px solid rgba(255,255,255,.35);
+    background: var(--btn-bg); color: var(--btn-text); border: 1.5px solid var(--btn-border);
     border-radius:22px; padding:8px 15px; font-size:13px; font-weight:600; cursor:pointer;
   }
-  .btn:active { background: rgba(255,255,255,.3); }
+  .btn:active { opacity: .8; }
 
-  /* Etichetă AR — ancorată 2D după azimut, deasupra săgeții */
+  /* Etichetă AR — ancorată 2D după azimut */
   #arLabel {
     position: fixed; left:50%; top:50%; z-index:2; pointer-events:none;
-    background: rgba(13,59,102,.85); color:#fff; border:1.5px solid rgba(255,255,255,.4);
+    background: var(--bg-surface); color: var(--text-main); border:1.5px solid var(--border-color);
     border-radius:12px; padding:7px 13px; text-align:center; white-space:nowrap;
-    box-shadow:0 6px 20px rgba(0,0,0,.5); opacity:0; transition:opacity .15s linear;
+    box-shadow:0 6px 20px rgba(0,0,0,.4); opacity:0; transition:opacity .15s linear;
   }
   #arLabel .al-name { font-size:14px; font-weight:700; }
   #arLabel .al-meta { font-size:11px; opacity:.85; margin-top:1px; }
@@ -96,23 +225,23 @@
   /* Fișa reperului (bottom sheet) */
   #card {
     position: fixed; left:0; right:0; bottom:0; z-index:4; display:none;
-    background: linear-gradient(180deg, rgba(13,59,102,.97), rgba(13,59,102,1));
-    color:#fff; border-top:2px solid rgba(124,252,152,.6);
+    background: var(--bg-surface);
+    color: var(--text-main); border-top:2px solid var(--accent-green);
     padding:16px 16px calc(20px + env(safe-area-inset-bottom)) 16px;
-    border-radius:16px 16px 0 0; box-shadow:0 -12px 40px rgba(0,0,0,.55);
+    border-radius:16px 16px 0 0; box-shadow:0 -12px 40px rgba(0,0,0,.5);
     max-height:72vh; overflow-y:auto;
   }
   #card .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-  #card .card-title { font-size:20px; font-weight:800; }
+  #card .card-title { font-size:20px; font-weight:800; color: var(--text-main); }
   #card .card-x {
-    flex:0 0 auto; background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.4);
+    flex:0 0 auto; background:transparent; color: var(--text-main); border:1.5px solid var(--border-color);
     border-radius:18px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;
   }
-  #card .card-meta { font-size:12px; opacity:.85; margin-top:4px; letter-spacing:.3px; }
-  #card .card-desc { font-size:14px; line-height:1.55; margin:12px 0 14px; }
+  #card .card-meta { font-size:12px; opacity:.85; margin-top:4px; letter-spacing:.3px; color: var(--text-muted); }
+  #card .card-desc { font-size:14px; line-height:1.55; margin:12px 0 14px; color: var(--text-main); }
   #card .card-actions { display:flex; gap:8px; flex-wrap:wrap; }
-  #card .card-actions .btn { background:#2a9d8f; border-color:#2a9d8f; }
-  #card .card-actions .btn.alt { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35); }
+  #card .card-actions .btn { background: var(--accent-teal); border-color: var(--accent-teal); color: #fff; }
+  #card .card-actions .btn.alt { background: var(--btn-bg); border-color: var(--btn-border); color: var(--btn-text); }
 
   /* Comparație foto istoric vs actual */
   #photoCmp { position:fixed; inset:0; z-index:5; display:none; background:#000; --pos:50%; }
@@ -139,7 +268,7 @@
   }
   #photoCmp #cmpRange {
     position:absolute; left:20px; width:calc(100% - 40px);
-    bottom:calc(64px + env(safe-area-inset-bottom)); z-index:2; accent-color:#2a9d8f;
+    bottom:calc(64px + env(safe-area-inset-bottom)); z-index:2; accent-color: var(--accent-teal);
   }
   #photoCmp .cmp-hint {
     position:absolute; left:0; right:0; bottom:calc(40px + env(safe-area-inset-bottom));
@@ -149,6 +278,245 @@
     position:absolute; left:0; right:0; bottom:calc(14px + env(safe-area-inset-bottom));
     text-align:center; color:#fff; font-size:10px; opacity:.55; padding:0 16px; z-index:2;
   }
+
+  /* Buton deschidere album (colțul stânga-jos) */
+  #albumBtn {
+    position: fixed; left: 16px; bottom: calc(18px + env(safe-area-inset-bottom));
+    width: 48px; height: 48px; border-radius: 50%; z-index: 3;
+    background: var(--fab-bg);
+    border: 1.5px solid var(--fab-border); color: var(--fab-color);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,.45); cursor: pointer;
+    transition: transform .15s ease, background .2s ease;
+  }
+  #albumBtn:active { transform: scale(.92); }
+  #albumBtn svg { width: 22px; height: 22px; }
+
+  /* Buton fotografiere reper (colțul dreapta-jos) */
+  #photoCaptureBtn {
+    position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom));
+    width: 48px; height: 48px; border-radius: 50%; z-index: 3;
+    background: var(--fab-bg);
+    border: 1.5px solid var(--fab-border); color: var(--fab-color);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,.45); cursor: pointer;
+    transition: transform .15s ease, background .2s ease;
+  }
+  #photoCaptureBtn:active { transform: scale(.92); }
+  #photoCaptureBtn svg { width: 22px; height: 22px; }
+
+  /* Notificare eroare busolă (dreptunghi cu colțuri rotunjite) */
+  #compassWarning {
+    position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 14px; right: 14px;
+    max-width: 400px; margin: 0 auto; z-index: 10;
+    background: linear-gradient(135deg, rgba(220,53,34,.96), rgba(230,81,0,.96));
+    color: #fff; border-radius: 12px; padding: 12px 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5); border: 1.5px solid rgba(255,255,255,.35);
+    display: none; animation: toastIn .25s ease-out;
+  }
+  .cw-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;
+  }
+  .cw-title {
+    display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700;
+  }
+  .cw-close {
+    background: transparent; border: none; color: #fff; font-size: 20px;
+    line-height: 1; cursor: pointer; padding: 2px 6px; opacity: .85;
+  }
+  .cw-close:hover { opacity: 1; }
+  .cw-body { font-size: 12px; line-height: 1.45; opacity: .95; }
+
+  /* Pictogramă mică de avertizare (colțul din dreapta sus) */
+  #compassWarningBadge {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #e65100; border: 2px solid #fff; color: #fff;
+    display: none; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.5);
+    font-weight: 900; font-size: 17px; line-height: 1;
+    transition: transform .15s ease;
+  }
+  #compassWarningBadge:active { transform: scale(.92); }
+
+  /* Toast discret pentru detectarea apropierii de un reper */
+  #proximityToast {
+    position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 14px; right: 14px;
+    margin: 0 auto; max-width: 420px; z-index: 7;
+    background: linear-gradient(135deg, rgba(13,59,102,.96), rgba(42,157,143,.92));
+    border: 1.5px solid #7CFC98; border-radius: 14px;
+    padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.55);
+    color: #fff; display: none; align-items: flex-start; justify-content: space-between;
+    gap: 12px; animation: toastIn .25s ease-out;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #proximityToast .pt-icon { font-size: 24px; flex: 0 0 auto; margin-top: 2px; }
+  #proximityToast .pt-content { flex: 1; font-size: 13px; line-height: 1.35; }
+  #proximityToast .pt-title { font-weight: 700; color: #7CFC98; }
+  #proximityToast .pt-close {
+    background: transparent; border: none; color: #fff; font-size: 20px;
+    line-height: 1; cursor: pointer; padding: 4px; opacity: .8;
+  }
+  #proximityToast .pt-close:hover { opacity: 1; }
+
+  /* Ecran / Panou Album și Hartă */
+  #albumModal {
+    position: fixed; inset: 0; z-index: 6; display: none; flex-direction: column;
+    background: linear-gradient(180deg, #07192b, #0d3b66); color: #fff;
+    overflow-y: auto; padding: calc(14px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) 16px;
+  }
+  .album-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.15); margin-bottom: 14px;
+  }
+  .album-header h2 { font-size: 20px; font-weight: 800; }
+  .album-header p { font-size: 12px; opacity: .75; margin-top: 2px; }
+  .album-close-btn {
+    background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.35);
+    color: #fff; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* Hartă schematică temporară: header aliniat vertical și pini măriți */
+  .schematic-box {
+    background: rgba(0,0,0,.35); border: 1.5px solid rgba(42,157,143,.45);
+    border-radius: 14px; padding: 12px; margin-bottom: 14px;
+  }
+  .schematic-header-group {
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 4px; margin-bottom: 10px;
+  }
+  .schematic-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    background: rgba(42,157,143,.4); color: #7CFC98; padding: 3px 8px; border-radius: 8px;
+    text-transform: uppercase;
+  }
+  .schematic-instruction {
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,.88); margin-left: 2px;
+  }
+  .schematic-svg-wrap {
+    width: 100%; height: 230px; position: relative; border-radius: 10px;
+    overflow: hidden; background: #081d33; border: 1px solid rgba(255,255,255,.1);
+  }
+  .schematic-svg-wrap svg { width: 100%; height: 100%; display: block; }
+  .schematic-pin { transition: all .2s ease; cursor: pointer; }
+  .schematic-pin.active-pin { filter: drop-shadow(0 0 8px #7CFC98); }
+  .schematic-pin-group { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .schematic-pin-group:active .schematic-pin { transform: scale(.93); }
+  .schematic-note { font-size: 11px; opacity: .7; margin-top: 8px; line-height: 1.35; }
+
+  /* Secțiunea de comparație Atunci / Acum */
+  .album-detail {
+    background: rgba(255,255,255,.06); border-radius: 14px;
+    padding: 14px; border: 1px solid rgba(255,255,255,.12); margin-bottom: 14px;
+  }
+  .album-landmark-name { font-size: 18px; font-weight: 800; color: #7CFC98; margin-bottom: 4px; }
+  .album-landmark-meta { font-size: 12px; opacity: .8; margin-bottom: 12px; }
+
+  .cmp-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .cmp-grid { grid-template-columns: 1fr; }
+  }
+  .cmp-card {
+    background: rgba(0,0,0,.35); border-radius: 12px; border: 1px solid rgba(255,255,255,.15);
+    padding: 12px; display: flex; flex-direction: column; min-height: 170px;
+  }
+  .cmp-card-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: #2a9d8f; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .cmp-card-content {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; border-radius: 8px; padding: 10px; background: rgba(255,255,255,.03);
+    border: 1px dashed rgba(255,255,255,.2);
+  }
+  .cmp-card-img {
+    width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;
+  }
+  .cmp-card-credit { font-size: 9px; opacity: .6; line-height: 1.25; margin-top: 4px; }
+  .cmp-placeholder-icon { font-size: 26px; margin-bottom: 6px; opacity: .85; }
+  .cmp-placeholder-text { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .cmp-placeholder-sub { font-size: 10px; opacity: .65; line-height: 1.3; }
+
+  /* Acțiuni de navigare din album */
+  .album-actions {
+    display: flex; gap: 10px; flex-direction: column; margin-top: 6px;
+  }
+  .album-action-btn {
+    width: 100%; padding: 12px; border-radius: 24px; font-size: 14px; font-weight: 700;
+    text-align: center; cursor: pointer; border: none;
+  }
+  .album-action-btn.primary { background: #2a9d8f; color: #fff; }
+  .album-action-btn.secondary {
+    background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.35);
+  }
+
+  /* Modul de fotografiere activă (când ești lângă reper) */
+  #captureScreen {
+    position: fixed; inset: 0; z-index: 5; display: none; flex-direction: column;
+    justify-content: space-between; pointer-events: auto;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) 16px;
+    background: linear-gradient(180deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 70%, rgba(0,0,0,.75) 100%);
+  }
+  .cs-top { text-align: center; color: #fff; }
+  .cs-badge {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    background: #2a9d8f; color: #fff; padding: 4px 10px; border-radius: 14px;
+    margin-bottom: 6px; text-transform: uppercase;
+  }
+  .cs-title { font-size: 22px; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+  .cs-sub { font-size: 13px; opacity: .85; margin-top: 3px; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+
+  .cs-viewfinder {
+    flex: 1; display: flex; align-items: center; justify-content: center; pointer-events: none;
+  }
+  .cs-frame {
+    width: 240px; height: 240px; border: 2px dashed rgba(124,252,152,.6);
+    border-radius: 16px; box-shadow: 0 0 0 9999px rgba(0,0,0,.15);
+  }
+
+  .cs-bottom {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .cs-shutter {
+    width: 72px; height: 72px; border-radius: 50%; background: #fff;
+    border: 4px solid rgba(255,255,255,.4); box-shadow: 0 4px 20px rgba(0,0,0,.6);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform .12s ease;
+  }
+  .cs-shutter:active { transform: scale(.92); }
+  .cs-shutter-inner {
+    width: 56px; height: 56px; border-radius: 50%; background: #2a9d8f;
+    border: 2px solid #fff;
+  }
+  .cs-cancel-btn {
+    background: rgba(0,0,0,.5); border: 1.5px solid rgba(255,255,255,.4);
+    color: #fff; border-radius: 20px; padding: 7px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* Flash vizual la declanșator */
+  #captureFlash {
+    position: fixed; inset: 0; z-index: 20; background: #fff;
+    opacity: 0; pointer-events: none; transition: opacity .15s ease-out;
+  }
+  #captureFlash.flash-active { opacity: 0.9; }
+
+  /* Modal confirmare captură foto */
+  #captureModal {
+    position: fixed; inset: 0; z-index: 25; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.7); padding: 20px; backdrop-filter: blur(4px);
+  }
+  .cm-card {
+    background: #0d3b66; border: 1.5px solid #7CFC98; border-radius: 16px;
+    padding: 22px 20px; text-align: center; color: #fff; max-width: 340px; width: 100%;
+    box-shadow: 0 12px 32px rgba(0,0,0,.7);
+  }
+  .cm-icon { font-size: 40px; margin-bottom: 8px; }
+  .cm-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; color: #7CFC98; }
+  .cm-desc { font-size: 13px; line-height: 1.45; opacity: .9; margin-bottom: 18px; }
 
   /* Placeholder Desktop */
   #desktopPlaceholder {
@@ -166,29 +534,216 @@
 <div id="desktopPlaceholder">
   <h2>Experiență AR</h2>
   <p>Această aplicație este concepută pentru a fi explorată pe teren. Te rugăm să o accesezi de pe un telefon mobil.</p>
+  <button id="desktopPreviewBtn" class="btn" style="margin-top:16px;">Continuă în mod previzualizare (Desktop)</button>
+</div>
+
+<!-- Notificare eroare busolă (dreptunghi rotunjit cu buton închidere) -->
+<div id="compassWarning" role="alert">
+  <div class="cw-header">
+    <div class="cw-title">
+      <span>⚠️</span>
+      <span>Busola nu trimite date</span>
+    </div>
+    <button id="compassWarningClose" class="cw-close" aria-label="Închide notificarea">&times;</button>
+  </div>
+  <div class="cw-body" id="compassWarningText">
+    Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.
+  </div>
+</div>
+
+<!-- Toast discret pentru detectarea apropierii de reper -->
+<div id="proximityToast" role="alert">
+  <div class="pt-icon">📸</div>
+  <div class="pt-content">
+    <div class="pt-title" id="ptTitle">Obiectiv în apropiere!</div>
+    <div id="ptMsg">Te afli lângă un reper. Te invităm să fotografiezi obiectivul.</div>
+    <div style="margin-top:6px;">
+      <button id="toastCaptureBtn" class="btn" style="background:#2a9d8f;border-color:#7CFC98;padding:6px 14px;font-size:12px;">📷 Deschide camera clară</button>
+    </div>
+  </div>
+  <button class="pt-close" id="ptClose" aria-label="Închide notificarea">&times;</button>
+</div>
+
+<!-- Ecran mod fotografiere clară (activat când ești lângă reper) -->
+<div id="captureScreen">
+  <div class="cs-top">
+    <div class="cs-badge">📸 Mod Fotografiere</div>
+    <div class="cs-title" id="csTitle">Reper Arad</div>
+    <div class="cs-sub">Cadrează obiectivul și apasă declanșatorul</div>
+  </div>
+  <div class="cs-viewfinder">
+    <div class="cs-frame"></div>
+  </div>
+  <div class="cs-bottom">
+    <button id="shutterBtn" class="cs-shutter" aria-label="Fă fotografia">
+      <span class="cs-shutter-inner"></span>
+    </button>
+    <button id="cancelCaptureBtn" class="cs-cancel-btn">Anulează / Înapoi la ghidaj</button>
+  </div>
+</div>
+
+<!-- Efect vizual de flash la declanșator -->
+<div id="captureFlash"></div>
+
+<!-- Modal confirmare / informare fotografiere -->
+<div id="captureModal">
+  <div class="cm-card">
+    <div class="cm-icon" id="cmIcon">📸</div>
+    <div class="cm-title" id="cmTitle">Fotografie realizată!</div>
+    <div class="cm-desc" id="cmDesc">Obiectivul a fost fotografiat. Salvarea permanentă în album va fi disponibilă ulterior odată cu integrarea backend.</div>
+    <div style="display:flex;gap:8px;flex-direction:column;margin-top:12px;">
+      <button id="viewInAlbumBtn" class="album-action-btn primary" style="display:none;">Deschide în album</button>
+      <button id="finishCaptureBtn" class="album-action-btn secondary">Închide</button>
+    </div>
+  </div>
+</div>
+
+<!-- Buton circular fixat în colțul stânga jos pentru deschiderea albumului -->
+<button id="albumBtn" aria-label="Deschide albumul și harta" title="Deschide albumul și harta">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+    <circle cx="8.5" cy="8.5" r="1.5"/>
+    <polyline points="21 15 16 10 5 21"/>
+  </svg>
+</button>
+
+<!-- Buton circular fixat în colțul dreapta jos pentru fotografiere -->
+<button id="photoCaptureBtn" aria-label="Fotografiază reperul selectat" title="Fotografiază reperul selectat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+    <circle cx="12" cy="13" r="4"/>
+  </svg>
+</button>
+
+<!-- Ecran / Panou de Album și Hartă Schematică -->
+<div id="albumModal">
+  <div class="album-header">
+    <div>
+      <h2>Album &amp; Hartă Arad</h2>
+      <p>Hartă schematică demonstrativă și comparații istorice</p>
+    </div>
+    <button class="album-close-btn" id="albumCloseBtn">✕ Închide</button>
+  </div>
+
+  <!-- Hartă schematică temporară: titlu și instrucțiune aliniate vertical, pini măriți -->
+  <div class="schematic-box">
+    <div class="schematic-header-group">
+      <span class="schematic-badge">Hartă schematică temporară (Demo)</span>
+      <div class="schematic-instruction">Selectează un reper</div>
+    </div>
+    <div class="schematic-svg-wrap">
+      <svg viewBox="0 0 380 230" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#gridPattern)" />
+
+        <!-- Râul Mureș (formă schematică de râu) -->
+        <path d="M 0 185 C 90 215, 180 200, 260 175 S 380 145, 380 145" stroke="#1d5573" stroke-width="26" fill="none" opacity="0.85" stroke-linecap="round"/>
+        <text x="250" y="200" fill="#5cb3e4" font-size="9" font-weight="700" letter-spacing="1">RÂUL MUREȘ</text>
+
+        <!-- Bulevardul Revoluției (axă schematică) -->
+        <path d="M 40 108 L 340 96" stroke="rgba(255,255,255,0.2)" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 4"/>
+        <text x="50" y="94" fill="rgba(255,255,255,0.45)" font-size="8">Bd. Revoluției (schematic)</text>
+
+        <!-- Pini demonstrativi măriți pentru cele 5 repere -->
+        <g class="schematic-pin-group" onclick="selectAlbumLandmark(0)" style="cursor:pointer">
+          <circle class="schematic-pin" id="mapPin0" cx="75" cy="48" r="16" fill="#2a9d8f" stroke="#fff" stroke-width="2"/>
+          <text x="75" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1</text>
+          <text x="75" y="74" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" opacity="0.9">Turnul de Apă</text>
+        </g>
+        <g class="schematic-pin-group" onclick="selectAlbumLandmark(1)" style="cursor:pointer">
+          <circle class="schematic-pin" id="mapPin1" cx="290" cy="130" r="16" fill="#2a9d8f" stroke="#fff" stroke-width="2"/>
+          <text x="290" y="134" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">2</text>
+          <text x="290" y="156" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" opacity="0.9">Palatul Cultural</text>
+        </g>
+        <g class="schematic-pin-group" onclick="selectAlbumLandmark(2)" style="cursor:pointer">
+          <circle class="schematic-pin" id="mapPin2" cx="215" cy="80" r="16" fill="#2a9d8f" stroke="#fff" stroke-width="2"/>
+          <text x="215" y="84" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">3</text>
+          <text x="215" y="106" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" opacity="0.9">Primăria</text>
+        </g>
+        <g class="schematic-pin-group" onclick="selectAlbumLandmark(3)" style="cursor:pointer">
+          <circle class="schematic-pin" id="mapPin3" cx="145" cy="96" r="16" fill="#2a9d8f" stroke="#fff" stroke-width="2"/>
+          <text x="145" y="100" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">4</text>
+          <text x="145" y="122" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" opacity="0.9">Teatrul Slavici</text>
+        </g>
+        <g class="schematic-pin-group" onclick="selectAlbumLandmark(4)" style="cursor:pointer">
+          <circle class="schematic-pin" id="mapPin4" cx="90" cy="150" r="16" fill="#2a9d8f" stroke="#fff" stroke-width="2"/>
+          <text x="90" y="154" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">5</text>
+          <text x="90" y="176" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" opacity="0.9">Catedrala Veche</text>
+        </g>
+      </svg>
+    </div>
+    <div class="schematic-note">ℹ️ Pozițiile de pe această hartă sunt demonstrative și orientative (fără proiecție GPS reală).</div>
+  </div>
+
+  <!-- Zonă detaliu și comparație Atunci / Acum (fără butoane suplimentare de selecție) -->
+  <div class="album-detail">
+    <div class="album-landmark-name" id="albumLandmarkTitle">—</div>
+    <div class="album-landmark-meta" id="albumLandmarkMeta">—</div>
+
+    <div class="cmp-grid">
+      <!-- Card Atunci -->
+      <div class="cmp-card">
+        <div class="cmp-card-title"><span>🏛️</span> Atunci (Istoric)</div>
+        <div class="cmp-card-content" id="albumThenBox">
+          <!-- Generat dinamic -->
+        </div>
+      </div>
+
+      <!-- Card Acum -->
+      <div class="cmp-card">
+        <div class="cmp-card-title"><span>📷</span> Acum (Album personal)</div>
+        <div class="cmp-card-content" id="albumNowBox">
+          <!-- Generat dinamic -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Butoane acțiune album -->
+  <div class="album-actions">
+    <button class="album-action-btn primary" id="albumGuideBtn">Ghidează spre acest reper în AR</button>
+    <button class="album-action-btn secondary" id="albumBackBtn">← Înapoi la experiența AR</button>
+  </div>
 </div>
 
 <video id="cam" autoplay muted playsinline></video>
 
 <div id="overlay">
   <div class="top">
-    <div class="brand">Arad · AR Ghidare (POC)</div>
+    <div class="top-row">
+      <div class="brand">AradLens</div>
+      <div class="top-actions">
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Comută modul de lumină / întuneric" title="Comută modul de lumină / întuneric">
+          <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button id="compassWarningBadge" aria-label="Avertisment busolă" title="Avertisment busolă: apasă pentru detalii">
+          <span>!</span>
+        </button>
+      </div>
+    </div>
     <div class="target" id="targetName">—</div>
     <div id="diag" style="font-size:11px;opacity:.7;margin-top:3px;font-variant-numeric:tabular-nums;">busolă: — · direcție reper: —</div>
   </div>
 
   <div class="center">
-    <div id="arrowWrap">
-      <svg id="arrow" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#7CFC98"/>
-            <stop offset="1" stop-color="#2a9d8f"/>
-          </linearGradient>
-        </defs>
-        <path d="M50 6 L82 78 L50 62 L18 78 Z" fill="url(#g)" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
-      </svg>
-    </div>
+    <!-- Săgeata din mijloc a fost eliminată conform cerințelor -->
   </div>
 
   <div class="bottom">
@@ -201,8 +756,11 @@
       <button id="detailsBtn" class="btn" style="display:none;">Fișă & audio</button>
       <button id="flipBtn" class="btn">↻ Inversează 180°</button>
     </div>
-    <div class="pills" id="pills"></div>
-    <div class="hint">Ține telefonul ridicat și rotește-te până săgeata indică în sus — când înclini telefonul, săgeata se înclină în 3D împreună cu el.</div>
+    <!-- Selector repere — carusel orizontal tip rotiță (scrollwheel) deasupra butoanelor -->
+    <div id="scrollWheelContainer" class="wheel-container" aria-label="Selector repere">
+      <div id="wheelTrack" class="wheel-track"></div>
+    </div>
+    <div class="hint">Glisează rotița orizontal sau apasă un reper pentru a-l selecta.</div>
   </div>
 </div>
 
@@ -244,20 +802,19 @@
 
 <div id="start">
   <h1>Arad în AR</h1>
-  <p>Prototip de ghidare cu realitate augmentată. Alege un reper și lasă-te condus de săgeată — fără hartă.</p>
+  <p>Ghidare cu realitate augmentată. Alege un reper și explorează patrimoniul arhitectural din Arad.</p>
   <button id="startBtn">Pornește</button>
   <div class="note">Aplicația va cere acces la <b>cameră</b> și la <b>locație / busolă</b>. Funcționează cel mai bine afară, cu GPS activ.</div>
 </div>
 
 <script>
 /* =====================================================================
-   POC ARAD AR — GHIDARE DIRECȚIONALĂ CU DATE STATICE
+   ARADLENS AR — GHIDARE DIRECȚIONALĂ CU DATE STATICE
    ---------------------------------------------------------------------
    Coordonate preluate din OpenStreetMap / Wikipedia (Wikidata) și
    rotunjite la ~1 m. Pentru precizie maximă, verifică-le pe teren
    (mergi la fiecare reper cu telefonul și citește lat/lon reale).
-   Precizia lor determină direct exactitatea săgeții. Acesta este
-   singurul pas de "date" al POC-ului.
+   Precizia lor determină direct exactitatea direcției spre reper.
    ===================================================================== */
 const REPERE = [
   { nume: "Turnul de Apă",        lat: 46.16966, lon: 21.30803 },
@@ -296,6 +853,50 @@ const statusBar = $("#status");
 function showStatus(msg){ statusBar.textContent = msg; statusBar.style.display = "block"; }
 function hideStatus(){ statusBar.style.display = "none"; }
 
+/* ---------- Formatare Distanță ---------- */
+function formatDistance(d) {
+  if (d == null || isNaN(d)) return "Distanță indisponibilă";
+  if (d < 1000) {
+    return `${Math.round(d)} m`;
+  }
+  const km = (d / 1000).toFixed(1).replace(".", ",");
+  return `${km} km`;
+}
+
+/* ---------- Gestionare Temă (Dark / Light Mode) ---------- */
+const THEME_STORAGE_KEY = "aradlens_theme";
+let currentTheme = "dark";
+try {
+  currentTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+} catch (e) {
+  currentTheme = "dark";
+}
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  const isLight = (theme === "light");
+  document.body.classList.toggle("light-theme", isLight);
+  const iconSun = $("#themeIconSun");
+  const iconMoon = $("#themeIconMoon");
+  if (iconSun && iconMoon) {
+    iconSun.style.display = isLight ? "block" : "none";
+    iconMoon.style.display = isLight ? "none" : "block";
+  }
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (e) {}
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === "dark" ? "light" : "dark");
+}
+
+const themeToggleBtn = $("#themeToggleBtn");
+if (themeToggleBtn) {
+  themeToggleBtn.onclick = toggleTheme;
+}
+applyTheme(currentTheme);
+
 /* ---------- Detectare Dispozitiv (Mobil / Desktop) ---------- */
 let isMobile = false;
 let isDesktop = true;
@@ -312,29 +913,195 @@ function checkDeviceType() {
   }
 }
 
+const desktopPreviewBtn = document.getElementById('desktopPreviewBtn');
+if (desktopPreviewBtn) {
+  desktopPreviewBtn.onclick = () => {
+    const desktopPlaceholder = document.getElementById('desktopPlaceholder');
+    if (desktopPlaceholder) desktopPlaceholder.style.display = 'none';
+  };
+}
+
 checkDeviceType();
 window.addEventListener('resize', checkDeviceType);
 window.addEventListener('orientationchange', checkDeviceType);
 
-/* ---------- Construiește pastilele de selecție ---------- */
-const pillsEl = $("#pills");
-REPERE.forEach((r, i) => {
-  const b = document.createElement("div");
-  b.className = "pill" + (i === 0 ? " active" : "");
-  b.textContent = r.nume;
-  b.onclick = () => {
-    const wasOpen = cardEl.style.display === "block";
-    target = r;
-    document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
-    b.classList.add("active");
-    $("#targetName").textContent = r.nume;
-    stopSpeech();
-    if (wasOpen) openCard(); else closeCard();
-    updateDetailsBtn();
-    scheduleUpdate();
-  };
-  pillsEl.appendChild(b);
-});
+/* ---------- Selector de Repere — Carusel Orizontal (Scrollwheel) ---------- */
+let activeWheelIndex = 0;
+const WHEEL_SPACING = 135; // Distanța în pixeli între centrele cardurilor
+let wheelDragOffset = 0;
+let isDraggingWheel = false;
+let wheelStartX = 0;
+let wheelStartTime = 0;
+let hasWheelMoved = false;
+
+function initWheel() {
+  const track = $("#wheelTrack");
+  if (!track) return;
+  track.innerHTML = "";
+
+  REPERE.forEach((r, i) => {
+    const card = document.createElement("div");
+    card.className = "wheel-card" + (i === 0 ? " is-center" : "");
+    card.dataset.index = i;
+    card.innerHTML = `
+      <div class="wc-name">${r.nume}</div>
+      <div class="wc-dist" id="wheelDist${i}">Distanță indisponibilă</div>
+    `;
+
+    card.addEventListener("click", () => {
+      if (hasWheelMoved) return;
+      if (i !== activeWheelIndex) {
+        setWheelActiveIndex(i, true);
+        selectTargetByIndex(i, false);
+      }
+    });
+
+    track.appendChild(card);
+  });
+
+  const container = $("#scrollWheelContainer");
+  if (container) {
+    container.addEventListener("pointerdown", onWheelPointerDown);
+    container.addEventListener("pointermove", onWheelPointerMove);
+    container.addEventListener("pointerup", onWheelPointerUp);
+    container.addEventListener("pointercancel", onWheelPointerUp);
+  }
+
+  updateWheelPositions(0);
+  updateWheelDistances();
+}
+
+function updateWheelPositions(offsetPx = 0) {
+  const N = REPERE.length;
+  const cards = document.querySelectorAll(".wheel-card");
+  const u = offsetPx / WHEEL_SPACING;
+  const effectiveIdx = activeWheelIndex - u;
+
+  cards.forEach((card, i) => {
+    let diff = (i - effectiveIdx) % N;
+    if (diff > N / 2) diff -= N;
+    if (diff < -N / 2) diff += N;
+
+    const absDiff = Math.abs(diff);
+    if (absDiff > 1.35) {
+      card.style.opacity = "0";
+      card.style.visibility = "hidden";
+      card.style.pointerEvents = "none";
+    } else {
+      card.style.visibility = "visible";
+      card.style.pointerEvents = "auto";
+
+      const x = diff * WHEEL_SPACING;
+      const scale = Math.max(0.78, 1 - 0.18 * Math.min(1, absDiff));
+      const opacity = Math.max(0, 1 - 0.35 * Math.min(1, absDiff));
+      const zIndex = Math.round(10 - absDiff * 5);
+
+      card.style.transform = `translate(calc(-50% + ${x.toFixed(1)}px), -50%) scale(${scale.toFixed(3)})`;
+      card.style.opacity = opacity.toFixed(2);
+      card.style.zIndex = zIndex;
+
+      if (absDiff < 0.28) {
+        card.classList.add("is-center");
+      } else {
+        card.classList.remove("is-center");
+      }
+    }
+  });
+}
+
+function setWheelActiveIndex(idx, animate = true) {
+  const N = REPERE.length;
+  activeWheelIndex = ((idx % N) + N) % N;
+  wheelDragOffset = 0;
+  if (!animate) {
+    document.querySelectorAll(".wheel-card").forEach(c => c.classList.add("is-dragging"));
+  }
+  updateWheelPositions(0);
+  if (!animate) {
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".wheel-card").forEach(c => c.classList.remove("is-dragging"));
+    });
+  }
+}
+
+function onWheelPointerDown(e) {
+  isDraggingWheel = true;
+  hasWheelMoved = false;
+  wheelStartX = e.clientX;
+  wheelDragOffset = 0;
+  wheelStartTime = Date.now();
+  document.querySelectorAll(".wheel-card").forEach(c => c.classList.add("is-dragging"));
+  const container = $("#scrollWheelContainer");
+  if (container && container.setPointerCapture) {
+    try { container.setPointerCapture(e.pointerId); } catch (_) {}
+  }
+}
+
+function onWheelPointerMove(e) {
+  if (!isDraggingWheel) return;
+  const deltaX = e.clientX - wheelStartX;
+  if (Math.abs(deltaX) > 4) {
+    hasWheelMoved = true;
+  }
+  wheelDragOffset = deltaX;
+  updateWheelPositions(wheelDragOffset);
+}
+
+function onWheelPointerUp(e) {
+  if (!isDraggingWheel) return;
+  isDraggingWheel = false;
+  document.querySelectorAll(".wheel-card").forEach(c => c.classList.remove("is-dragging"));
+
+  const deltaX = wheelDragOffset;
+  const elapsed = Math.max(1, Date.now() - wheelStartTime);
+  const velocity = deltaX / elapsed;
+  const N = REPERE.length;
+
+  let step = 0;
+  if (Math.abs(velocity) > 0.3) {
+    step = velocity > 0 ? -1 : 1;
+  } else {
+    step = -Math.round(deltaX / (WHEEL_SPACING * 0.45));
+    if (step > 1) step = 1;
+    if (step < -1) step = -1;
+  }
+
+  const newIdx = ((activeWheelIndex + step) % N + N) % N;
+  setWheelActiveIndex(newIdx, true);
+  selectTargetByIndex(newIdx, false);
+
+  setTimeout(() => { hasWheelMoved = false; }, 80);
+}
+
+function updateWheelDistances() {
+  REPERE.forEach((r, i) => {
+    const distEl = document.getElementById("wheelDist" + i);
+    if (!distEl) return;
+    if (userLat != null && userLon != null && hasValidCoords(r)) {
+      const d = distance(userLat, userLon, r.lat, r.lon);
+      distEl.textContent = formatDistance(d);
+    } else {
+      distEl.textContent = "Distanță indisponibilă";
+    }
+  });
+}
+
+function selectTargetByIndex(i, shouldUpdateWheel = true) {
+  const r = REPERE[i];
+  if (!r) return;
+  const wasOpen = cardEl && cardEl.style.display === "block";
+  target = r;
+  $("#targetName").textContent = r.nume;
+  stopSpeech();
+  if (wasOpen) openCard(); else closeCard();
+  updateDetailsBtn();
+  if (shouldUpdateWheel) {
+    setWheelActiveIndex(i, true);
+  }
+  scheduleUpdate();
+}
+
+initWheel();
 $("#targetName").textContent = target.nume;
 
 /* =====================================================================
@@ -503,11 +1270,12 @@ function update(){
   const tilt = 70 * (1 - t / 90);
   const sc   = d < 80 ? 1.15 : (d < 400 ? 1.05 : 1);
 
-  // Ordinea contează: perspective + rotateX (culcare 3D), apoi rotateZ (orizontal
-  // spre clădire), apoi scale. perspective() inline = proiecție puternică,
-  // astfel încât înclinarea să se vadă clar ca adâncime.
-  $("#arrow").style.transform =
-    `perspective(520px) rotateX(${tilt.toFixed(1)}deg) rotateZ(${az.toFixed(1)}deg) scale(${sc})`;
+  // Săgeata a fost eliminată; dacă elementul există, actualizăm transformarea, altfel sărim
+  const arrowEl = $("#arrow");
+  if (arrowEl) {
+    arrowEl.style.transform =
+      `perspective(520px) rotateX(${tilt.toFixed(1)}deg) rotateZ(${az.toFixed(1)}deg) scale(${sc})`;
+  }
 
   // Diagnostic vizibil la testare
   $("#diag").textContent =
@@ -548,7 +1316,15 @@ async function startCamera(){
 function startGeo(){
   if (!navigator.geolocation){ showStatus("GPS indisponibil pe acest dispozitiv."); return; }
   navigator.geolocation.watchPosition(
-    pos => { userLat = pos.coords.latitude; userLon = pos.coords.longitude; hideStatus(); $("#coords").textContent = `lat: ${userLat.toFixed(5)} · lon: ${userLon.toFixed(5)} · precizie: ${Math.round(pos.coords.accuracy)}m`; scheduleUpdate(); },
+    pos => {
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+      hideStatus();
+      $("#coords").textContent = `lat: ${userLat.toFixed(5)} · lon: ${userLon.toFixed(5)} · precizie: ${Math.round(pos.coords.accuracy)}m`;
+      updateWheelDistances();
+      checkLandmarkProximity(userLat, userLon);
+      scheduleUpdate();
+    },
     err => showStatus("Locație: " + err.message + " (activează GPS și ieși afară)"),
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
   );
@@ -722,6 +1498,401 @@ function startSensors(){
   }
 }
 
+/* =====================================================================
+   FUNCȚIONALITATEA 2: DETECTARE APROPIERE DE REPER (GEOLOCATION API)
+   ===================================================================== */
+// Raza configurabilă pentru notificarea de proximitate (în metri)
+const PROXIMITY_RADIUS_METERS = 50;
+
+// Reține numele reperelor pentru care s-a afișat notificarea în această sesiune (evită notificări repetate)
+const notifiedLandmarksInSession = new Set();
+let proximityToastTimer = null;
+
+// Verifică dacă reperul are coordonate numerice valide (nu inventează coordonate)
+function hasValidCoords(r) {
+  return r && typeof r.lat === "number" && typeof r.lon === "number" &&
+         !isNaN(r.lat) && !isNaN(r.lon) && r.lat !== 0 && r.lon !== 0;
+}
+
+let currentProximityLandmark = null;
+
+function showProximityNotification(landmark, distMeters) {
+  currentProximityLandmark = landmark;
+  const toast = $("#proximityToast");
+  if (!toast) return;
+  $("#ptTitle").textContent = `Ești aproape de ${landmark.nume}!`;
+  $("#ptMsg").textContent = `Te afli la aproximativ ${distMeters} m. Te invităm să fotografiezi obiectivul.`;
+  toast.style.display = "flex";
+
+  if (proximityToastTimer) clearTimeout(proximityToastTimer);
+  proximityToastTimer = setTimeout(() => {
+    toast.style.display = "none";
+  }, 12000);
+}
+
+function hideProximityNotification() {
+  const toast = $("#proximityToast");
+  if (toast) toast.style.display = "none";
+  if (proximityToastTimer) clearTimeout(proximityToastTimer);
+}
+
+$("#ptClose").onclick = hideProximityNotification;
+
+function checkLandmarkProximity(lat, lon) {
+  if (lat == null || lon == null) return;
+  for (const r of REPERE) {
+    if (!hasValidCoords(r)) continue;
+    if (notifiedLandmarksInSession.has(r.nume)) continue;
+
+    const d = distance(lat, lon, r.lat, r.lon);
+    if (d <= PROXIMITY_RADIUS_METERS) {
+      notifiedLandmarksInSession.add(r.nume);
+      showProximityNotification(r, Math.round(d));
+      break; // Afișează o singură notificare discretă o dată
+    }
+  }
+}
+
+// Utilitar de testare în consolă pentru simularea apropierii pe PC / DevTools
+window.simulateProximity = function(landmarkIndexOrName = 0) {
+  let l = typeof landmarkIndexOrName === "number"
+    ? REPERE[landmarkIndexOrName]
+    : REPERE.find(r => r.nume === landmarkIndexOrName);
+  if (!l) l = REPERE[0];
+  userLat = l.lat;
+  userLon = l.lon;
+  const idx = REPERE.findIndex(r => r.nume === l.nume);
+  if (idx >= 0) {
+    selectTargetByIndex(idx);
+  }
+  updateWheelDistances();
+  currentProximityLandmark = l;
+  showProximityNotification(l, 35);
+  scheduleUpdate();
+};
+
+/* =====================================================================
+   STOCARE FOTOGRAFII CAPTURATE & MOD FOTOGRAFIERE (PROTOTIP BROWSER)
+   ===================================================================== */
+const USER_PHOTOS_STORAGE_KEY = "aradlens_user_photos";
+let userCapturedPhotos = {};
+try {
+  const saved = localStorage.getItem(USER_PHOTOS_STORAGE_KEY);
+  if (saved) userCapturedPhotos = JSON.parse(saved);
+} catch (e) {
+  userCapturedPhotos = {};
+}
+
+let activeCaptureLandmark = null;
+let lastCapturedLandmarkName = null;
+
+function showCaptureFeedback(icon, title, desc, allowViewInAlbum = false, landmarkName = null) {
+  lastCapturedLandmarkName = landmarkName;
+  const iconEl = $("#cmIcon");
+  const titleEl = $("#cmTitle");
+  const descEl = $("#cmDesc");
+  const albumBtn = $("#viewInAlbumBtn");
+  const modal = $("#captureModal");
+
+  if (iconEl) iconEl.textContent = icon;
+  if (titleEl) titleEl.textContent = title;
+  if (descEl) descEl.textContent = desc;
+  if (albumBtn) {
+    albumBtn.style.display = allowViewInAlbum ? "block" : "none";
+  }
+  if (modal) modal.style.display = "flex";
+}
+
+function hideCaptureModal() {
+  const modal = $("#captureModal");
+  if (modal) modal.style.display = "none";
+}
+
+function executePhotoCapture() {
+  const currentLandmark = target;
+  if (!currentLandmark) {
+    showCaptureFeedback("⚠️", "Niciun reper selectat", "Selectează un reper din carusel înainte de a fotografia.");
+    return;
+  }
+
+  // 1. Verificare acces la fluxul camerei
+  const cam = $("#cam");
+  const hasStream = cam && cam.srcObject && cam.videoWidth > 0;
+  if (!hasStream) {
+    showCaptureFeedback(
+      "📷",
+      "Camera nu este activă",
+      "Pentru a realiza fotografii reale, asigură-te că ai acordat permisiunea de acces la cameră (apasă butonul Pornește de pe ecranul inițial)."
+    );
+    return;
+  }
+
+  // 2. Verificare proximitate (raza de 50 m)
+  if (userLat == null || userLon == null) {
+    showCaptureFeedback(
+      "📍",
+      "Locație indisponibilă",
+      `Pentru a asocia fotografia reperului ${currentLandmark.nume}, aplicația trebuie să verifice dacă te afli la mai puțin de 50 m de acesta. Activează GPS-ul și permisiunea de locație.\n(Pentru testare pe calculator, poți rula simulateProximity() în consolă).`
+    );
+    return;
+  }
+
+  const d = distance(userLat, userLon, currentLandmark.lat, currentLandmark.lon);
+  if (d > PROXIMITY_RADIUS_METERS) {
+    showCaptureFeedback(
+      "📍",
+      "Ești prea departe de obiectiv",
+      `Pentru a fotografia ${currentLandmark.nume}, trebuie să te afli la o distanță de maximum 50 m de obiectiv. Distanța ta actuală este de ${formatDistance(d)}.`
+    );
+    return;
+  }
+
+  // 3. Declanșare captură foto: camera devine clară, flash vizual
+  cam.classList.add("camera-clear");
+  const flash = $("#captureFlash");
+  if (flash) {
+    flash.classList.add("flash-active");
+    setTimeout(() => flash.classList.remove("flash-active"), 220);
+  }
+
+  // Captură cadru video pe canvas ascuns
+  let photoDataUrl = "";
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = cam.videoWidth || 1280;
+    canvas.height = cam.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
+    photoDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+  } catch (err) {
+    console.error("Eroare la captură video:", err);
+  }
+
+  // Asociere strictă cu reperul selectat în acel moment
+  userCapturedPhotos[currentLandmark.nume] = {
+    dataUrl: photoDataUrl,
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    localStorage.setItem(USER_PHOTOS_STORAGE_KEY, JSON.stringify(userCapturedPhotos));
+  } catch (err) {
+    console.warn("Storage quota depășită sau mod privat:", err);
+  }
+
+  // Afișare confirmare explicită
+  showCaptureFeedback(
+    "📸",
+    "Fotografie realizată!",
+    `Obiectivul „${currentLandmark.nume}” a fost fotografiat cu succes și salvat în albumul tău. Notă: Salvarea este stocată temporar în browser (prototip); salvarea permanentă și sincronizarea pe server vor necesita modulul de backend.`,
+    true,
+    currentLandmark.nume
+  );
+
+  // Revenire cameră la starea estompată după 1.5s
+  setTimeout(() => {
+    cam.classList.remove("camera-clear");
+  }, 1500);
+
+  // Dacă albumul e deschis, îl actualizăm
+  if ($("#albumModal").style.display === "flex") {
+    renderAlbum();
+  }
+}
+
+function enterCaptureMode(landmark) {
+  activeCaptureLandmark = landmark || currentProximityLandmark || target;
+  const cam = $("#cam");
+  if (cam) cam.classList.add("camera-clear");
+
+  const titleEl = $("#csTitle");
+  if (titleEl) titleEl.textContent = activeCaptureLandmark.nume;
+
+  const captureScreen = $("#captureScreen");
+  if (captureScreen) captureScreen.style.display = "flex";
+
+  hideProximityNotification();
+}
+
+function exitCaptureMode() {
+  const cam = $("#cam");
+  if (cam) cam.classList.remove("camera-clear");
+
+  const captureScreen = $("#captureScreen");
+  if (captureScreen) captureScreen.style.display = "none";
+
+  hideCaptureModal();
+}
+
+const photoCaptureBtn = $("#photoCaptureBtn");
+if (photoCaptureBtn) photoCaptureBtn.onclick = executePhotoCapture;
+
+const shutterBtn = $("#shutterBtn");
+if (shutterBtn) shutterBtn.onclick = executePhotoCapture;
+
+const cancelCaptureBtn = $("#cancelCaptureBtn");
+if (cancelCaptureBtn) cancelCaptureBtn.onclick = exitCaptureMode;
+
+const finishCaptureBtn = $("#finishCaptureBtn");
+if (finishCaptureBtn) finishCaptureBtn.onclick = hideCaptureModal;
+
+const viewInAlbumBtn = $("#viewInAlbumBtn");
+if (viewInAlbumBtn) {
+  viewInAlbumBtn.onclick = () => {
+    hideCaptureModal();
+    if (lastCapturedLandmarkName) {
+      const idx = REPERE.findIndex(r => r.nume === lastCapturedLandmarkName);
+      if (idx >= 0) selectedAlbumIndex = idx;
+    }
+    openAlbum();
+  };
+}
+
+const toastCaptureBtn = $("#toastCaptureBtn");
+if (toastCaptureBtn) {
+  toastCaptureBtn.onclick = () => {
+    if (currentProximityLandmark) {
+      const idx = REPERE.findIndex(r => r.nume === currentProximityLandmark.nume);
+      if (idx >= 0) selectTargetByIndex(idx);
+    }
+    executePhotoCapture();
+  };
+}
+
+window.enterCaptureMode = enterCaptureMode;
+window.exitCaptureMode = exitCaptureMode;
+window.executePhotoCapture = executePhotoCapture;
+
+/* =====================================================================
+   FUNCȚIONALITATEA 2 (NOTIFICARE EROARE BUSOLĂ & PICTOGRAMĂ DREAPTA-SUS)
+   ===================================================================== */
+function showCompassWarning(msg) {
+  const card = $("#compassWarning");
+  const text = $("#compassWarningText");
+  if (text && msg) text.textContent = msg;
+  if (card) card.style.display = "block";
+
+  const badge = $("#compassWarningBadge");
+  if (badge) badge.style.display = "flex";
+}
+
+function closeCompassWarning() {
+  const card = $("#compassWarning");
+  if (card) card.style.display = "none";
+
+  // Pictograma de avertizare rămâne vizibilă în dreapta sus conform cerințelor
+  const badge = $("#compassWarningBadge");
+  if (badge) badge.style.display = "flex";
+}
+
+function toggleCompassWarning() {
+  const card = $("#compassWarning");
+  if (!card) return;
+  card.style.display = (card.style.display === "block") ? "none" : "block";
+}
+
+const cwClose = $("#compassWarningClose");
+if (cwClose) cwClose.onclick = closeCompassWarning;
+
+const cwBadge = $("#compassWarningBadge");
+if (cwBadge) cwBadge.onclick = toggleCompassWarning;
+
+window.simulateCompassWarning = function() {
+  showCompassWarning("Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.");
+};
+
+/* =====================================================================
+   FUNCȚIONALITATEA 1: BUTON ȘI ECRAN DE ALBUM (SELECȚIE DOAR PE HARTĂ)
+   ===================================================================== */
+let selectedAlbumIndex = 0;
+
+function openAlbum() {
+  const activeIdx = REPERE.findIndex(r => r.nume === target.nume);
+  selectedAlbumIndex = activeIdx >= 0 ? activeIdx : 0;
+  renderAlbum();
+  $("#albumModal").style.display = "flex";
+}
+
+function closeAlbum() {
+  $("#albumModal").style.display = "none";
+}
+
+function selectAlbumLandmark(idx) {
+  selectedAlbumIndex = idx;
+  renderAlbum();
+}
+window.selectAlbumLandmark = selectAlbumLandmark;
+
+function renderAlbum() {
+  const landmark = REPERE[selectedAlbumIndex] || REPERE[0];
+
+  // Actualizare pini vizuali pe harta schematică
+  REPERE.forEach((_, i) => {
+    const pin = document.getElementById("mapPin" + i);
+    if (pin) {
+      if (i === selectedAlbumIndex) {
+        pin.classList.add("active-pin");
+        pin.setAttribute("stroke", "#7CFC98");
+        pin.setAttribute("stroke-width", "3.5");
+      } else {
+        pin.classList.remove("active-pin");
+        pin.setAttribute("stroke", "#ffffff");
+        pin.setAttribute("stroke-width", "2");
+      }
+    }
+  });
+
+  // Titlu și metadate reper selectat
+  $("#albumLandmarkTitle").textContent = landmark.nume;
+  const metaParts = [landmark.stil, landmark.an, landmark.arhitect].filter(Boolean);
+  $("#albumLandmarkMeta").textContent = metaParts.length > 0 ? metaParts.join(" · ") : "Obiectiv istoric din Arad";
+
+  // Zona „Atunci” (istoric)
+  const thenBox = $("#albumThenBox");
+  if (landmark.foto) {
+    thenBox.innerHTML = `
+      <img src="${landmark.foto}" alt="${landmark.nume}" class="cmp-card-img">
+      <div class="cmp-card-credit">${landmark.fotoCredit || "Foto istorică din arhivă"}</div>
+    `;
+  } else {
+    thenBox.innerHTML = `
+      <div class="cmp-placeholder-icon">🏛️</div>
+      <div class="cmp-placeholder-text">Fotografia istorică va fi disponibilă ulterior</div>
+      <div class="cmp-placeholder-sub">Arhiva fotografică pentru acest obiectiv este în curs de completare.</div>
+    `;
+  }
+
+  // Zona „Acum” (prezent / album personal)
+  const nowBox = $("#albumNowBox");
+  const userPhoto = userCapturedPhotos[landmark.nume];
+  if (userPhoto && userPhoto.dataUrl) {
+    const dateFormatted = userPhoto.timestamp ? new Date(userPhoto.timestamp).toLocaleString("ro-RO", {
+      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    }) : "";
+    nowBox.innerHTML = `
+      <img src="${userPhoto.dataUrl}" alt="Foto capturată ${landmark.nume}" class="cmp-card-img" style="border: 1.5px solid var(--accent-green);">
+      <div style="font-size:12px;font-weight:700;color:var(--accent-green);margin-top:4px;">✓ Fotografie capturată de tine</div>
+      <div class="cmp-card-credit">Realizată local ${dateFormatted ? 'la ' + dateFormatted : ''} · Stocată temporar în browser (prototip)</div>
+    `;
+  } else {
+    nowBox.innerHTML = `
+      <div class="cmp-placeholder-icon">📷</div>
+      <div class="cmp-placeholder-text">Nicio fotografie realizată încă</div>
+      <div class="cmp-placeholder-sub">Apropie-te la mai puțin de 50 m de ${landmark.nume} și folosește butonul foto din dreapta jos pentru a adăuga o imagine aici.</div>
+    `;
+  }
+}
+
+function guideToSelectedLandmark() {
+  selectTargetByIndex(selectedAlbumIndex);
+  closeAlbum();
+}
+
+$("#albumBtn").onclick = openAlbum;
+$("#albumCloseBtn").onclick = closeAlbum;
+$("#albumBackBtn").onclick = closeAlbum;
+$("#albumGuideBtn").onclick = guideToSelectedLandmark;
+
 $("#startBtn").onclick = async () => {
   $("#start").style.display = "none";
 
@@ -733,10 +1904,10 @@ $("#startBtn").onclick = async () => {
   startSensors();
   startGeo();
 
-  // Watchdog: dacă în 6s nu a venit niciun heading, anunță clar utilizatorul
+  // Watchdog: dacă în 6s nu a venit niciun heading, afișează notificarea cu colțuri rotunjite
   setTimeout(() => {
     if (heading == null){
-      showStatus("Busola nu trimite date. Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.");
+      showCompassWarning("Verifică: pagina se deschide pe HTTPS, ai acordat permisiunea de mișcare/orientare și cea de locație, apoi reîncarcă.");
     }
   }, 6000);
 };
