@@ -3605,6 +3605,9 @@
  "Dacă săgeata arată în direcția opusă, apasă o dată.": "If the arrow points the opposite way, tap once.",
  "Direcția a fost inversată. Dacă săgeata e din nou greșită, apasă încă o dată.": "The direction was flipped. If the arrow is wrong again, tap once more.",
  "Direcția a fost readusă la orientarea implicită.": "The direction was reset to the default orientation.",
+ "Fișierul audio nu este disponibil pentru acest loc. Folosesc vocea browserului.": "The audio file is not available for this place. Using the browser voice.",
+ "Audio ghidat indisponibil. Folosesc vocea browserului.": "Guided audio unavailable. Using the browser voice.",
+ "Locația nu este validă pentru audio.": "The location is not valid for audio.",
  "Arad": "Arad",
  "Fortepan / Schoch Frigyes, Arad, 1901": "Fortepan / Schoch Frigyes, Arad, 1901",
  "AradLens": "AradLens"
@@ -4757,7 +4760,6 @@ function openCard(){
   $("#photoBtn").style.display = t.foto ? "" : "none";
   updateHeadingCalibrationUI();
   cardEl.style.display = "block";
-  checkVoiceService().catch(() => {});
   scheduleUpdate();
 }
 
@@ -4766,20 +4768,7 @@ function closeCard(){
   stopSpeech();
 }
 
-/* --- Audio: API-ul voice AradLens, cu fallback local doar la eroare --- */
-const VOICE_LANGUAGE = "ro";
-const VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
-const VOICE_MODEL_ID = "eleven_v4_turbo";
-
-const voiceService = {
-  state: "idle",          // idle | loading | ready | unavailable
-  configured: null,       // null = unknown, true/false from /voice/status
-  voiceCount: 0,
-  lastAttempt: 0,
-  speechBlockedUntil: 0,
-  promise: null
-};
-
+/* --- Audio: fișierul pre-generat al locației, cu fallback local la eroare --- */
 let voiceAudio = null;
 let voiceAudioUrl = null;
 let voicePendingPlay = false;
@@ -4787,77 +4776,12 @@ let voiceBusy = false;
 let voiceRequestToken = 0;
 let voiceAudioText = "";
 let voiceAudioFailed = false;
-
-function voiceStatusConfigured(data) {
-  if (typeof data === "boolean") return data;
-  if (!data || typeof data !== "object") return null;
-  const boolKeys = [
-    "configured", "is_configured", "enabled", "available", "ready", "ok",
-    "has_api_key", "api_key_configured", "elevenlabs_configured"
-  ];
-  for (const key of boolKeys) {
-    if (typeof data[key] === "boolean") return data[key];
-  }
-  for (const key of ["elevenlabs", "config", "configuration", "voice"]) {
-    if (data[key] && typeof data[key] === "object") {
-      const nested = voiceStatusConfigured(data[key]);
-      if (nested !== null) return nested;
-    }
-  }
-  const state = String(data.status || data.state || "").toLowerCase();
-  if (["ok", "configured", "ready", "enabled", "active", "available"].includes(state)) return true;
-  if (["error", "disabled", "missing", "not_configured", "unconfigured", "unavailable"].includes(state)) return false;
-  return null;
-}
-
-function countVoiceEntries(data) {
-  if (!data) return 0;
-  let raw = Array.isArray(data) ? data : (data.voices || data.items || data.data || data.results || []);
-  if (!Array.isArray(raw) && raw && typeof raw === "object") raw = Object.values(raw);
-  return Array.isArray(raw) ? raw.length : 0;
-}
-
-/* GET status + voices only tells us whether the service is reachable.
-   The Romanian voice/model remain fixed; the returned list never replaces them. */
-async function checkVoiceService(force = false) {
-  if (voiceService.promise) return voiceService.promise;
-  if (!force && voiceService.state === "ready") return voiceService;
-  if (!force && voiceService.state === "unavailable" && Date.now() - voiceService.lastAttempt < 30000) {
-    return voiceService;
-  }
-  voiceService.state = "loading";
-  voiceService.lastAttempt = Date.now();
-  voiceService.promise = (async () => {
-    const [statusRes, voicesRes] = await Promise.allSettled([VoiceApi.status(), VoiceApi.voices()]);
-    if (statusRes.status === "fulfilled") {
-      voiceService.configured = voiceStatusConfigured(statusRes.value);
-    } else {
-      console.warn("[AradLens voice] status indisponibil:", statusRes.reason && statusRes.reason.kind);
-    }
-    if (voicesRes.status === "fulfilled") {
-      voiceService.voiceCount = countVoiceEntries(voicesRes.value);
-      console.info("[AradLens voice] voci disponibile în API:", voiceService.voiceCount, "— folosesc vocea română implicită");
-    } else {
-      voiceService.voiceCount = 0;
-      console.warn("[AradLens voice] lista vocilor indisponibilă:", voicesRes.reason && voicesRes.reason.kind);
-    }
-    voiceService.state = (statusRes.status === "rejected" && voicesRes.status === "rejected")
-      ? "unavailable"
-      : "ready";
-    return voiceService;
-  })().catch((e) => {
-    voiceService.state = "unavailable";
-    console.warn("[AradLens voice] verificare eșuată:", e && e.kind);
-    return voiceService;
-  }).finally(() => {
-    voiceService.promise = null;
-  });
-  return voiceService.promise;
-}
+const voiceLocationBlockedUntil = new Map();
 
 function buildVoiceText(t) {
   if (!t) return "";
   let text = String(t.apiDesc || t.descriere || "").replace(/\s+/g, " ").trim();
+  if (appLang === "en" && text) text = trString(text);
   if (text && !/[.!?]$/.test(text)) text += ".";
   if (text.length > 4800) {
     text = text.slice(0, 4797);
@@ -4976,19 +4900,27 @@ function playVoiceBlob(blob, text) {
   attemptVoicePlay();
 }
 
-let roVoice = null;
-function pickRoVoice() {
+let browserSpeechVoice = null;
+let browserSpeechLocale = "";
+function pickBrowserVoice(locale) {
+  const want = locale || trLocale();
+  if (browserSpeechVoice && browserSpeechLocale === want) return browserSpeechVoice;
   try {
     if (!("speechSynthesis" in window)) return null;
+    const prefix = want.slice(0, 2).toLowerCase();
     const vs = speechSynthesis.getVoices() || [];
-    roVoice = vs.find(v => (v.lang || "").toLowerCase().startsWith("ro")) || null;
-  } catch (e) { roVoice = null; }
-  return roVoice;
+    browserSpeechVoice = vs.find(v => (v.lang || "").toLowerCase().startsWith(prefix)) || null;
+    browserSpeechLocale = want;
+  } catch (e) {
+    browserSpeechVoice = null;
+    browserSpeechLocale = "";
+  }
+  return browserSpeechVoice;
 }
 if ("speechSynthesis" in window) {
-  pickRoVoice();
-  try { speechSynthesis.onvoiceschanged = pickRoVoice; } catch (e) {}
-  window.addEventListener("voiceschanged", pickRoVoice);
+  const clearPickedVoice = () => { browserSpeechVoice = null; browserSpeechLocale = ""; };
+  try { speechSynthesis.onvoiceschanged = clearPickedVoice; } catch (e) {}
+  window.addEventListener("voiceschanged", clearPickedVoice);
 }
 
 function stopSpeech() {
@@ -5009,9 +4941,10 @@ function speakWithBrowser(text) {
     return;
   }
   if (speechSynthesis.speaking) { stopSpeech(); return; }
+  const locale = trLocale();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "ro-RO"; u.rate = 1.0; u.pitch = 1.0;
-  const v = roVoice || pickRoVoice();
+  u.lang = locale; u.rate = 1.0; u.pitch = 1.0;
+  const v = pickBrowserVoice(locale);
   if (v) u.voice = v;
   u.onend = u.onerror = () => setVoiceUi("idle");
   speechSynthesis.cancel();
@@ -5035,52 +4968,49 @@ async function toggleSpeech() {
   voiceBusy = true;
   setVoiceUi("loading");
 
-  let svc = voiceService;
-  if (svc.state === "idle" || svc.state === "loading") {
-    svc = await checkVoiceService();
-  } else if (svc.state === "unavailable" && Date.now() - svc.lastAttempt > 30000) {
-    svc = await checkVoiceService(true);
-  }
-  if (requestToken !== voiceRequestToken) return;
-
-  if (svc.configured === false) {
+  // Fișierele API sunt în română; pentru interfața engleză folosim vocea
+  // browserului, cu descrierea tradusă.
+  if (appLang === "en") {
     voiceBusy = false;
-    showStatus("Serviciul vocal nu este configurat. Folosesc vocea browserului.");
     speakWithBrowser(text);
     return;
   }
 
-  const apiAllowed = Date.now() >= (svc.speechBlockedUntil || 0);
-  if (apiAllowed) {
-    try {
-      const body = {
-        text,
-        language: VOICE_LANGUAGE,
-        voice_id: VOICE_ID,
-        model_id: VOICE_MODEL_ID
-      };
-      const blob = await VoiceApi.speech(body);
-      if (requestToken !== voiceRequestToken) return;
-      voiceService.speechBlockedUntil = 0;
-      voiceBusy = false;
-      playVoiceBlob(blob, text);
-      return;
-    } catch (e) {
-      if (requestToken !== voiceRequestToken) return;
-      voiceBusy = false;
-      console.warn("[AradLens voice] sinteza a eșuat:", e && e.kind);
-      if (e && e.kind === "validation") {
-        showStatus(e.message);
-        setVoiceUi("idle");
-        return;
-      }
-      voiceService.speechBlockedUntil = Date.now() + 30000;
-      showStatus("Vocea API nu este disponibilă. Folosesc vocea browserului.");
-    }
+  const locationId = target && target.apiId != null ? Number(target.apiId) : null;
+  if (!Number.isFinite(locationId)) {
+    voiceBusy = false;
+    speakWithBrowser(text);
+    return;
+  }
+  if (Date.now() < (voiceLocationBlockedUntil.get(locationId) || 0)) {
+    voiceBusy = false;
+    speakWithBrowser(text);
+    return;
   }
 
-  voiceBusy = false;
-  speakWithBrowser(text);
+  try {
+    const blob = await VoiceApi.locationAudio(locationId);
+    if (requestToken !== voiceRequestToken) return;
+    voiceLocationBlockedUntil.delete(locationId);
+    voiceBusy = false;
+    playVoiceBlob(blob, text);
+    return;
+  } catch (e) {
+    if (requestToken !== voiceRequestToken) return;
+    voiceBusy = false;
+    console.warn("[AradLens voice] audio locație indisponibil:", e && e.kind, locationId);
+    if (e && e.kind === "not-generated") {
+      voiceLocationBlockedUntil.set(locationId, Date.now() + 30000);
+      showStatus("Fișierul audio nu este disponibil pentru acest loc. Folosesc vocea browserului.");
+    } else if (e && e.kind === "validation") {
+      showStatus(e.message);
+      setVoiceUi("idle");
+      return;
+    } else {
+      showStatus("Audio ghidat indisponibil. Folosesc vocea browserului.");
+    }
+    speakWithBrowser(text);
+  }
 }
 
 /* --- Foto istoric vs. actual: instantaneu din cameră + foto de arhivă --- */
@@ -6474,72 +6404,60 @@ async function apiRequest(path, { timeoutMs = 0 } = {}) {
   return data;
 }
 
-/* POST binar pentru voce: răspunsul de succes este MP3, nu JSON. */
-const VOICE_TIMEOUT_MS = 8000;
-const VOICE_SPEECH_TIMEOUT_MS = 30000;
+/* GET binar pentru voce: fișierul audio pre-generat al unei locații. */
+const VOICE_AUDIO_TIMEOUT_MS = 30000;
 
-async function apiPostVoiceSpeech(body, { timeoutMs = VOICE_SPEECH_TIMEOUT_MS } = {}) {
+async function apiGetVoiceLocation(locationId, { timeoutMs = VOICE_AUDIO_TIMEOUT_MS } = {}) {
   const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
   const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
   let res;
   try {
-    res = await fetch(API_PREFIX + "/voice/speech", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "audio/mpeg" },
-      body: JSON.stringify(body),
+    res = await fetch(API_PREFIX + "/voice/locations/" + encodeURIComponent(locationId), {
+      headers: { "Accept": "audio/mpeg, audio/*;q=0.9" },
       signal: ctrl ? ctrl.signal : undefined
     });
   } catch (e) {
     if (timer) clearTimeout(timer);
     if (e && e.name === "AbortError") {
-      throw { kind: "timeout", message: "Serviciul vocal nu a răspuns la timp. Încearcă din nou." };
+      throw { kind: "timeout", message: "Audio nu a răspuns la timp. Încearcă din nou." };
     }
     if (!navigator.onLine) throw { kind: "offline", message: "Ești offline." };
     throw { kind: "network", message: "Nu merge conexiunea. Încearcă din nou." };
   }
+  if (timer) clearTimeout(timer);
 
   if (!res.ok) {
-    let data = null;
-    const ct = res.headers.get("content-type") || "";
-    if (ct.indexOf("json") !== -1) {
-      try { data = await res.json(); } catch (e) {}
+    if (res.status === 404) {
+      throw { kind: "not-generated", message: "Fișierul audio nu a fost generat pentru acest loc." };
     }
-    if (timer) clearTimeout(timer);
     if (res.status === 422) {
-      const fields = data && Array.isArray(data.detail)
-        ? data.detail.map(d => (d && d.loc ? d.loc.join(".") : "") + (d && d.msg ? ": " + d.msg : "")).join("; ")
-        : "validation";
-      console.warn("[AradLens voice] 422:", fields);
-      throw { kind: "validation", message: "Textul nu a putut fi citit. Încearcă din nou." };
+      throw { kind: "validation", message: "Locația nu este validă pentru audio." };
     }
     if (res.status === 401 || res.status === 403) {
-      console.warn("[AradLens voice] serviciul cere autentificare (", res.status, ")");
-      throw { kind: "unavailable", message: "Serviciul vocal nu este disponibil momentan." };
+      console.warn("[AradLens voice] audio cere autentificare (", res.status, ")");
+      throw { kind: "unavailable", message: "Serviciul audio nu este disponibil momentan." };
     }
     if (res.status === 429) {
-      throw { kind: "busy", message: "Serviciul vocal este ocupat. Încearcă din nou în câteva secunde." };
+      throw { kind: "busy", message: "Serviciul audio este ocupat. Încearcă din nou în câteva secunde." };
     }
-    console.warn("[AradLens voice] eroare", res.status);
-    throw { kind: "http", message: "Serviciul vocal nu a răspuns. Încearcă din nou." };
+    console.warn("[AradLens voice] eroare audio", res.status);
+    throw { kind: "http", message: "Serviciul audio nu a răspuns. Încearcă din nou." };
   }
 
   const ct = res.headers.get("content-type") || "";
   if (ct.indexOf("audio") === -1) {
-    if (timer) clearTimeout(timer);
-    throw { kind: "server", message: "Răspuns neașteptat de la serviciul vocal." };
+    throw { kind: "server", message: "Răspuns neașteptat de la serviciul audio." };
   }
 
   try {
     const blob = await res.blob();
     if (!blob || blob.size === 0) {
-      throw { kind: "server", message: "Serviciul vocal nu a trimis audio." };
+      throw { kind: "server", message: "Serviciul audio nu a trimis fișier." };
     }
     return blob;
   } catch (e) {
     if (e && e.kind) throw e;
     throw { kind: "network", message: "Audio nu a putut fi descărcat. Încearcă din nou." };
-  } finally {
-    if (timer) clearTimeout(timer);
   }
 }
 
@@ -6559,9 +6477,7 @@ const ToursApi = {
   get:  (id) => apiRequest("/tours/" + id)
 };
 const VoiceApi = {
-  status: () => apiRequest("/voice/status", { timeoutMs: VOICE_TIMEOUT_MS }),
-  voices: () => apiRequest("/voice/voices", { timeoutMs: VOICE_TIMEOUT_MS }),
-  speech: (body) => apiPostVoiceSpeech(body)
+  locationAudio: (locationId) => apiGetVoiceLocation(locationId)
 };
 
 /* Dacă un fișier de imagine lipsește în arhivă, nu lăsăm iconița de
