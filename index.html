@@ -569,6 +569,14 @@
     font-weight: 700;
   }
   #card .card-actions .voice-stop[hidden] { display: none; }
+  #card .card-actions .card-calibrate {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  #card .card-actions .card-calibrate[hidden] { display: none; }
   body.light-theme #card { box-shadow: 2px -8px 28px rgba(23,17,6,.25); }
 
   /* Comparație foto istoric vs actual */
@@ -3163,6 +3171,7 @@
     <button class="btn" id="speakBtn">Ascultă</button>
     <button class="btn voice-stop" id="stopSpeakBtn" hidden>Oprește</button>
     <button class="btn alt" id="photoBtn">Foto 1901 / acum</button>
+    <button class="btn alt card-calibrate" id="flipHeadingBtn" type="button" hidden title="Dacă săgeata arată în direcția opusă, apasă o dată.">Inversează săgeata</button>
   </div>
 </div>
 
@@ -3592,6 +3601,10 @@
  "Arhivă indisponibilă": "Archive unavailable",
  "Poza nu poate fi afișată": "The photo cannot be displayed",
  "Arhiva foto nu este disponibilă momentan. Încearcă din nou.": "The photo archive is not available right now. Try again.",
+ "Inversează săgeata": "Flip the arrow",
+ "Dacă săgeata arată în direcția opusă, apasă o dată.": "If the arrow points the opposite way, tap once.",
+ "Direcția a fost inversată. Dacă săgeata e din nou greșită, apasă încă o dată.": "The direction was flipped. If the arrow is wrong again, tap once more.",
+ "Direcția a fost readusă la orientarea implicită.": "The direction was reset to the default orientation.",
  "Arad": "Arad",
  "Fortepan / Schoch Frigyes, Arad, 1901": "Fortepan / Schoch Frigyes, Arad, 1901",
  "AradLens": "AradLens"
@@ -3956,7 +3969,14 @@ let headingRaw = null;       // valoare brută de la senzori (pentru diagnostic)
 let headingMode = "...";       // sursa: "abs" | "rel" | "iOS"
 let cameraPitch = 0;         // înclinarea camerei față de orizont (grade, + = în sus)
 let lastPitch = null, pitchSpike = 0, angleSpike = 0;
-let headingOffset = 0;       // corecție manuală ±180° (debug inversare săgeată)
+const HEADING_OFFSET_KEY = "aradlens_heading_offset";
+function loadHeadingOffset(){
+  try {
+    const v = Number(localStorage.getItem(HEADING_OFFSET_KEY));
+    return Number.isFinite(v) ? ((v % 360) + 360) % 360 : 0;
+  } catch (e) { return 0; }
+}
+let headingOffset = loadHeadingOffset(); // corecție manuală 0/180° (convenție busolă)
 let absSupported = false;    // browserul expune deviceorientationabsolute?
 let absSeen = false;         // au sosit deja date absolute valide?
 let relFbkActive = false;    // să folosim deviceorientation (relativ) ca fallback?
@@ -4735,6 +4755,7 @@ function openCard(){
   $("#cardMeta").textContent  = metaFor(t);
   $("#cardDesc").textContent  = t.apiDesc || t.descriere || "";
   $("#photoBtn").style.display = t.foto ? "" : "none";
+  updateHeadingCalibrationUI();
   cardEl.style.display = "block";
   checkVoiceService().catch(() => {});
   scheduleUpdate();
@@ -5118,7 +5139,7 @@ function updateArLabel(az, phrase, meta){
   // Reperul e în spate (|az|>85): păstrăm indicatorul de margine, legenda numește direcția.
   if (Math.abs(az) > 85){
     const side = az > 0 ? "\u2192" : "\u2190";
-    const deg = Math.round(180 - Math.abs(az));
+    const deg = Math.round(Math.abs(az));
     if (steerEdge) { steerEdge.style.display = "block"; steerEdge.textContent = `${side} ${deg}\u00b0`; }
     if (steerArrow) steerArrow.style.display = "none";
     setCaption(phrase, side === "\u2192" ? "Întoarce-te spre dreapta" : "Întoarce-te spre stânga");
@@ -5332,19 +5353,39 @@ function setHeading(raw, mode){
   headingRaw = raw;
   headingMode = mode;
   heading = robustAngle(heading, raw + headingOffset, SMOOTH);
+  updateHeadingCalibrationUI();
   scheduleUpdate();
 }
 
-// Inversare manuală 180°: dacă săgeata arată în partea opusă pe un anumit
-// dispozitiv (convenție alpha diferită), un tap rotește heading-ul cu 180°.
-$("#flipBtn").onclick = () => {
-  headingOffset = (headingOffset + 180) % 360;
+// Corecție manuală 180°: unele telefoane/browsere raportează busola în
+// convenția opusă. Alegerea se păstrează local, ca săgeata să rămână corectă
+// și după reîncărcare.
+function setHeadingOffset(next){
+  const normalized = ((next % 360) + 360) % 360;
+  const delta = ((normalized - headingOffset + 540) % 360) - 180;
+  headingOffset = normalized;
+  try { localStorage.setItem(HEADING_OFFSET_KEY, String(headingOffset)); } catch (e) {}
   if (heading != null){
-    heading = ((heading + 180) % 360 + 360) % 360;
-    headingRaw = ((headingRaw + 180) % 360 + 360) % 360;
+    heading = ((heading + delta) % 360 + 360) % 360;
+    headingRaw = ((headingRaw + delta) % 360 + 360) % 360;
   }
+  updateHeadingCalibrationUI();
   scheduleUpdate();
-};
+}
+function flipHeading(){
+  setHeadingOffset(headingOffset + 180);
+  showStatus(headingOffset === 180
+    ? "Direcția a fost inversată. Dacă săgeata e din nou greșită, apasă încă o dată."
+    : "Direcția a fost readusă la orientarea implicită.");
+  setTimeout(hideStatus, 4500);
+}
+function updateHeadingCalibrationUI(){
+  const btn = $("#flipHeadingBtn");
+  if (btn) btn.hidden = heading == null;
+}
+$("#flipBtn").onclick = flipHeading;
+const flipHeadingBtn = $("#flipHeadingBtn");
+if (flipHeadingBtn) flipHeadingBtn.onclick = flipHeading;
 
 function handleOrientation(e){
   // Înclinarea camerei (beta/gamma) NU depinde de frame-ul abs/rel (diferă doar
@@ -5359,17 +5400,27 @@ function handleOrientation(e){
     }
   }
 
+  // iOS , webkitCompassHeading e deja un heading corect și tilt-compensat.
+  // Îl preferăm când există, chiar dacă browserul expune și alt eveniment.
+  if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)){
+    setHeading(e.webkitCompassHeading + screenAngle(), "iOS");
+    return;
+  }
+
   // Android/Chrome , deviceorientationabsolute: alpha e world-based (față de
   // Nordul magnetic), deci heading = 360 − alpha. Sursa principală.
-  if (e.type === "deviceorientationabsolute" && e.alpha != null && !isNaN(e.alpha)){
+  if (e.type === "deviceorientationabsolute" && e.alpha != null && !isNaN(e.alpha) && e.absolute !== false){
     absSeen = true;
     setHeading(360 - e.alpha + screenAngle(), "abs");
     return;
   }
 
-  // iOS , webkitCompassHeading e deja un heading corect și tilt-compensat.
-  if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)){
-    setHeading(e.webkitCompassHeading + screenAngle(), "iOS");
+  // Unele browsere nu trimit deloc `deviceorientationabsolute`, dar marchează
+  // `deviceorientation` cu absolute=true. Folosim și această variantă, tot
+  // după ce fallback-ul relativ a fost activat, ca să nu dublăm sursele.
+  if (relFbkActive && e.type === "deviceorientation" && e.absolute === true && e.alpha != null && !isNaN(e.alpha)){
+    absSeen = true;
+    setHeading(360 - e.alpha + screenAngle(), "abs");
     return;
   }
 
